@@ -1,53 +1,66 @@
-export type DeviceStatus = "Available" | "Sold" | "Pending";
+export type DeviceStatus = "in_stock" | "sold" | "reserved";
 
-export interface InventoryItem {
+export interface Profile {
   id: string;
-  imei: string;
-  serial?: string | null;
-  model: string;
-  color: string;
-  storage: string;
-  purchase_cost: number;
-  asking_price: number;
-  battery_health?: number | null;
-  condition?: string | null;
-  status: DeviceStatus;
-  notes?: string | null;
+  full_name: string | null;
+  role: string;
   created_at: string;
-  updated_at?: string | null;
+}
+
+export interface Device {
+  id: string;
+  model: string;
+  imei: string;
+  storage: string;
+  condition: string;
+  cost_price: number;
+  selling_price: number;
+  status: DeviceStatus;
+  created_at: string;
+  created_by: string | null;
+}
+
+export interface Customer {
+  id: string;
+  full_name: string;
+  phone: string | null;
+  email: string | null;
+  created_at: string;
 }
 
 export interface Sale {
   id: string;
-  inventory_id: string;
-  sold_price: number;
+  device_id: string;
+  customer_id: string | null;
+  final_price: number;
+  payment_method: string;
+  sold_by: string | null;
   sold_at: string;
-  profit: number;
-  buyer_name?: string | null;
-  buyer_contact?: string | null;
-  notes?: string | null;
-  created_at: string;
-  inventory?: InventoryItem;
+  device?: Device | null;
+  customer?: Customer | null;
 }
 
 export interface NewDeviceInput {
-  imei: string;
-  serial?: string;
   model: string;
-  color: string;
+  imei: string;
   storage: string;
-  purchaseCost: number;
-  askingPrice: number;
-  batteryHealth?: number;
-  condition?: string;
-  notes?: string;
+  condition: string;
+  cost_price: number;
+  selling_price: number;
+  status?: DeviceStatus;
+  created_by?: string | null;
+}
+
+export interface NewCustomerInput {
+  full_name: string;
+  phone?: string | null;
+  email?: string | null;
 }
 
 export interface NewSaleInput {
-  inventoryId: string;
-  soldPrice: number;
-  profit: number;
-  buyerName?: string;
-  buyerContact?: string;
-  notes?: string;
+  device_id: string;
+  customer_id?: string | null;
+  final_price: number;
+  payment_method?: string;
+  sold_by?: string | null;
 }

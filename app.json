@@ -3,6 +3,7 @@
     "name": "iStocked",
     "slug": "iStocked",
     "version": "1.0.0",
+    "scheme": "istocked",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -23,10 +24,25 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
-      "expo-secure-store",
+      [
+        "expo-router",
+        {
+          "headers": {
+            "Cross-Origin-Embedder-Policy": "credentialless",
+            "Cross-Origin-Opener-Policy": "same-origin"
+          }
+        }
+      ],
       "expo-image",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan IMEI barcodes",
+          "barcodeScannerEnabled": true
+        }
+      ],
+      "expo-sqlite"
     ]
   }
 }
