@@ -1,38 +1,45 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
-import type { InventoryItem } from "../types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchDevices,
+  fetchDeviceById,
+  lookupDeviceByImei,
+  updateDevice,
+  type DeviceFilters,
+} from "../lib/inventory";
+import type { Device, NewDeviceInput } from "../types";
 
-async function fetchInventory() {
-  const { data, error } = await supabase
-    .from("inventory")
-    .select("*")
-    .eq("status", "Available")
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data as InventoryItem[];
-}
-
-export function useInventory() {
+export function useDevices(filters: DeviceFilters = {}) {
   return useQuery({
-    queryKey: ["inventory"],
-    queryFn: fetchInventory,
+    queryKey: ["devices", filters],
+    queryFn: () => fetchDevices(filters),
   });
 }
 
-export function useInventoryItem(id: string) {
+export function useDevice(id: string) {
   return useQuery({
-    queryKey: ["inventory", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("inventory")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (error) throw error;
-      return data as InventoryItem;
-    },
+    queryKey: ["devices", id],
+    queryFn: () => fetchDeviceById(id),
     enabled: !!id,
+  });
+}
+
+export function useDeviceByImei(imei: string | null) {
+  return useQuery({
+    queryKey: ["devices", "imei", imei],
+    queryFn: () => lookupDeviceByImei(imei ?? ""),
+    enabled: !!imei,
+  });
+}
+
+export function useUpdateDevice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<NewDeviceInput> }) =>
+      updateDevice(id, data),
+    onSuccess: (device: Device) => {
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+      queryClient.setQueryData(["devices", device.id], device);
+      queryClient.invalidateQueries({ queryKey: ["metrics"] });
+    },
   });
 }
