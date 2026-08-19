@@ -19,12 +19,11 @@ import { formatImei, formatPrice } from "../../lib/format";
 const STATUS_OPTIONS = [
   { label: "In stock", value: "in_stock" },
   { label: "Sold", value: "sold" },
-  { label: "Reserved", value: "reserved" },
 ];
 
 const CONDITION_OPTIONS = [
   { label: "Brand New", value: "Brand New" },
-  { label: "Excellent", value: "Excellent" },
+  { label: "Like New", value: "Like New" },
   { label: "Good", value: "Good" },
   { label: "Fair", value: "Fair" },
 ];
@@ -42,20 +41,20 @@ function MarginTile({
     <View
       className={`rounded-2xl border p-4 ${
         highlight
-          ? "border-brand-500 bg-brand-50"
-          : "border-[#E3E8E2] bg-white"
+          ? "border-zinc-900 bg-zinc-900"
+          : "border-zinc-200 bg-white"
       }`}
     >
       <Text
         className={`text-[11px] font-bold uppercase tracking-[0.14em] ${
-          highlight ? "text-brand-900" : "text-[#5F6F64]"
+          highlight ? "text-zinc-400" : "text-zinc-500"
         }`}
       >
         {label}
       </Text>
       <Text
         className={`mt-1.5 text-xl font-bold ${
-          highlight ? "text-brand-900" : "text-[#13241B]"
+          highlight ? "text-white" : "text-zinc-950"
         }`}
       >
         {value}
@@ -70,17 +69,17 @@ export default function DeviceDetailScreen() {
   const { data: device, isLoading, isError, error } = useDevice(id);
   const updateMutation = useUpdateDevice();
 
-  const [costPrice, setCostPrice] = useState("");
-  const [sellingPrice, setSellingPrice] = useState("");
-  const [condition, setCondition] = useState("Excellent");
+  const [buyPrice, setBuyPrice] = useState("");
+  const [listPrice, setListPrice] = useState("");
+  const [condition, setCondition] = useState("Good");
   const [status, setStatus] = useState("in_stock");
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!device) return;
-    setCostPrice(String(device.cost_price));
-    setSellingPrice(String(device.selling_price));
+    setBuyPrice(String(device.buy_price));
+    setListPrice(String(device.list_price));
     setCondition(device.condition);
     setStatus(device.status);
   }, [device]);
@@ -90,8 +89,8 @@ export default function DeviceDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <AppHeader title="Device" />
-        <View className="flex-1 items-center justify-center bg-[#F6F8F5]">
-          <ActivityIndicator size="large" color="#16a34a" />
+        <View className="flex-1 items-center justify-center bg-zinc-100">
+          <ActivityIndicator size="large" color="#09090b" />
         </View>
       </>
     );
@@ -102,8 +101,8 @@ export default function DeviceDetailScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <AppHeader title="Device" />
-        <View className="flex-1 items-center justify-center bg-[#F6F8F5] px-8">
-          <Text className="text-center text-base font-semibold text-[#13241B]">
+        <View className="flex-1 items-center justify-center bg-zinc-100 px-8">
+          <Text className="text-center text-base font-semibold text-zinc-950">
             Couldn't load this device
           </Text>
           <Text className="mt-2 text-center text-sm leading-5 text-red-600">
@@ -114,10 +113,11 @@ export default function DeviceDetailScreen() {
     );
   }
 
-  const cost = Number(costPrice) || 0;
-  const sell = Number(sellingPrice) || 0;
-  const profit = sell - cost;
-  const margin = sell > 0 ? ((profit / sell) * 100).toFixed(0) : "0";
+  const buy = Number(buyPrice) || 0;
+  const list = Number(listPrice) || 0;
+  const sold = Number(device.sold_price ?? 0);
+  const profit = device.status === "sold" ? sold - buy : list - buy;
+  const margin = list > 0 ? ((profit / list) * 100).toFixed(0) : "0";
 
   const handleSave = () => {
     setSaveError(null);
@@ -125,8 +125,8 @@ export default function DeviceDetailScreen() {
       {
         id: device.id,
         data: {
-          cost_price: Number(costPrice) || 0,
-          selling_price: Number(sellingPrice) || 0,
+          buy_price: Number(buyPrice) || 0,
+          list_price: Number(listPrice) || 0,
           condition,
           status: status as Device["status"],
         },
@@ -145,8 +145,8 @@ export default function DeviceDetailScreen() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <AppHeader title="Device" />
-      <ScrollView className="flex-1 bg-[#F6F8F5]" contentContainerClassName="pb-10">
-        <View className="bg-[#13241B] px-5 pb-8 pt-6">
+      <ScrollView className="flex-1 bg-zinc-100" contentContainerClassName="pb-10">
+        <View className="bg-zinc-950 px-5 pb-8 pt-6">
           <Text className="text-2xl font-bold text-white">{device.model}</Text>
           <Text className="mt-1.5 font-mono text-sm tracking-wide text-white/70">
             {formatImei(device.imei)}
@@ -159,15 +159,15 @@ export default function DeviceDetailScreen() {
         <View className="-mt-5 px-5">
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <MarginTile label="Cost price" value={formatPrice(cost)} />
+              <MarginTile label="Buy price" value={formatPrice(buy)} />
             </View>
             <View className="flex-1">
-              <MarginTile label="Selling price" value={formatPrice(sell)} />
+              <MarginTile label="List price" value={formatPrice(list)} />
             </View>
           </View>
           <View className="mt-3">
             <MarginTile
-              label="Profit margin"
+              label="Profit"
               value={`${formatPrice(profit)} (${margin}%)`}
               highlight
             />
@@ -175,31 +175,31 @@ export default function DeviceDetailScreen() {
         </View>
 
         <View className="mt-6 px-5">
-          <Text className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[#5F6F64]">
+          <Text className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
             Edit details
           </Text>
 
-          <View className="rounded-2xl border border-[#E3E8E2] bg-white p-5">
+          <View className="rounded-2xl border border-zinc-200 bg-white p-5">
             <View className="flex-row gap-3">
               <View className="flex-1">
                 <TextField
-                  label="Cost price"
-                  value={costPrice}
-                  onChangeText={setCostPrice}
+                  label="Buy price"
+                  value={buyPrice}
+                  onChangeText={setBuyPrice}
                   keyboardType="decimal-pad"
                 />
               </View>
               <View className="flex-1">
                 <TextField
-                  label="Selling price"
-                  value={sellingPrice}
-                  onChangeText={setSellingPrice}
+                  label="List price"
+                  value={listPrice}
+                  onChangeText={setListPrice}
                   keyboardType="decimal-pad"
                 />
               </View>
             </View>
 
-            <Text className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#3A4A40]">
+            <Text className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
               Condition
             </Text>
             <FilterChips
@@ -208,7 +208,7 @@ export default function DeviceDetailScreen() {
               onChange={setCondition}
             />
 
-            <Text className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#3A4A40]">
+            <Text className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
               Status
             </Text>
             <FilterChips
@@ -234,7 +234,7 @@ export default function DeviceDetailScreen() {
           {device.status === "in_stock" ? (
             <View className="mt-5">
               <Button
-                title="Sell this device"
+                title="Record sale"
                 variant="secondary"
                 onPress={() =>
                   router.push({
