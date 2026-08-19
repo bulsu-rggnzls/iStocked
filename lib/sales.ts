@@ -1,71 +1,34 @@
-import { ensureDb, genId } from "./db";
-import { findOrCreateCustomer } from "./customers";
-import type { Customer, Device, NewSaleInput, Sale } from "../types";
+import { ensureDb } from "./db";
+import type { Device, RecordSaleInput } from "../types";
 
-export async function createSale(sale: NewSaleInput) {
-  const db = ensureDb();
-  const id = genId();
-
-  await db.withTransactionAsync(async () => {
-    await db.runAsync(
-      "INSERT INTO sales (id, device_id, customer_id, final_price, payment_method, sold_by, sold_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      id,
-      sale.device_id,
-      sale.customer_id ?? null,
-      sale.final_price,
-      sale.payment_method ?? "cash",
-      sale.sold_by ?? null,
-      new Date().toISOString(),
-    );
-    await db.runAsync("UPDATE devices SET status = 'sold' WHERE id = ?", sale.device_id);
-  });
-
-  const row = await db.getFirstAsync<Sale>(
-    "SELECT * FROM sales WHERE id = ?",
-    id,
+export async function recordSale(input: RecordSaleInput) {
+  const db = await ensureDb();
+  const device = await db.getFirstAsync<Device>(
+    "SELECT * FROM devices WHERE id = ?",
+    input.deviceId,
   );
-  if (!row) throw new Error("Failed to create sale");
+  if (!device) throw new Error("Device not found");
+  if (device.status === "sold") throw new Error("Device is already sold");
+
+  await db.runAsync(
+    "UPDATE devices SET status = 'sold', sold_price = ?, customer_name = ?, date_sold = ? WHERE id = ?",
+    input.soldPrice,
+    input.customerName.trim() || null,
+    input.dateSold ?? new Date().toISOString(),
+    input.deviceId,
+  );
+
+  const row = await db.getFirstAsync<Device>(
+    "SELECT * FROM devices WHERE id = ?",
+    input.deviceId,
+  );
+  if (!row) throw new Error("Failed to record sale");
   return row;
 }
 
 export async function getSalesHistory() {
-  const db = ensureDb();
-  const [sales, devices, customers] = await Promise.all([
-    db.getAllAsync<Omit<Sale, "device" | "customer">>(
-      "SELECT * FROM sales ORDER BY sold_at DESC, id DESC",
-    ),
-    db.getAllAsync<Device>("SELECT * FROM devices"),
-    db.getAllAsync<Customer>("SELECT * FROM customers"),
-  ]);
-
-  const deviceMap = new Map(devices.map((d) => [d.id, d]));
-  const customerMap = new Map(customers.map((c) => [c.id, c]));
-
-  return sales.map<Sale>((s) => ({
-    ...s,
-    device: deviceMap.get(s.device_id) ?? null,
-    customer: s.customer_id ? customerMap.get(s.customer_id) ?? null : null,
-  }));
-}
-
-export interface CompleteSaleInput {
-  device: Device;
-  customerName: string;
-  phone?: string;
-  finalPrice: number;
-  paymentMethod: string;
-}
-
-export async function completeSale(input: CompleteSaleInput) {
-  const customer = await findOrCreateCustomer({
-    full_name: input.customerName,
-    phone: input.phone,
-  });
-
-  return createSale({
-    device_id: input.device.id,
-    customer_id: customer.id,
-    final_price: input.finalPrice,
-    payment_method: input.paymentMethod,
-  });
+  const db = await ensureDb();
+  return db.getAllAsync<Device>(
+    "SELECT * FROM devices WHERE status = 'sold' ORDER BY date_sold DESC, created_at DESC",
+  );
 }
