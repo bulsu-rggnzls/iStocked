@@ -1,14 +1,14 @@
 import { ensureDb, genId } from "./db";
 import type { SQLiteBindValue } from "expo-sqlite";
-import type { Device, NewDeviceInput } from "../types";
+import type { Device, DeviceStatus, NewDeviceInput } from "../types";
 
 export interface DeviceFilters {
-  status?: "all" | Device["status"];
+  status?: "all" | DeviceStatus;
   condition?: string | null;
 }
 
 export async function fetchDevices(filters: DeviceFilters = {}) {
-  const db = ensureDb();
+  const db = await ensureDb();
   const clauses: string[] = [];
   const params: string[] = [];
 
@@ -23,13 +23,13 @@ export async function fetchDevices(filters: DeviceFilters = {}) {
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   return db.getAllAsync<Device>(
-    `SELECT * FROM devices ${where} ORDER BY created_at DESC, id DESC`,
+    `SELECT * FROM devices ${where} ORDER BY date_bought DESC, created_at DESC`,
     params,
   );
 }
 
 export async function fetchDeviceById(id: string) {
-  const db = ensureDb();
+  const db = await ensureDb();
   const row = await db.getFirstAsync<Device>(
     "SELECT * FROM devices WHERE id = ?",
     id,
@@ -39,7 +39,7 @@ export async function fetchDeviceById(id: string) {
 }
 
 export async function lookupDeviceByImei(imei: string) {
-  const db = ensureDb();
+  const db = await ensureDb();
   return (
     (await db.getFirstAsync<Device>(
       "SELECT * FROM devices WHERE imei = ?",
@@ -48,21 +48,21 @@ export async function lookupDeviceByImei(imei: string) {
   );
 }
 
-export async function addDevice(deviceData: NewDeviceInput) {
-  const db = ensureDb();
+export async function addDevice(input: NewDeviceInput) {
+  const db = await ensureDb();
   const id = genId();
+  const now = new Date().toISOString();
   await db.runAsync(
-    "INSERT INTO devices (id, model, imei, storage, condition, cost_price, selling_price, status, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO devices (id, model, imei, storage, condition, buy_price, list_price, status, date_bought, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?)",
     id,
-    deviceData.model,
-    deviceData.imei,
-    deviceData.storage,
-    deviceData.condition,
-    deviceData.cost_price,
-    deviceData.selling_price,
-    deviceData.status ?? "in_stock",
-    new Date().toISOString(),
-    deviceData.created_by ?? null,
+    input.model,
+    input.imei,
+    input.storage,
+    input.condition,
+    input.buy_price,
+    input.list_price,
+    now,
+    now,
   );
   const row = await db.getFirstAsync<Device>(
     "SELECT * FROM devices WHERE id = ?",
@@ -74,19 +74,19 @@ export async function addDevice(deviceData: NewDeviceInput) {
 
 export async function updateDevice(
   id: string,
-  deviceData: Partial<NewDeviceInput>,
+  deviceData: Partial<NewDeviceInput> & { status?: DeviceStatus },
 ) {
-  const db = ensureDb();
+  const db = await ensureDb();
   const sets: string[] = [];
   const params: SQLiteBindValue[] = [];
 
-  const fields: Array<keyof NewDeviceInput> = [
+  const fields: Array<keyof NewDeviceInput | "status"> = [
     "model",
     "imei",
     "storage",
     "condition",
-    "cost_price",
-    "selling_price",
+    "buy_price",
+    "list_price",
     "status",
   ];
   for (const field of fields) {
@@ -114,6 +114,6 @@ export async function updateDevice(
 }
 
 export async function deleteDevice(id: string) {
-  const db = ensureDb();
+  const db = await ensureDb();
   await db.runAsync("DELETE FROM devices WHERE id = ?", id);
 }
