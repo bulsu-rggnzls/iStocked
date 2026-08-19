@@ -5,6 +5,13 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Poppins_400Regular"],
+        poppins: ["Poppins_400Regular"],
+        "poppins-medium": ["Poppins_500Medium"],
+        "poppins-semibold": ["Poppins_600SemiBold"],
+        "poppins-bold": ["Poppins_700Bold"],
+      },
       colors: {
         brand: {
           50: "#f0fdf4",
