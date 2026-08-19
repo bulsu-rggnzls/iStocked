@@ -17,7 +17,7 @@ function TabIcon({
   return (
     <View
       className={`h-8 w-12 items-center justify-center rounded-full ${
-        focused ? "bg-emerald-50" : ""
+        focused ? "bg-zinc-100" : ""
       }`}
     >
       <Ionicons name={name} size={size} color={color} />
@@ -30,12 +30,12 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#16a34a",
-        tabBarInactiveTintColor: "#8a958d",
+        tabBarActiveTintColor: "#09090b",
+        tabBarInactiveTintColor: "#a1a1aa",
         tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
         tabBarStyle: {
           backgroundColor: "#ffffff",
-          borderTopColor: "#E3E8E2",
+          borderTopColor: "#e4e4e7",
           minHeight: 58,
           paddingTop: 6,
         },
@@ -56,6 +56,15 @@ export default function TabLayout() {
           title: "Inventory",
           tabBarIcon: ({ color, size, focused }) => (
             <TabIcon name="phone-portrait-outline" color={color} size={size} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="sales"
+        options={{
+          title: "Sales",
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon name="receipt-outline" color={color} size={size} focused={focused} />
           ),
         }}
       />
