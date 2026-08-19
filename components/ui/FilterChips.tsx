@@ -25,12 +25,12 @@ export function FilterChips({ options, value, onChange }: FilterChipsProps) {
             key={option.value}
             onPress={() => onChange(option.value)}
             className={`rounded-full px-4 py-2 active:opacity-80 ${
-              selected ? "bg-brand-500" : "border border-[#E3E8E2] bg-white"
+              selected ? "bg-black" : "border border-zinc-200 bg-white"
             }`}
           >
             <Text
               className={`text-sm font-medium ${
-                selected ? "text-white" : "text-[#5F6F64]"
+                selected ? "text-white" : "text-zinc-600"
               }`}
             >
               {option.label}
