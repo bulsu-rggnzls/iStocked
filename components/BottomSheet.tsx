@@ -34,11 +34,11 @@ export function BottomSheet({
           className="rounded-t-3xl bg-white p-5"
           style={{ paddingBottom: Math.max(insets.bottom, 20) }}
         >
-          <View className="mx-auto mb-4 h-1 w-10 rounded-full bg-[#E3E8E2]" />
+          <View className="mx-auto mb-4 h-1 w-10 rounded-full bg-zinc-200" />
           <View className="mb-4 flex-row items-center justify-between">
-            <Text className="text-lg font-bold text-[#13241B]">{title}</Text>
+            <Text className="text-lg font-bold text-zinc-950">{title}</Text>
             <Pressable onPress={onClose} hitSlop={8}>
-              <Ionicons name="close" size={24} color="#5F6F64" />
+              <Ionicons name="close" size={24} color="#71717a" />
             </Pressable>
           </View>
           {children}
