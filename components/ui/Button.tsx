@@ -14,17 +14,17 @@ interface ButtonProps {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-brand-500 active:bg-brand-600",
-  secondary: "border border-[#E3E8E2] bg-white active:bg-[#F1F4F0]",
+  primary: "bg-black active:bg-zinc-900",
+  secondary: "border border-zinc-200 bg-white active:bg-zinc-100",
   danger: "bg-red-600 active:bg-red-700",
   ghost: "bg-transparent active:opacity-70",
 };
 
 const textStyles: Record<ButtonVariant, string> = {
   primary: "text-white",
-  secondary: "text-[#13241B]",
+  secondary: "text-zinc-950",
   danger: "text-white",
-  ghost: "text-brand-700",
+  ghost: "text-zinc-900",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -50,7 +50,7 @@ export function Button({
       } ${className}`}
     >
       {loading ? (
-        <ActivityIndicator color={variant === "primary" || variant === "danger" ? "#ffffff" : "#16a34a"} />
+        <ActivityIndicator color={variant === "primary" || variant === "danger" ? "#ffffff" : "#09090b"} />
       ) : (
         <Text className={`text-base font-semibold ${textStyles[variant]}`}>
           {title}

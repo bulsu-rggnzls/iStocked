@@ -1,5 +1,11 @@
+const formatNumber = (value: number) => {
+  const fixed = Number(value).toFixed(2);
+  const [int, dec] = fixed.split(".");
+  return `${int.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${dec}`;
+};
+
 export const formatPrice = (value: number | string) =>
-  `$${Number(value).toFixed(2)}`;
+  `₱${formatNumber(Number(value))}`;
 
 export const formatImei = (imei: string) =>
   imei.replace(/(\d{5})(?=\d)/g, "$1 ").trim();

@@ -19,13 +19,13 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <View className="items-center px-8 py-10">
-      <View className="h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-        <Ionicons name={icon} size={28} color="#059669" />
+      <View className="h-16 w-16 items-center justify-center rounded-full bg-zinc-900">
+        <Ionicons name={icon} size={28} color="#ffffff" />
       </View>
-      <Text className="mt-4 text-base font-semibold text-[#13241B]">
+      <Text className="mt-4 text-base font-semibold text-zinc-950">
         {title}
       </Text>
-      <Text className="mt-2 text-center text-sm text-[#5F6F64]">{message}</Text>
+      <Text className="mt-2 text-center text-sm text-zinc-500">{message}</Text>
       {actionLabel && onAction ? (
         <View className="mt-5 w-full">
           <Button title={actionLabel} onPress={onAction} variant="secondary" />

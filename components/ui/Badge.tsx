@@ -10,17 +10,17 @@ interface BadgeProps {
 }
 
 const toneStyles: Record<BadgeTone, string> = {
-  brand: "bg-brand-50 text-brand-900",
-  gray: "bg-gray-100 text-gray-600",
-  amber: "bg-amber-50 text-amber-700",
-  emerald: "bg-emerald-50 text-emerald-700",
+  brand: "border border-zinc-200 bg-zinc-100 text-zinc-900",
+  gray: "border border-zinc-200 bg-zinc-100 text-zinc-600",
+  amber: "border border-zinc-200 bg-zinc-100 text-zinc-700",
+  emerald: "border border-zinc-200 bg-zinc-100 text-zinc-700",
 };
 
 const dotStyles: Record<BadgeTone, string> = {
-  brand: "bg-brand-500",
-  gray: "bg-gray-400",
-  amber: "bg-amber-500",
-  emerald: "bg-emerald-500",
+  brand: "bg-black",
+  gray: "bg-zinc-400",
+  amber: "bg-zinc-600",
+  emerald: "bg-zinc-600",
 };
 
 export function Badge({ label, tone = "gray", dot = false }: BadgeProps) {
@@ -37,12 +37,11 @@ export function Badge({ label, tone = "gray", dot = false }: BadgeProps) {
 export const STATUS_META: Record<DeviceStatus, { label: string; tone: BadgeTone }> = {
   in_stock: { label: "In stock", tone: "brand" },
   sold: { label: "Sold", tone: "gray" },
-  reserved: { label: "Reserved", tone: "amber" },
 };
 
 export const CONDITION_META: Record<string, { tone: BadgeTone }> = {
   "Brand New": { tone: "brand" },
-  Excellent: { tone: "emerald" },
+  "Like New": { tone: "emerald" },
   Good: { tone: "amber" },
   Fair: { tone: "gray" },
 };

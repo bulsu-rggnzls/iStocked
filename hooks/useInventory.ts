@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addDevice,
   fetchDevices,
   fetchDeviceById,
   lookupDeviceByImei,
@@ -31,11 +32,28 @@ export function useDeviceByImei(imei: string | null) {
   });
 }
 
+export function useAddDevice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: NewDeviceInput) => addDevice(data),
+    onSuccess: (device: Device) => {
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+      queryClient.setQueryData(["devices", device.id], device);
+      queryClient.invalidateQueries({ queryKey: ["metrics"] });
+    },
+  });
+}
+
 export function useUpdateDevice() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<NewDeviceInput> }) =>
-      updateDevice(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<NewDeviceInput> & { status?: Device["status"] };
+    }) => updateDevice(id, data),
     onSuccess: (device: Device) => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
       queryClient.setQueryData(["devices", device.id], device);

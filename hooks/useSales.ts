@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { completeSale, createSale, getSalesHistory, type CompleteSaleInput } from "../lib/sales";
-import type { NewSaleInput } from "../types";
+import { getSalesHistory, recordSale } from "../lib/sales";
+import type { RecordSaleInput } from "../types";
 
 export function useSales() {
   return useQuery({
@@ -9,22 +9,10 @@ export function useSales() {
   });
 }
 
-export function useCreateSale() {
+export function useRecordSale() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (sale: NewSaleInput) => createSale(sale),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sales"] });
-      queryClient.invalidateQueries({ queryKey: ["devices"] });
-      queryClient.invalidateQueries({ queryKey: ["metrics"] });
-    },
-  });
-}
-
-export function useCompleteSale() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: CompleteSaleInput) => completeSale(input),
+    mutationFn: (input: RecordSaleInput) => recordSale(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
       queryClient.invalidateQueries({ queryKey: ["sales"] });

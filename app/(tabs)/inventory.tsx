@@ -12,31 +12,28 @@ import { Ionicons } from "@expo/vector-icons";
 import { useDevices } from "../../hooks/useInventory";
 import { ScreenHeader } from "../../components/ui/ScreenHeader";
 import { SearchBar } from "../../components/ui/SearchBar";
-import { FilterChips } from "../../components/ui/FilterChips";
 import { DeviceCard } from "../../components/DeviceCard";
 import { BottomSheet } from "../../components/BottomSheet";
+import { AddDeviceSheet } from "../../components/AddDeviceSheet";
+import { RecordSaleSheet } from "../../components/RecordSaleSheet";
 import { EmptyState } from "../../components/EmptyState";
-import type { Device, DeviceStatus } from "../../types";
-
-const STATUS_OPTIONS = [
-  { label: "All", value: "all" },
-  { label: "In stock", value: "in_stock" },
-  { label: "Sold", value: "sold" },
-  { label: "Reserved", value: "reserved" },
-];
+import { formatPrice } from "../../lib/format";
+import type { Device } from "../../types";
 
 const CONDITION_OPTIONS = [
   { label: "All conditions", value: "all" },
   { label: "Brand New", value: "Brand New" },
-  { label: "Excellent", value: "Excellent" },
+  { label: "Like New", value: "Like New" },
   { label: "Good", value: "Good" },
+  { label: "Fair", value: "Fair" },
 ];
 
 export default function InventoryScreen() {
   const router = useRouter();
-  const [status, setStatus] = useState<"all" | DeviceStatus>("all");
   const [condition, setCondition] = useState<string>("all");
   const [conditionSheetOpen, setConditionSheetOpen] = useState(false);
+  const [addSheetOpen, setAddSheetOpen] = useState(false);
+  const [saleDevice, setSaleDevice] = useState<Device | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -45,8 +42,10 @@ export default function InventoryScreen() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data, isLoading, isError, error, isRefetching, refetch } =
-    useDevices({ status, condition });
+  const { data, isLoading, isError, error, isRefetching, refetch } = useDevices({
+    status: "in_stock",
+    condition,
+  });
 
   const filtered = useMemo(() => {
     const term = debouncedSearch.trim().toLowerCase();
@@ -58,11 +57,13 @@ export default function InventoryScreen() {
     );
   }, [data, debouncedSearch]);
 
+  const capitalInStock = useMemo(
+    () => (data ?? []).reduce((sum, d) => sum + Number(d.buy_price), 0),
+    [data],
+  );
+
   const openDevice = (device: Device) =>
     router.push({ pathname: "/inventory/[id]", params: { id: device.id } });
-
-  const startSale = (device: Device) =>
-    router.push({ pathname: "/checkout", params: { deviceId: device.id } });
 
   const header = (
     <View>
@@ -71,8 +72,17 @@ export default function InventoryScreen() {
         title="Inventory"
         subtitle={
           data
-            ? `${filtered.length} of ${data.length} ${data.length === 1 ? "device" : "devices"}`
+            ? `${filtered.length} of ${data.length} ${data.length === 1 ? "phone" : "phones"}`
             : undefined
+        }
+        trailing={
+          <Pressable
+            onPress={() => setAddSheetOpen(true)}
+            className="flex-row items-center gap-1 rounded-xl bg-black px-4 py-2.5 active:bg-zinc-900"
+          >
+            <Ionicons name="add" size={18} color="#ffffff" />
+            <Text className="text-sm font-semibold text-white">Buy Phone</Text>
+          </Pressable>
         }
       />
       <View className="px-5 pb-3">
@@ -82,17 +92,29 @@ export default function InventoryScreen() {
           onFilterPress={() => setConditionSheetOpen(true)}
         />
       </View>
-      <FilterChips options={STATUS_OPTIONS} value={status} onChange={(v) => setStatus(v as "all" | DeviceStatus)} />
-      <View className="pb-2" />
+
+      <View className="mx-5 mb-3 flex-row items-center justify-between rounded-2xl border border-zinc-200 bg-white px-4 py-3.5">
+        <View>
+          <Text className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+            Capital in stock
+          </Text>
+          <Text className="mt-0.5 text-xl font-bold text-zinc-950">
+            {formatPrice(capitalInStock)}
+          </Text>
+        </View>
+        <Text className="text-xs text-zinc-400">
+          {data?.length ?? 0} {data?.length === 1 ? "phone" : "phones"} ready
+        </Text>
+      </View>
     </View>
   );
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-[#F6F8F5]">
+      <View className="flex-1 bg-zinc-100">
         {header}
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#16a34a" />
+          <ActivityIndicator size="large" color="#09090b" />
         </View>
       </View>
     );
@@ -100,10 +122,10 @@ export default function InventoryScreen() {
 
   if (isError) {
     return (
-      <View className="flex-1 bg-[#F6F8F5]">
+      <View className="flex-1 bg-zinc-100">
         {header}
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-base font-semibold text-[#13241B]">
+          <Text className="text-center text-base font-semibold text-zinc-950">
             Couldn't load inventory
           </Text>
           <Text className="mt-2 text-center text-sm leading-5 text-red-600">
@@ -111,7 +133,7 @@ export default function InventoryScreen() {
           </Text>
           <Pressable
             onPress={() => refetch()}
-            className="mt-5 rounded-xl bg-brand-500 px-6 py-3 active:opacity-80"
+            className="mt-5 rounded-xl bg-black px-6 py-3 active:opacity-80"
           >
             <Text className="font-semibold text-white">Retry</Text>
           </Pressable>
@@ -121,7 +143,7 @@ export default function InventoryScreen() {
   }
 
   return (
-    <View className="flex-1 bg-[#F6F8F5]">
+    <View className="flex-1 bg-zinc-100">
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -130,7 +152,7 @@ export default function InventoryScreen() {
             <DeviceCard
               device={item}
               onPress={() => openDevice(item)}
-              onSell={() => startSale(item)}
+              onRecordSale={() => setSaleDevice(item)}
             />
           </View>
         )}
@@ -138,14 +160,14 @@ export default function InventoryScreen() {
         ListEmptyComponent={
           <EmptyState
             icon="phone-portrait-outline"
-            title={
-              data && data.length > 0 ? "No devices match" : "No devices in stock"
-            }
+            title={data && data.length > 0 ? "No devices match" : "No stock on hand"}
             message={
               data && data.length > 0
                 ? "Try a different search or filter."
-                : "Add your first device to start tracking inventory."
+                : "Log your first purchased phone to start flipping."
             }
+            actionLabel={data && data.length > 0 ? undefined : "Add a phone"}
+            onAction={data && data.length > 0 ? undefined : () => setAddSheetOpen(true)}
           />
         }
         contentContainerClassName="gap-3 pb-10"
@@ -153,7 +175,7 @@ export default function InventoryScreen() {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={() => refetch()}
-            tintColor="#16a34a"
+            tintColor="#09090b"
           />
         }
       />
@@ -172,18 +194,28 @@ export default function InventoryScreen() {
                 setCondition(option.value);
                 setConditionSheetOpen(false);
               }}
-              className="flex-row items-center justify-between rounded-xl px-3 py-3.5 active:bg-[#F1F4F0]"
+              className="flex-row items-center justify-between rounded-xl px-3 py-3.5 active:bg-zinc-100"
             >
-              <Text className="text-base text-[#13241B]">{option.label}</Text>
+              <Text className="text-base text-zinc-950">{option.label}</Text>
               {selected ? (
-                <Ionicons name="checkmark-circle" size={22} color="#16a34a" />
+                <Ionicons name="checkmark-circle" size={22} color="#09090b" />
               ) : (
-                <View className="h-5 w-5 rounded-full border border-[#E3E8E2]" />
+                <View className="h-5 w-5 rounded-full border border-zinc-300" />
               )}
             </Pressable>
           );
         })}
       </BottomSheet>
+
+      <AddDeviceSheet
+        visible={addSheetOpen}
+        onClose={() => setAddSheetOpen(false)}
+      />
+
+      <RecordSaleSheet
+        device={saleDevice}
+        onClose={() => setSaleDevice(null)}
+      />
     </View>
   );
 }

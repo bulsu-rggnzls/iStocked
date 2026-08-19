@@ -1,35 +1,40 @@
 import { ensureDb } from "./db";
-import { getSalesHistory } from "./sales";
-import type { Sale } from "../types";
+import type { Device } from "../types";
 
 export interface Metrics {
-  totalSales: number;
-  netProfit: number;
+  totalNetProfit: number;
+  totalInvestment: number;
+  unitsAvailable: number;
   unitsSold: number;
-  availableStock: number;
-  recentSales: Sale[];
+  recentSales: Device[];
 }
 
 export async function fetchMetrics(): Promise<Metrics> {
-  const db = ensureDb();
-  const [sales, stockRow] = await Promise.all([
-    getSalesHistory(),
-    db.getFirstAsync<{ c: number }>(
-      "SELECT COUNT(*) AS c FROM devices WHERE status = 'in_stock'",
-    ),
-  ]);
-
-  const totalSales = sales.reduce((sum, s) => sum + Number(s.final_price), 0);
-  const netProfit = sales.reduce(
-    (sum, s) => sum + (Number(s.final_price) - Number(s.device?.cost_price ?? 0)),
-    0,
-  );
+  const db = await ensureDb();
+  const [recentSales, investmentRow, profitRow, stockRow, soldRow] =
+    await Promise.all([
+      db.getAllAsync<Device>(
+        "SELECT * FROM devices WHERE status = 'sold' ORDER BY date_sold DESC, created_at DESC LIMIT 15",
+      ),
+      db.getFirstAsync<{ c: number | null }>(
+        "SELECT SUM(buy_price) AS c FROM devices WHERE status = 'in_stock'",
+      ),
+      db.getFirstAsync<{ c: number | null }>(
+        "SELECT SUM(sold_price - buy_price) AS c FROM devices WHERE status = 'sold'",
+      ),
+      db.getFirstAsync<{ c: number }>(
+        "SELECT COUNT(*) AS c FROM devices WHERE status = 'in_stock'",
+      ),
+      db.getFirstAsync<{ c: number }>(
+        "SELECT COUNT(*) AS c FROM devices WHERE status = 'sold'",
+      ),
+    ]);
 
   return {
-    totalSales,
-    netProfit,
-    unitsSold: sales.length,
-    availableStock: stockRow?.c ?? 0,
-    recentSales: sales.slice(0, 15),
+    totalNetProfit: Number(profitRow?.c ?? 0),
+    totalInvestment: Number(investmentRow?.c ?? 0),
+    unitsAvailable: stockRow?.c ?? 0,
+    unitsSold: soldRow?.c ?? 0,
+    recentSales,
   };
 }

@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  * {
+    font-family: Poppins_400Regular;
+  }
+}
+
+@layer utilities {
+  .font-normal {
+    font-family: Poppins_400Regular;
+    font-weight: 400;
+  }
+  .font-medium {
+    font-family: Poppins_500Medium;
+    font-weight: 500;
+  }
+  .font-semibold {
+    font-family: Poppins_600SemiBold;
+    font-weight: 600;
+  }
+  .font-bold {
+    font-family: Poppins_700Bold;
+    font-weight: 700;
+  }
+}
+
 html,
 body,
 #root {
