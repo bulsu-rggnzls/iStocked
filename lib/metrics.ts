@@ -17,10 +17,10 @@ export async function fetchMetrics(): Promise<Metrics> {
         "SELECT * FROM devices WHERE status = 'sold' ORDER BY date_sold DESC, created_at DESC LIMIT 15",
       ),
       db.getFirstAsync<{ c: number | null }>(
-        "SELECT SUM(buy_price) AS c FROM devices WHERE status = 'in_stock'",
+        "SELECT SUM(buy_price + repair_cost) AS c FROM devices WHERE status = 'in_stock'",
       ),
       db.getFirstAsync<{ c: number | null }>(
-        "SELECT SUM(sold_price - buy_price) AS c FROM devices WHERE status = 'sold'",
+        "SELECT SUM(sold_price - buy_price - repair_cost) AS c FROM devices WHERE status = 'sold'",
       ),
       db.getFirstAsync<{ c: number }>(
         "SELECT COUNT(*) AS c FROM devices WHERE status = 'in_stock'",
