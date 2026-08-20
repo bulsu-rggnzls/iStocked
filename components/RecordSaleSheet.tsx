@@ -28,6 +28,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
   const recordSale = useRecordSale();
   const [customerName, setCustomerName] = useState("");
+  const [buyerContact, setBuyerContact] = useState("");
   const [soldPrice, setSoldPrice] = useState("");
   const [dateSold, setDateSold] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +36,7 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
   useEffect(() => {
     if (device) {
       setCustomerName("");
+      setBuyerContact("");
       setSoldPrice(String(device.list_price));
       setDateSold(new Date().toISOString().slice(0, 10));
       setError(null);
@@ -44,7 +46,8 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
   if (!device) return null;
 
   const price = Number(soldPrice) || 0;
-  const profit = price - Number(device.buy_price);
+  const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);
+  const profit = price - totalCost;
 
   const handleConfirm = async () => {
     if (price <= 0) {
@@ -57,6 +60,7 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
         deviceId: device.id,
         customerName: customerName.trim(),
         soldPrice: price,
+        buyerContact: buyerContact.trim() || undefined,
         dateSold: dateSold.trim()
           ? new Date(`${dateSold.trim()}T00:00:00`).toISOString()
           : undefined,
@@ -87,6 +91,14 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
               {formatPrice(device.buy_price)}
             </Text>
           </View>
+          {Number(device.repair_cost ?? 0) > 0 ? (
+            <View className="mt-2 flex-row items-center justify-between">
+              <Text className="text-sm text-zinc-500">Repair cost</Text>
+              <Text className="text-sm font-medium text-zinc-950">
+                {formatPrice(device.repair_cost)}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
         <Field label="Customer name">
@@ -96,6 +108,18 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
             placeholder="e.g. Juan dela Cruz"
             placeholderTextColor="#a1a1aa"
             autoCapitalize="words"
+            className={inputClass}
+          />
+        </Field>
+
+        <Field label="Buyer contact (optional)">
+          <TextInput
+            value={buyerContact}
+            onChangeText={setBuyerContact}
+            placeholder="Name, phone, or social link"
+            placeholderTextColor="#a1a1aa"
+            autoCapitalize="none"
+            autoCorrect={false}
             className={inputClass}
           />
         </Field>

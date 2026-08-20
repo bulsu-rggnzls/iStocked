@@ -21,6 +21,7 @@ export default function CheckoutScreen() {
   const { data: device, isLoading, isError } = useDevice(deviceId);
 
   const [customerName, setCustomerName] = useState("");
+  const [buyerContact, setBuyerContact] = useState("");
   const [soldPrice, setSoldPrice] = useState("");
   const [dateSold, setDateSold] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +62,8 @@ export default function CheckoutScreen() {
   }
 
   const price = Number(soldPrice) || 0;
-  const profit = price - Number(device.buy_price);
+  const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);
+  const profit = price - totalCost;
 
   const handleConfirm = () => {
     setError(null);
@@ -74,6 +76,7 @@ export default function CheckoutScreen() {
         deviceId: device.id,
         customerName: customerName.trim(),
         soldPrice: price,
+        buyerContact: buyerContact.trim(),
         dateSold: dateSold.trim()
           ? new Date(`${dateSold.trim()}T00:00:00`).toISOString()
           : undefined,
@@ -111,6 +114,14 @@ export default function CheckoutScreen() {
                 {formatPrice(device.buy_price)}
               </Text>
             </View>
+            {Number(device.repair_cost ?? 0) > 0 ? (
+              <View className="mt-2 flex-row items-center justify-between">
+                <Text className="text-sm text-zinc-500">Repair cost</Text>
+                <Text className="text-sm font-semibold text-zinc-950">
+                  {formatPrice(device.repair_cost)}
+                </Text>
+              </View>
+            ) : null}
             <View className="mt-2 flex-row items-center justify-between">
               <Text className="text-sm text-zinc-500">List price</Text>
               <Text className="text-lg font-bold text-zinc-950">
@@ -129,6 +140,15 @@ export default function CheckoutScreen() {
               onChangeText={setCustomerName}
               placeholder="e.g. Juan dela Cruz"
             />
+            <View className="mt-4">
+              <TextField
+                label="Buyer contact / social link"
+                value={buyerContact}
+                onChangeText={setBuyerContact}
+                placeholder="Name, phone, or social link"
+                autoCapitalize="none"
+              />
+            </View>
             <View className="mt-4">
               <TextField
                 label="Final sold price (₱)"

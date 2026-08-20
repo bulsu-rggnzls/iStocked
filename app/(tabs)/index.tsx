@@ -7,6 +7,7 @@ import { ScreenHeader } from "../../components/ui/ScreenHeader";
 import { StatCard } from "../../components/StatCard";
 import { EmptyState } from "../../components/EmptyState";
 import { AddDeviceSheet } from "../../components/AddDeviceSheet";
+import { exportDatabase } from "../../lib/export";
 import { formatDate, formatPrice } from "../../lib/format";
 import type { Device } from "../../types";
 
@@ -43,7 +44,8 @@ function QuickAction({
 }
 
 function SaleRow({ device }: { device: Device }) {
-  const profit = Number(device.sold_price ?? 0) - Number(device.buy_price);
+  const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);
+  const profit = Number(device.sold_price ?? 0) - totalCost;
   return (
     <View className="rounded-2xl border border-zinc-200 bg-white p-4">
       <View className="flex-row items-center justify-between gap-3">
@@ -60,7 +62,7 @@ function SaleRow({ device }: { device: Device }) {
           {device.customer_name ?? "Walk-in"}
         </Text>
         <Text className="text-sm font-semibold text-zinc-700">
-          +{formatPrice(profit)} profit
+          +{formatPrice(profit)} net
         </Text>
       </View>
     </View>
@@ -72,6 +74,20 @@ export default function DashboardScreen() {
   const { data, isLoading, isError, error, isRefetching, refetch } =
     useMetrics();
   const [addSheetOpen, setAddSheetOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exported, setExported] = useState(false);
+
+  const handleExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await exportDatabase();
+      setExported(true);
+      setTimeout(() => setExported(false), 2000);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const header = (
     <View>
@@ -83,6 +99,20 @@ export default function DashboardScreen() {
           month: "long",
           day: "numeric",
         })}
+        trailing={
+          <Pressable
+            onPress={handleExport}
+            disabled={exporting}
+            className="h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white active:bg-zinc-100"
+            accessibilityLabel="Export database"
+          >
+            <Ionicons
+              name={exported ? "checkmark" : exporting ? "hourglass-outline" : "download-outline"}
+              size={20}
+              color={exported ? "#09090b" : "#09090b"}
+            />
+          </Pressable>
+        }
       />
 
       <View className="flex-row flex-wrap px-3.5 pt-1">
@@ -91,7 +121,7 @@ export default function DashboardScreen() {
             label="Total net profit"
             value={data ? formatPrice(data.totalNetProfit) : "—"}
             icon="trending-up-outline"
-            trend="sold price − buy price"
+            trend="sold − buy − repair"
           />
         </View>
         <View className="w-1/2 p-1.5">

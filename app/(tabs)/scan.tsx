@@ -91,16 +91,16 @@ export default function ScanScreen() {
 
   if (!permission) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#13241B] px-8">
-        <ActivityIndicator color="#22c55e" />
+      <View className="flex-1 items-center justify-center bg-zinc-950 px-8">
+        <ActivityIndicator color="#ffffff" />
       </View>
     );
   }
 
   if (!permission.granted) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#13241B] px-8">
-        <Ionicons name="scan-outline" size={44} color="#22c55e" />
+      <View className="flex-1 items-center justify-center bg-zinc-950 px-8">
+        <Ionicons name="scan-outline" size={44} color="#ffffff" />
         <Text className="mt-4 text-center text-xl font-bold text-white">
           Camera access needed
         </Text>
@@ -115,7 +115,7 @@ export default function ScanScreen() {
   }
 
   return (
-    <View className="flex-1 bg-[#13241B]">
+    <View className="flex-1 bg-zinc-950">
       {isFocused ? (
         <CameraView
           className="flex-1"
@@ -141,23 +141,23 @@ export default function ScanScreen() {
         <Pressable
           onPress={() => setTorch((t) => !t)}
           className={`h-11 w-11 items-center justify-center rounded-full active:opacity-80 ${
-            torch ? "bg-brand-500" : "bg-white/15"
+            torch ? "bg-white" : "bg-white/15"
           }`}
         >
           <Ionicons
             name={torch ? "flashlight" : "flashlight-outline"}
             size={22}
-            color={torch ? "#ffffff" : "#ffffff"}
+            color={torch ? "#09090b" : "#ffffff"}
           />
         </Pressable>
       </View>
 
       <View className="absolute inset-0 items-center justify-center">
         <View className="h-60 w-60">
-          <View className="absolute left-0 top-0 h-12 w-12 rounded-tl-3xl border-l-4 border-t-4 border-brand-500" />
-          <View className="absolute right-0 top-0 h-12 w-12 rounded-tr-3xl border-r-4 border-t-4 border-brand-500" />
-          <View className="absolute bottom-0 left-0 h-12 w-12 rounded-bl-3xl border-b-4 border-l-4 border-brand-500" />
-          <View className="absolute bottom-0 right-0 h-12 w-12 rounded-br-3xl border-b-4 border-r-4 border-brand-500" />
+          <View className="absolute left-0 top-0 h-12 w-12 rounded-tl-3xl border-l-4 border-t-4 border-white" />
+          <View className="absolute right-0 top-0 h-12 w-12 rounded-tr-3xl border-r-4 border-t-4 border-white" />
+          <View className="absolute bottom-0 left-0 h-12 w-12 rounded-bl-3xl border-b-4 border-l-4 border-white" />
+          <View className="absolute bottom-0 right-0 h-12 w-12 rounded-br-3xl border-b-4 border-r-4 border-white" />
         </View>
       </View>
 
@@ -186,11 +186,11 @@ export default function ScanScreen() {
           value={manualImei}
           onChangeText={(t) => setManualImei(t.replace(/\D/g, ""))}
           placeholder="15-digit IMEI"
-          placeholderTextColor="#9AA69D"
+          placeholderTextColor="#a1a1aa"
           keyboardType="number-pad"
           maxLength={15}
           autoFocus
-          className="rounded-xl border border-[#E3E8E2] bg-white px-4 py-3.5 text-base text-[#13241B]"
+          className="rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-950"
         />
         {manualError ? (
           <Text className="mt-2 text-sm text-red-600">{manualError}</Text>
@@ -211,8 +211,8 @@ export default function ScanScreen() {
       >
         {isLookingUp ? (
           <View className="items-center py-8">
-            <ActivityIndicator size="large" color="#16a34a" />
-            <Text className="mt-3 text-sm text-[#5F6F64]">Looking up device…</Text>
+            <ActivityIndicator size="large" color="#09090b" />
+            <Text className="mt-3 text-sm text-zinc-500">Looking up device…</Text>
           </View>
         ) : device ? (
           <>
@@ -228,9 +228,9 @@ export default function ScanScreen() {
           </>
         ) : (
           <>
-            <Text className="text-sm leading-6 text-[#5F6F64]">
+            <Text className="text-sm leading-6 text-zinc-500">
               No device in your inventory matches{" "}
-              <Text className="font-mono text-[#13241B]">
+              <Text className="font-mono text-zinc-950">
                 {formatImei(scannedImei ?? "")}
               </Text>
               .

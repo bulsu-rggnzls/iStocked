@@ -5,6 +5,7 @@ import type { Device, DeviceStatus, NewDeviceInput } from "../types";
 export interface DeviceFilters {
   status?: "all" | DeviceStatus;
   condition?: string | null;
+  networkLock?: string | null;
 }
 
 export async function fetchDevices(filters: DeviceFilters = {}) {
@@ -19,6 +20,10 @@ export async function fetchDevices(filters: DeviceFilters = {}) {
   if (filters.condition && filters.condition !== "all") {
     clauses.push("condition = ?");
     params.push(filters.condition);
+  }
+  if (filters.networkLock && filters.networkLock !== "all") {
+    clauses.push("network_lock = ?");
+    params.push(filters.networkLock);
   }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
@@ -53,7 +58,7 @@ export async function addDevice(input: NewDeviceInput) {
   const id = genId();
   const now = new Date().toISOString();
   await db.runAsync(
-    "INSERT INTO devices (id, model, imei, storage, condition, buy_price, list_price, status, date_bought, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?)",
+    "INSERT INTO devices (id, model, imei, storage, condition, buy_price, list_price, battery_health, color, network_lock, repair_cost, status, date_bought, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?)",
     id,
     input.model,
     input.imei,
@@ -61,6 +66,10 @@ export async function addDevice(input: NewDeviceInput) {
     input.condition,
     input.buy_price,
     input.list_price,
+    input.battery_health ?? null,
+    input.color?.trim() || null,
+    input.network_lock ?? null,
+    input.repair_cost ?? 0,
     now,
     now,
   );
@@ -87,6 +96,10 @@ export async function updateDevice(
     "condition",
     "buy_price",
     "list_price",
+    "battery_health",
+    "color",
+    "network_lock",
+    "repair_cost",
     "status",
   ];
   for (const field of fields) {
