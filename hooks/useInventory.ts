@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDevice,
+  deleteDevice,
   fetchDevices,
   fetchDeviceById,
   lookupDeviceByImei,
@@ -57,6 +58,18 @@ export function useUpdateDevice() {
     onSuccess: (device: Device) => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
       queryClient.setQueryData(["devices", device.id], device);
+      queryClient.invalidateQueries({ queryKey: ["metrics"] });
+    },
+  });
+}
+
+export function useDeleteDevice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteDevice(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
     },
   });
