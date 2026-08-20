@@ -20,7 +20,7 @@ export function TextField({
   return (
     <View>
       {label ? (
-        <Text className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#3A4A40]">
+        <Text className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
           {label}
         </Text>
       ) : null}
@@ -28,9 +28,9 @@ export function TextField({
         <TextInput
           {...inputProps}
           secureTextEntry={hidden}
-          placeholderTextColor={inputProps.placeholderTextColor ?? "#9AA69D"}
-          className={`rounded-xl border bg-white px-4 py-3.5 text-base text-[#13241B] ${
-            error ? "border-red-400" : "border-[#E3E8E2]"
+          placeholderTextColor={inputProps.placeholderTextColor ?? "#a1a1aa"}
+          className={`rounded-xl border bg-white px-4 py-3.5 text-base text-zinc-950 ${
+            error ? "border-red-400" : "border-zinc-200"
           } ${secure ? "pr-12" : ""}`}
         />
         {secure ? (
@@ -42,7 +42,7 @@ export function TextField({
             <Ionicons
               name={hidden ? "eye-off-outline" : "eye-outline"}
               size={20}
-              color="#5F6F64"
+              color="#71717a"
             />
           </Pressable>
         ) : null}
