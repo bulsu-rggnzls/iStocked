@@ -89,6 +89,22 @@ export default function ScanScreen() {
     if (id) router.push({ pathname: "/checkout", params: { deviceId: id } });
   };
 
+  const prefillSearch = () => {
+    const imei = scannedImei;
+    closeSheet();
+    if (imei) {
+      router.push({ pathname: "/inventory", params: { search: imei } });
+    }
+  };
+
+  const quickAdd = () => {
+    const imei = scannedImei;
+    closeSheet();
+    if (imei) {
+      router.push({ pathname: "/(tabs)/inventory", params: { addImei: imei } });
+    }
+  };
+
   if (!permission) {
     return (
       <View className="flex-1 items-center justify-center bg-zinc-950 px-8">
@@ -158,6 +174,12 @@ export default function ScanScreen() {
           <View className="absolute right-0 top-0 h-12 w-12 rounded-tr-3xl border-r-4 border-t-4 border-white" />
           <View className="absolute bottom-0 left-0 h-12 w-12 rounded-bl-3xl border-b-4 border-l-4 border-white" />
           <View className="absolute bottom-0 right-0 h-12 w-12 rounded-br-3xl border-b-4 border-r-4 border-white" />
+          <View className="absolute inset-0 items-center justify-center">
+            <View className="h-0.5 w-48 bg-white/30" />
+          </View>
+          <View className="absolute inset-0 items-center justify-center">
+            <View className="h-48 w-0.5 bg-white/30" />
+          </View>
         </View>
       </View>
 
@@ -235,11 +257,15 @@ export default function ScanScreen() {
               </Text>
               .
             </Text>
-            <View className="mt-5">
+            <View className="mt-5 gap-3">
               <Button
-                title="Try again"
+                title="Search inventory for this IMEI"
                 variant="secondary"
-                onPress={() => setManualOpen(true)}
+                onPress={prefillSearch}
+              />
+              <Button
+                title="Quick add to inventory"
+                onPress={quickAdd}
               />
             </View>
           </>
