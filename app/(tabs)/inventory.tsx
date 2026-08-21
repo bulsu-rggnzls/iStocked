@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useDevices } from "../../hooks/useInventory";
 import { ScreenHeader } from "../../components/ui/ScreenHeader";
@@ -99,13 +99,25 @@ function InventoryRow({
 
 export default function InventoryScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ search?: string; addImei?: string }>();
   const [condition, setCondition] = useState<string>("all");
   const [networkLock, setNetworkLock] = useState<string>("all");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [saleDevice, setSaleDevice] = useState<Device | null>(null);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [search, setSearch] = useState(params.search ?? "");
+  const [debouncedSearch, setDebouncedSearch] = useState(params.search ?? "");
+  const [prefilledImei, setPrefilledImei] = useState<string | null>(params.addImei ?? null);
+  const paramsHandledRef = useRef(false);
+
+  useEffect(() => {
+    if (paramsHandledRef.current) return;
+    if (params.search || params.addImei) {
+      paramsHandledRef.current = true;
+      if (params.addImei) setAddSheetOpen(true);
+      router.replace("/(tabs)/inventory");
+    }
+  }, [params.search, params.addImei, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -239,7 +251,7 @@ export default function InventoryScreen() {
             onAction={data && data.length > 0 ? undefined : () => setAddSheetOpen(true)}
           />
         }
-        contentContainerClassName="gap-1.5 pb-10"
+        contentContainerClassName="gap-1.5 pb-4"
         initialNumToRender={15}
         maxToRenderPerBatch={10}
         removeClippedSubviews
@@ -311,7 +323,8 @@ export default function InventoryScreen() {
 
       <AddDeviceSheet
         visible={addSheetOpen}
-        onClose={() => setAddSheetOpen(false)}
+        onClose={() => { setAddSheetOpen(false); setPrefilledImei(null); }}
+        prefilledImei={prefilledImei}
       />
 
       <RecordSaleSheet
