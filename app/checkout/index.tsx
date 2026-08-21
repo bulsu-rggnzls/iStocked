@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   ScrollView,
   Text,
   View,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDevice } from "../../hooks/useInventory";
 import { useRecordSale } from "../../hooks/useSales";
@@ -13,6 +15,13 @@ import { Button } from "../../components/ui/Button";
 import { TextField } from "../../components/ui/TextField";
 import { AppHeader } from "../../components/ui/AppHeader";
 import { formatImei, formatPrice } from "../../lib/format";
+import type { WarrantyPeriod } from "../../types";
+
+const WARRANTY_OPTIONS: { label: string; value: WarrantyPeriod; desc: string }[] = [
+  { label: "No warranty", value: "none", desc: "Sold as-is" },
+  { label: "7-day warranty", value: "7_day", desc: "Covers 7 days from sale" },
+  { label: "30-day warranty", value: "30_day", desc: "Covers 30 days from sale" },
+];
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -24,6 +33,7 @@ export default function CheckoutScreen() {
   const [buyerContact, setBuyerContact] = useState("");
   const [soldPrice, setSoldPrice] = useState("");
   const [dateSold, setDateSold] = useState("");
+  const [warrantyPeriod, setWarrantyPeriod] = useState<WarrantyPeriod>("none");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,6 +87,7 @@ export default function CheckoutScreen() {
         customerName: customerName.trim(),
         soldPrice: price,
         buyerContact: buyerContact.trim(),
+        warrantyPeriod,
         dateSold: dateSold.trim()
           ? new Date(`${dateSold.trim()}T00:00:00`).toISOString()
           : undefined,
@@ -164,6 +175,48 @@ export default function CheckoutScreen() {
                 onChangeText={setDateSold}
                 placeholder="YYYY-MM-DD"
               />
+            </View>
+
+            <Text className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wide text-zinc-500">
+              Warranty
+            </Text>
+            <View className="gap-2">
+              {WARRANTY_OPTIONS.map((option) => {
+                const selected = warrantyPeriod === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => setWarrantyPeriod(option.value)}
+                    className={`flex-row items-center justify-between rounded-xl border px-4 py-3 active:opacity-80 ${
+                      selected
+                        ? "border-zinc-900 bg-zinc-950"
+                        : "border-zinc-200 bg-white"
+                    }`}
+                  >
+                    <View className="flex-1">
+                      <Text
+                        className={`text-sm font-semibold ${
+                          selected ? "text-white" : "text-zinc-950"
+                        }`}
+                      >
+                        {option.label}
+                      </Text>
+                      <Text
+                        className={`text-xs ${
+                          selected ? "text-zinc-400" : "text-zinc-500"
+                        }`}
+                      >
+                        {option.desc}
+                      </Text>
+                    </View>
+                    {selected ? (
+                      <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+                    ) : (
+                      <View className="h-5 w-5 rounded-full border border-zinc-300" />
+                    )}
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 
