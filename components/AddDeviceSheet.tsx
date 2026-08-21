@@ -24,6 +24,7 @@ interface AddDeviceSheetProps {
   visible: boolean;
   onClose: () => void;
   onSaved?: (device: Device) => void;
+  prefilledImei?: string | null;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -64,7 +65,7 @@ function Pill({
   );
 }
 
-export function AddDeviceSheet({ visible, onClose, onSaved }: AddDeviceSheetProps) {
+export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: AddDeviceSheetProps) {
   const addDevice = useAddDevice();
   const [model, setModel] = useState("");
   const [imei, setImei] = useState("");
@@ -82,7 +83,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved }: AddDeviceSheetProp
   useEffect(() => {
     if (visible) {
       setModel("");
-      setImei("");
+      setImei(prefilledImei?.replace(/\D/g, "") ?? "");
       setStorage(null);
       setCondition(null);
       setBuyPrice("");
@@ -94,7 +95,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved }: AddDeviceSheetProp
       setRepairCost("");
       setError(null);
     }
-  }, [visible]);
+  }, [visible, prefilledImei]);
 
   const handleSave = async () => {
     const digits = imei.replace(/\D/g, "");
