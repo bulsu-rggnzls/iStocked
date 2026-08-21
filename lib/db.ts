@@ -77,7 +77,8 @@ export async function ensureDb(): Promise<SQLiteDatabase> {
       "REAL NOT NULL DEFAULT 0",
     );
     await addColumnIfMissing(database, "devices", "buyer_contact", "TEXT");
-    await database.execAsync("PRAGMA user_version = 3");
+    await addColumnIfMissing(database, "devices", "warranty_period", "TEXT");
+    await database.execAsync("PRAGMA user_version = 4");
 
     await seedIfEmpty(database);
     initialized = true;
