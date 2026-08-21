@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { BottomSheet } from "./BottomSheet";
 import { Button } from "./ui/Button";
 import { useRecordSale } from "../hooks/useSales";
 import { formatPrice } from "../lib/format";
-import type { Device } from "../types";
+import type { Device, WarrantyPeriod } from "../types";
 
 const inputClass =
   "rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-950";
@@ -25,12 +26,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+const WARRANTY_OPTIONS: { label: string; value: WarrantyPeriod; desc: string }[] = [
+  { label: "No warranty", value: "none", desc: "Sold as-is" },
+  { label: "7-day warranty", value: "7_day", desc: "Covers 7 days from sale" },
+  { label: "30-day warranty", value: "30_day", desc: "Covers 30 days from sale" },
+];
+
 export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
   const recordSale = useRecordSale();
   const [customerName, setCustomerName] = useState("");
   const [buyerContact, setBuyerContact] = useState("");
   const [soldPrice, setSoldPrice] = useState("");
   const [dateSold, setDateSold] = useState("");
+  const [warrantyPeriod, setWarrantyPeriod] = useState<WarrantyPeriod>("none");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,6 +47,7 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
       setBuyerContact("");
       setSoldPrice(String(device.list_price));
       setDateSold(new Date().toISOString().slice(0, 10));
+      setWarrantyPeriod("none");
       setError(null);
     }
   }, [device]);
@@ -61,6 +70,7 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
         customerName: customerName.trim(),
         soldPrice: price,
         buyerContact: buyerContact.trim() || undefined,
+        warrantyPeriod,
         dateSold: dateSold.trim()
           ? new Date(`${dateSold.trim()}T00:00:00`).toISOString()
           : undefined,
@@ -145,6 +155,47 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
             autoCorrect={false}
             className={`${inputClass} font-mono tracking-wide`}
           />
+        </Field>
+
+        <Field label="Warranty">
+          <View className="gap-2">
+            {WARRANTY_OPTIONS.map((option) => {
+              const selected = warrantyPeriod === option.value;
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => setWarrantyPeriod(option.value)}
+                  className={`flex-row items-center justify-between rounded-xl border px-4 py-3 active:opacity-80 ${
+                    selected
+                      ? "border-zinc-900 bg-zinc-950"
+                      : "border-zinc-200 bg-white"
+                  }`}
+                >
+                  <View className="flex-1">
+                    <Text
+                      className={`text-sm font-semibold ${
+                        selected ? "text-white" : "text-zinc-950"
+                      }`}
+                    >
+                      {option.label}
+                    </Text>
+                    <Text
+                      className={`text-xs ${
+                        selected ? "text-zinc-400" : "text-zinc-500"
+                      }`}
+                    >
+                      {option.desc}
+                    </Text>
+                  </View>
+                  {selected ? (
+                    <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+                  ) : (
+                    <View className="h-5 w-5 rounded-full border border-zinc-300" />
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
         </Field>
 
         <View className="mb-4 flex-row items-center justify-between rounded-xl bg-zinc-100 px-4 py-3">

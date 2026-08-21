@@ -11,10 +11,11 @@ export async function recordSale(input: RecordSaleInput) {
   if (device.status === "sold") throw new Error("Device is already sold");
 
   await db.runAsync(
-    "UPDATE devices SET status = 'sold', sold_price = ?, customer_name = ?, buyer_contact = ?, date_sold = ? WHERE id = ?",
+    "UPDATE devices SET status = 'sold', sold_price = ?, customer_name = ?, buyer_contact = ?, warranty_period = ?, date_sold = ? WHERE id = ?",
     input.soldPrice,
     input.customerName.trim() || null,
     input.buyerContact?.trim() || null,
+    input.warrantyPeriod ?? "none",
     input.dateSold ?? new Date().toISOString(),
     input.deviceId,
   );

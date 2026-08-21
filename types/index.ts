@@ -1,5 +1,7 @@
 export type DeviceStatus = "in_stock" | "sold";
 
+export type WarrantyPeriod = "none" | "7_day" | "30_day";
+
 export interface Device {
   id: string;
   model: string;
@@ -18,6 +20,7 @@ export interface Device {
   network_lock: string | null;
   repair_cost: number;
   buyer_contact: string | null;
+  warranty_period: WarrantyPeriod | null;
   created_at: string;
 }
 
@@ -40,4 +43,5 @@ export interface RecordSaleInput {
   soldPrice: number;
   dateSold?: string;
   buyerContact?: string;
+  warrantyPeriod?: WarrantyPeriod;
 }

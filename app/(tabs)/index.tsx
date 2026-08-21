@@ -1,15 +1,33 @@
 import { useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useMetrics } from "../../hooks/useMetrics";
 import { ScreenHeader } from "../../components/ui/ScreenHeader";
 import { StatCard } from "../../components/StatCard";
+import { Badge } from "../../components/ui/Badge";
 import { EmptyState } from "../../components/EmptyState";
 import { AddDeviceSheet } from "../../components/AddDeviceSheet";
-import { exportDatabase } from "../../lib/export";
+import { exportCsv, exportDatabase } from "../../lib/export";
 import { formatDate, formatPrice } from "../../lib/format";
-import type { Device } from "../../types";
+import type { Device, WarrantyPeriod } from "../../types";
+
+function WarrantyBadge({ period, dateSold }: { period: WarrantyPeriod | null; dateSold: string | null }) {
+  if (!period || period === "none" || !dateSold) return null;
+  const days = period === "7_day" ? 7 : 30;
+  const soldDate = new Date(dateSold);
+  const expiry = new Date(soldDate.getTime() + days * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const active = now < expiry;
+
+  return (
+    <Badge
+      label={active ? `${days}d warranty` : `${days}d expired`}
+      tone={active ? "emerald" : "gray"}
+      dot
+    />
+  );
+}
 
 function QuickAction({
   icon,
@@ -25,18 +43,18 @@ function QuickAction({
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-1 items-center justify-center rounded-2xl px-3 py-4 active:opacity-80 ${
+      className={`flex-1 items-center justify-center rounded-2xl px-3 py-3 active:opacity-80 ${
         primary ? "bg-black" : "border border-zinc-200 bg-white"
       }`}
     >
       <View
-        className={`h-10 w-10 items-center justify-center rounded-full ${
+        className={`h-8 w-8 items-center justify-center rounded-full ${
           primary ? "bg-zinc-800" : "bg-zinc-100"
         }`}
       >
-        <Ionicons name={icon} size={20} color={primary ? "#ffffff" : "#09090b"} />
+        <Ionicons name={icon} size={16} color={primary ? "#ffffff" : "#09090b"} />
       </View>
-      <Text className={`mt-2 text-sm font-semibold ${primary ? "text-white" : "text-zinc-950"}`}>
+      <Text className={`mt-1.5 text-xs font-semibold ${primary ? "text-white" : "text-zinc-950"}`}>
         {label}
       </Text>
     </Pressable>
@@ -57,10 +75,13 @@ function SaleRow({ device }: { device: Device }) {
         </Text>
       </View>
       <View className="mt-1.5 flex-row items-center justify-between gap-3">
-        <Text className="text-sm text-zinc-500">
-          {device.date_sold ? formatDate(device.date_sold) : "—"} ·{" "}
-          {device.customer_name ?? "Walk-in"}
-        </Text>
+        <View className="flex-1 flex-row items-center gap-2">
+          <Text className="text-sm text-zinc-500">
+            {device.date_sold ? formatDate(device.date_sold) : "—"} ·{" "}
+            {device.customer_name ?? "Walk-in"}
+          </Text>
+          <WarrantyBadge period={device.warranty_period} dateSold={device.date_sold} />
+        </View>
         <Text className="text-sm font-semibold text-zinc-700">
           +{formatPrice(profit)} net
         </Text>
@@ -77,16 +98,38 @@ export default function DashboardScreen() {
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
 
-  const handleExport = async () => {
-    if (exporting) return;
-    setExporting(true);
-    try {
-      await exportDatabase();
-      setExported(true);
-      setTimeout(() => setExported(false), 2000);
-    } finally {
-      setExporting(false);
-    }
+  const handleExport = () => {
+    Alert.alert("Export Report", "Choose export format", [
+      {
+        text: "CSV Report",
+        onPress: async () => {
+          if (exporting) return;
+          setExporting(true);
+          try {
+            await exportCsv();
+            setExported(true);
+            setTimeout(() => setExported(false), 2000);
+          } finally {
+            setExporting(false);
+          }
+        },
+      },
+      {
+        text: "JSON Backup",
+        onPress: async () => {
+          if (exporting) return;
+          setExporting(true);
+          try {
+            await exportDatabase();
+            setExported(true);
+            setTimeout(() => setExported(false), 2000);
+          } finally {
+            setExporting(false);
+          }
+        },
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   const header = (
@@ -104,12 +147,12 @@ export default function DashboardScreen() {
             onPress={handleExport}
             disabled={exporting}
             className="h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white active:bg-zinc-100"
-            accessibilityLabel="Export database"
+            accessibilityLabel="Export report"
           >
             <Ionicons
               name={exported ? "checkmark" : exporting ? "hourglass-outline" : "download-outline"}
               size={20}
-              color={exported ? "#09090b" : "#09090b"}
+              color="#09090b"
             />
           </Pressable>
         }
@@ -134,18 +177,18 @@ export default function DashboardScreen() {
         </View>
         <View className="w-1/2 p-1.5">
           <StatCard
-            label="Units available"
-            value={data ? String(data.unitsAvailable) : "—"}
-            icon="phone-portrait-outline"
-            trend="ready to sell"
+            label="Repair expenses"
+            value={data ? formatPrice(data.totalRepairCost) : "—"}
+            icon="build-outline"
+            trend="all-time repair spend"
           />
         </View>
         <View className="w-1/2 p-1.5">
           <StatCard
-            label="Units sold"
-            value={data ? String(data.unitsSold) : "—"}
-            icon="checkmark-done-outline"
-            trend="all time"
+            label="Units available"
+            value={data ? String(data.unitsAvailable) : "—"}
+            icon="phone-portrait-outline"
+            trend="ready to sell"
           />
         </View>
       </View>
@@ -230,7 +273,7 @@ export default function DashboardScreen() {
             onAction={() => router.push("/inventory")}
           />
         }
-        contentContainerClassName="gap-3 pb-10"
+        contentContainerClassName="gap-3 pb-4"
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}

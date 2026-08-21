@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -23,6 +24,20 @@ import { formatImei, formatPrice } from "../../lib/format";
 const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
 const CONDITION_OPTIONS = ["Brand New", "Like New", "Good", "Fair"];
+
+function colorPlaceholder(model: string): string {
+  const lower = model.toLowerCase();
+  if (lower.includes("iphone")) return "e.g. Black, White, Blue";
+  if (lower.includes("samsung") || lower.includes("galaxy"))
+    return "e.g. Phantom Black, Green";
+  if (lower.includes("pixel")) return "e.g. Obsidian, Hazel";
+  if (lower.includes("xiaomi") || lower.includes("redmi"))
+    return "e.g. Onyx Black, Ice Blue";
+  if (lower.includes("oppo")) return "e.g. Glossy Black, Sunrise Gold";
+  if (lower.includes("vivo")) return "e.g. Cosmic Black, Sunset Gold";
+  if (lower.includes("realme")) return "e.g. Tech Black, Neon Green";
+  return "Enter color";
+}
 
 type Tab = "overview" | "edit";
 
@@ -92,35 +107,64 @@ function Pill({
   );
 }
 
+function CenteredPillRow({
+  options,
+  value,
+  onChange,
+}: {
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <View className="flex-row flex-wrap justify-start gap-2">
+      {options.map((option) => (
+        <Pill
+          key={option}
+          label={option}
+          selected={value === option}
+          onPress={() => onChange(option)}
+        />
+      ))}
+    </View>
+  );
+}
+
 function PickerField({
   label,
   options,
   value,
   onChange,
   even = false,
+  center = false,
 }: {
   label: string;
   options: string[];
   value: string;
   onChange: (value: string) => void;
   even?: boolean;
+  center?: boolean;
 }) {
   return (
     <View className="mb-3">
       <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
         {label}
       </Text>
-      <View className="flex-row flex-wrap gap-1.5">
-        {options.map((option) => (
-          <Pill
-            key={option}
-            label={option}
-            selected={value === option}
-            onPress={() => onChange(option)}
-            even={even}
-          />
-        ))}
-      </View>
+      {center ? (
+        <CenteredPillRow options={options} value={value} onChange={onChange} />
+      ) : (
+        <View className="flex-row flex-wrap gap-1.5">
+          {options.map((option) => (
+            <Pill
+              key={option}
+              label={option}
+              selected={value === option}
+              onPress={() => onChange(option)}
+              even={even}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -282,7 +326,7 @@ export default function DeviceDetailScreen() {
         </View>
 
         {tab === "overview" ? (
-          <View className="flex-1 px-5">
+          <ScrollView className="flex-1 px-5">
             <View className="rounded-2xl bg-zinc-900 p-4">
               <Text className="text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                 Net profit
@@ -342,9 +386,9 @@ export default function DeviceDetailScreen() {
                 </View>
               ))}
             </View>
-          </View>
+          </ScrollView>
         ) : (
-          <View className="flex-1 px-5">
+          <ScrollView className="flex-1 px-5">
             <View className="rounded-2xl border border-zinc-200 bg-white p-4">
               <View className="flex-row gap-3">
                 <View className="flex-1">
@@ -402,7 +446,7 @@ export default function DeviceDetailScreen() {
                     label="Color"
                     value={color}
                     onChangeText={setColor}
-                    placeholder="e.g. Natural Titanium"
+                    placeholder={colorPlaceholder(device.model)}
                     autoCapitalize="words"
                   />
                 </View>
@@ -420,7 +464,7 @@ export default function DeviceDetailScreen() {
                   );
                   setNetworkLock(full ?? short);
                 }}
-                even
+                center
               />
 
               <TextField
@@ -437,7 +481,7 @@ export default function DeviceDetailScreen() {
             {saveError ? (
               <Text className="mt-3 text-sm text-red-600">{saveError}</Text>
             ) : null}
-          </View>
+          </ScrollView>
         )}
 
         <View className="border-t border-zinc-200 bg-white px-5 py-4">

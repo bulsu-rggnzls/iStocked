@@ -9,10 +9,28 @@ import {
 import { useRouter } from "expo-router";
 import { useSales } from "../../hooks/useSales";
 import { ScreenHeader } from "../../components/ui/ScreenHeader";
+import { Badge } from "../../components/ui/Badge";
 import { EmptyState } from "../../components/EmptyState";
 import { networkLockShort } from "../../lib/networkLock";
 import { formatDate, formatPrice } from "../../lib/format";
-import type { Device } from "../../types";
+import type { Device, WarrantyPeriod } from "../../types";
+
+function WarrantyBadge({ period, dateSold }: { period: WarrantyPeriod | null; dateSold: string | null }) {
+  if (!period || period === "none" || !dateSold) return null;
+  const days = period === "7_day" ? 7 : 30;
+  const soldDate = new Date(dateSold);
+  const expiry = new Date(soldDate.getTime() + days * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const active = now < expiry;
+
+  return (
+    <Badge
+      label={active ? `${days}d warranty` : `${days}d expired`}
+      tone={active ? "emerald" : "gray"}
+      dot
+    />
+  );
+}
 
 function SoldRow({ device }: { device: Device }) {
   const sold = Number(device.sold_price ?? 0);
@@ -42,6 +60,12 @@ function SoldRow({ device }: { device: Device }) {
             {device.buyer_contact}
           </Text>
         ) : null}
+        <View className="mt-1 flex-row items-center gap-1.5">
+          <WarrantyBadge period={device.warranty_period} dateSold={device.date_sold} />
+          {Number(device.repair_cost ?? 0) > 0 ? (
+            <Badge label={`Repair ₱${Number(device.repair_cost).toFixed(0)}`} tone="amber" />
+          ) : null}
+        </View>
       </View>
 
       <View className="items-end">
@@ -126,7 +150,7 @@ export default function SalesHistoryScreen() {
             onAction={() => router.push("/inventory")}
           />
         }
-        contentContainerClassName="gap-1.5 pb-10"
+        contentContainerClassName="gap-1.5 pb-4"
         initialNumToRender={15}
         maxToRenderPerBatch={10}
         removeClippedSubviews

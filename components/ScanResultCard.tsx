@@ -8,6 +8,8 @@ interface ScanResultCardProps {
 }
 
 export function ScanResultCard({ device }: ScanResultCardProps) {
+  const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);
+
   return (
     <View>
       <View className="flex-row items-start justify-between gap-3">
@@ -35,6 +37,14 @@ export function ScanResultCard({ device }: ScanResultCardProps) {
             {formatPrice(device.list_price)}
           </Text>
         </View>
+        {Number(device.repair_cost ?? 0) > 0 ? (
+          <View className="mt-2 flex-row items-center justify-between border-t border-zinc-200 pt-2">
+            <Text className="text-sm text-zinc-500">Total cost (buy + repair)</Text>
+            <Text className="text-sm font-semibold text-zinc-700">
+              {formatPrice(totalCost)}
+            </Text>
+          </View>
+        ) : null}
       </View>
     </View>
   );
