@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import {
   useDevice,
   useDeleteDevice,
@@ -37,6 +38,34 @@ function colorPlaceholder(model: string): string {
   if (lower.includes("vivo")) return "e.g. Cosmic Black, Sunset Gold";
   if (lower.includes("realme")) return "e.g. Tech Black, Neon Green";
   return "Enter color";
+}
+
+function SpecRow({
+  icon,
+  label,
+  value,
+  mono = false,
+}: {
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <View className="flex-row items-center justify-between py-2.5">
+      <View className="flex-row items-center gap-2.5">
+        <Ionicons name={icon} size={16} color="#a1a1aa" />
+        <Text className="text-sm text-zinc-500">{label}</Text>
+      </View>
+      <Text
+        className={`text-sm font-semibold text-zinc-950 ${
+          mono ? "font-mono text-xs tracking-wide" : ""
+        }`}
+      >
+        {value}
+      </Text>
+    </View>
+  );
 }
 
 type Tab = "overview" | "edit";
@@ -241,25 +270,6 @@ export default function DeviceDetailScreen() {
   const profit = device.status === "sold" ? sold - buy - repair : list - buy - repair;
   const margin = list > 0 ? ((profit / list) * 100).toFixed(0) : "0";
 
-  const specRows = [
-    {
-      label: "IMEI",
-      value: formatImei(device.imei),
-      mono: true,
-    },
-    { label: "Storage", value: storage || "—" },
-    { label: "Condition", value: condition || "—" },
-    {
-      label: "Battery health",
-      value: batteryHealth.trim() ? `${batteryHealth}%` : "N/A",
-    },
-    { label: "Color", value: color.trim() || "N/A" },
-    {
-      label: "Network lock",
-      value: networkLockShort(networkLock) ?? "N/A",
-    },
-  ];
-
   const handleSave = () => {
     setSaveError(null);
     const battery = batteryHealth.trim() ? Number(batteryHealth) : null;
@@ -327,64 +337,85 @@ export default function DeviceDetailScreen() {
 
         {tab === "overview" ? (
           <ScrollView className="flex-1 px-5">
-            <View className="rounded-2xl bg-zinc-900 p-4">
-              <Text className="text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
-                Net profit
-              </Text>
-              <Text className="mt-1 text-3xl font-bold text-white">
-                {formatPrice(profit)}
-                <Text className="text-lg text-zinc-400"> ({margin}%)</Text>
-              </Text>
-            </View>
-
-            <View className="mt-3 flex-row gap-2">
-              <View className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3">
-                <Text className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-                  Buy price
+            <View className="flex-row gap-2">
+              <View
+                className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3"
+                style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
+              >
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
+                  <Ionicons name="trending-up-outline" size={16} color="#09090b" />
+                </View>
+                <Text className="mt-2 text-2xl font-bold text-zinc-950">
+                  {formatPrice(profit)}
                 </Text>
-                <Text className="mt-1 text-base font-bold text-zinc-950">
+                <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
+                  Net Profit
+                </Text>
+                <View className="mt-1.5 self-start rounded-full bg-zinc-100 px-2 py-0.5">
+                  <Text className="text-xs font-semibold text-zinc-900">{margin}%</Text>
+                </View>
+              </View>
+              <View
+                className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3"
+                style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
+              >
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
+                  <Ionicons name="cash-outline" size={16} color="#09090b" />
+                </View>
+                <Text className="mt-2 text-2xl font-bold text-zinc-950">
                   {formatPrice(buy)}
                 </Text>
-              </View>
-              <View className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3">
-                <Text className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-                  List price
-                </Text>
-                <Text className="mt-1 text-base font-bold text-zinc-950">
-                  {formatPrice(list)}
-                </Text>
-              </View>
-              <View className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3">
-                <Text className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-                  Repair
-                </Text>
-                <Text className="mt-1 text-base font-bold text-zinc-950">
-                  {formatPrice(repair)}
+                <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
+                  Buy Price
                 </Text>
               </View>
             </View>
 
-            <Text className="mt-4 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <View className="mt-2 flex-row gap-2">
+              <View
+                className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3"
+                style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
+              >
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
+                  <Ionicons name="pricetag-outline" size={16} color="#09090b" />
+                </View>
+                <Text className="mt-2 text-2xl font-bold text-zinc-950">
+                  {formatPrice(list)}
+                </Text>
+                <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
+                  List Price
+                </Text>
+              </View>
+              <View
+                className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3"
+                style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
+              >
+                <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
+                  <Ionicons name="build-outline" size={16} color="#09090b" />
+                </View>
+                <Text className="mt-2 text-2xl font-bold text-zinc-950">
+                  {formatPrice(repair)}
+                </Text>
+                <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
+                  Repair Cost
+                </Text>
+              </View>
+            </View>
+
+            <Text className="mt-5 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
               Specs
             </Text>
-            <View className="mt-1.5 rounded-2xl border border-zinc-200 bg-white px-4">
-              {specRows.map((row, i) => (
-                <View
-                  key={row.label}
-                  className={`flex-row items-center justify-between py-2.5 ${
-                    i > 0 ? "border-t border-zinc-100" : ""
-                  }`}
-                >
-                  <Text className="text-sm text-zinc-500">{row.label}</Text>
-                  <Text
-                    className={`text-sm font-semibold text-zinc-950 ${
-                      row.mono ? "font-mono text-xs tracking-wide" : ""
-                    }`}
-                  >
-                    {row.value}
-                  </Text>
-                </View>
-              ))}
+            <View className="mt-1.5 rounded-2xl border border-zinc-200 bg-white px-4 divide-y divide-zinc-100">
+              <SpecRow icon="call-outline" label="IMEI" value={formatImei(device.imei)} mono />
+              <SpecRow icon="layers-outline" label="Storage" value={storage || "\u2014"} />
+              <SpecRow icon="star-outline" label="Condition" value={condition || "\u2014"} />
+              {batteryHealth.trim() ? (
+                <SpecRow icon="battery-half-outline" label="Battery Health" value={`${batteryHealth}%`} />
+              ) : null}
+              {color.trim() ? (
+                <SpecRow icon="color-palette-outline" label="Color" value={color} />
+              ) : null}
+              <SpecRow icon="globe-outline" label="Network Lock" value={networkLockShort(networkLock) ?? "\u2014"} />
             </View>
           </ScrollView>
         ) : (
@@ -488,15 +519,21 @@ export default function DeviceDetailScreen() {
           {tab === "overview" ? (
             <View className="gap-2.5">
               {device.status === "in_stock" ? (
-                <Button title="Record Sale" onPress={() => setSaleOpen(true)} />
+                <Pressable
+                  onPress={() => setSaleOpen(true)}
+                  className="items-center justify-center rounded-xl bg-black py-3 active:bg-zinc-900"
+                  style={{ height: 48 }}
+                >
+                  <Text className="text-sm font-semibold text-white">Record Sale</Text>
+                </Pressable>
               ) : null}
               <Pressable
                 onPress={handleDelete}
                 disabled={deleteMutation.isPending}
-                className="items-center py-1 active:opacity-60"
+                className="items-center justify-center rounded-xl py-2.5 active:bg-red-50"
               >
-                <Text className="text-sm font-semibold text-red-600">
-                  {deleteMutation.isPending ? "Deleting…" : "Delete Device"}
+                <Text className="text-sm font-medium text-red-600">
+                  {deleteMutation.isPending ? "Deleting\u2026" : "Delete Device"}
                 </Text>
               </Pressable>
             </View>
@@ -506,6 +543,7 @@ export default function DeviceDetailScreen() {
               onPress={handleSave}
               loading={updateMutation.isPending}
               disabled={saved}
+              className="h-12"
             />
           )}
         </View>
