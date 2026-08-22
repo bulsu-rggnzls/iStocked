@@ -50,13 +50,13 @@ function Pill({
   return (
     <Pressable
       onPress={onPress}
-      className={`rounded-full px-2.5 py-1 active:opacity-80 ${
-        selected ? "bg-black" : "border border-zinc-200 bg-white"
+      className={`rounded-full px-3.5 py-2 active:opacity-80 ${
+        selected ? "border border-black bg-black" : "border border-zinc-200 bg-zinc-100"
       }`}
     >
       <Text
         className={`text-xs font-medium ${
-          selected ? "text-white" : "text-zinc-600"
+          selected ? "text-white" : "text-zinc-700"
         }`}
       >
         {label}
@@ -146,7 +146,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Add purchased phone">
       <View className="max-h-[76vh]">
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <Field label="Brand & model">
             <TextInput
               value={model}
@@ -322,6 +322,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
                 onPress={handleSave}
                 disabled={!canSave || addDevice.isPending}
                 loading={addDevice.isPending}
+                className="h-12"
               />
             </View>
           </View>
