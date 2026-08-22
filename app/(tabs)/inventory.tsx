@@ -103,6 +103,8 @@ export default function InventoryScreen() {
   const [condition, setCondition] = useState<string>("all");
   const [networkLock, setNetworkLock] = useState<string>("all");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [draftCondition, setDraftCondition] = useState<string>("all");
+  const [draftNetworkLock, setDraftNetworkLock] = useState<string>("all");
   const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [saleDevice, setSaleDevice] = useState<Device | null>(null);
   const [search, setSearch] = useState(params.search ?? "");
@@ -148,6 +150,26 @@ export default function InventoryScreen() {
   const openDevice = (device: Device) =>
     router.push({ pathname: "/inventory/[id]", params: { id: device.id } });
 
+  const activeFilterCount =
+    (condition !== "all" ? 1 : 0) + (networkLock !== "all" ? 1 : 0);
+
+  const openFilterSheet = () => {
+    setDraftCondition(condition);
+    setDraftNetworkLock(networkLock);
+    setFilterSheetOpen(true);
+  };
+
+  const applyFilters = () => {
+    setCondition(draftCondition);
+    setNetworkLock(draftNetworkLock);
+    setFilterSheetOpen(false);
+  };
+
+  const resetFilters = () => {
+    setDraftCondition("all");
+    setDraftNetworkLock("all");
+  };
+
   const header = (
     <View>
       <ScreenHeader
@@ -172,7 +194,8 @@ export default function InventoryScreen() {
         <SearchBar
           value={search}
           onChangeText={setSearch}
-          onFilterPress={() => setFilterSheetOpen(true)}
+          filterCount={activeFilterCount}
+          onFilterPress={openFilterSheet}
         />
       </View>
 
@@ -264,6 +287,17 @@ export default function InventoryScreen() {
         }
       />
 
+      <AddDeviceSheet
+        visible={addSheetOpen}
+        onClose={() => { setAddSheetOpen(false); setPrefilledImei(null); }}
+        prefilledImei={prefilledImei}
+      />
+
+      <RecordSaleSheet
+        device={saleDevice}
+        onClose={() => setSaleDevice(null)}
+      />
+
       <BottomSheet
         visible={filterSheetOpen}
         onClose={() => setFilterSheetOpen(false)}
@@ -273,16 +307,16 @@ export default function InventoryScreen() {
           Condition
         </Text>
         {CONDITION_OPTIONS.map((option) => {
-          const selected = condition === option.value;
+          const selected = draftCondition === option.value;
           return (
             <Pressable
               key={option.value}
-              onPress={() => setCondition(option.value)}
-              className="flex-row items-center justify-between rounded-xl px-3 py-3 active:bg-zinc-100"
+              onPress={() => setDraftCondition(option.value)}
+              className="flex-row items-center justify-between rounded-xl px-3 py-2.5 active:bg-zinc-100"
             >
-              <Text className="text-base text-zinc-950">{option.label}</Text>
+              <Text className="text-sm text-zinc-950">{option.label}</Text>
               {selected ? (
-                <Ionicons name="checkmark-circle" size={22} color="#09090b" />
+                <Ionicons name="checkmark-circle" size={20} color="#09090b" />
               ) : (
                 <View className="h-5 w-5 rounded-full border border-zinc-300" />
               )}
@@ -294,16 +328,16 @@ export default function InventoryScreen() {
           Network lock
         </Text>
         {NETWORK_FILTER_OPTIONS.map((option) => {
-          const selected = networkLock === option.value;
+          const selected = draftNetworkLock === option.value;
           return (
             <Pressable
               key={option.value}
-              onPress={() => setNetworkLock(option.value)}
-              className="flex-row items-center justify-between rounded-xl px-3 py-3 active:bg-zinc-100"
+              onPress={() => setDraftNetworkLock(option.value)}
+              className="flex-row items-center justify-between rounded-xl px-3 py-2.5 active:bg-zinc-100"
             >
-              <Text className="text-base text-zinc-950">{option.label}</Text>
+              <Text className="text-sm text-zinc-950">{option.label}</Text>
               {selected ? (
-                <Ionicons name="checkmark-circle" size={22} color="#09090b" />
+                <Ionicons name="checkmark-circle" size={20} color="#09090b" />
               ) : (
                 <View className="h-5 w-5 rounded-full border border-zinc-300" />
               )}
@@ -311,26 +345,21 @@ export default function InventoryScreen() {
           );
         })}
 
-        <View className="mt-4">
+        <View className="mt-5 flex-row gap-3">
           <Pressable
-            onPress={() => setFilterSheetOpen(false)}
-            className="items-center rounded-xl bg-black py-3 active:bg-zinc-900"
+            onPress={resetFilters}
+            className="flex-1 items-center rounded-xl border border-zinc-200 bg-white py-3 active:bg-zinc-100"
           >
-            <Text className="font-semibold text-white">Done</Text>
+            <Text className="text-sm font-semibold text-zinc-950">Reset</Text>
+          </Pressable>
+          <Pressable
+            onPress={applyFilters}
+            className="flex-1 items-center rounded-xl bg-black py-3 active:bg-zinc-900"
+          >
+            <Text className="text-sm font-semibold text-white">Apply Filters</Text>
           </Pressable>
         </View>
       </BottomSheet>
-
-      <AddDeviceSheet
-        visible={addSheetOpen}
-        onClose={() => { setAddSheetOpen(false); setPrefilledImei(null); }}
-        prefilledImei={prefilledImei}
-      />
-
-      <RecordSaleSheet
-        device={saleDevice}
-        onClose={() => setSaleDevice(null)}
-      />
     </View>
   );
 }
