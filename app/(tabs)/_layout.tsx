@@ -1,7 +1,9 @@
 import { Tabs } from "expo-router";
-import { View } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import type { ColorValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+
+const TABLET_BREAKPOINT = 768;
 
 function TabIcon({
   name,
@@ -26,18 +28,43 @@ function TabIcon({
 }
 
 export default function TabLayout() {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= TABLET_BREAKPOINT;
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#09090b",
         tabBarInactiveTintColor: "#a1a1aa",
-        tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "500",
+        },
         tabBarStyle: {
           backgroundColor: "#ffffff",
           borderTopColor: "#e4e4e7",
           paddingTop: 8,
           paddingBottom: 4,
+          ...(isTablet
+            ? {
+                width: "100%",
+                maxWidth: 640,
+                marginLeft: "auto",
+                marginRight: "auto",
+                marginBottom: 16,
+                height: 64,
+                paddingHorizontal: 24,
+                borderRadius: 999,
+                borderStyle: "solid",
+                borderWidth: 1,
+                borderColor: "#e4e4e7",
+                shadowColor: "#000",
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                shadowOffset: { width: 0, height: 2 },
+              }
+            : {}),
         },
       }}
     >
