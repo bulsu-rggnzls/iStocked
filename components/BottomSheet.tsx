@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useIsTablet } from "../hooks/useIsTablet";
 
 interface BottomSheetProps {
   visible: boolean;
@@ -17,6 +18,7 @@ export function BottomSheet({
   children,
 }: BottomSheetProps) {
   const insets = useSafeAreaInsets();
+  const isTablet = useIsTablet();
 
   return (
     <Modal
@@ -31,7 +33,9 @@ export function BottomSheet({
           className="absolute inset-0 bg-black/40"
         />
         <View
-          className="rounded-t-3xl bg-white p-5"
+          className={`rounded-t-3xl bg-white p-5 ${
+            isTablet ? "mx-auto max-w-lg my-auto rounded-2xl" : ""
+          }`}
           style={{ paddingBottom: Math.max(insets.bottom, 20) }}
         >
           <View className="mx-auto mb-4 h-1 w-10 rounded-full bg-zinc-200" />
