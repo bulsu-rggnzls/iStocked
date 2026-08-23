@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useMetrics } from "../../hooks/useMetrics";
+import { useIsTablet } from "../../hooks/useIsTablet";
 import { ScreenHeader } from "../../components/ui/ScreenHeader";
 import { StatCard } from "../../components/StatCard";
 import { Badge } from "../../components/ui/Badge";
@@ -34,18 +35,20 @@ function QuickAction({
   label,
   primary = false,
   onPress,
+  isTablet = false,
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
   label: string;
   primary?: boolean;
   onPress: () => void;
+  isTablet?: boolean;
 }) {
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-1 items-center justify-center rounded-2xl px-3 py-3 active:opacity-80 ${
-        primary ? "bg-black" : "border border-zinc-200 bg-white"
-      }`}
+      className={`items-center justify-center rounded-2xl px-3 py-3 active:opacity-80 ${
+        isTablet ? "h-32" : ""
+      } ${primary ? "bg-black" : "border border-zinc-200 bg-white"}`}
     >
       <View
         className={`h-8 w-8 items-center justify-center rounded-full ${
@@ -65,24 +68,24 @@ function SaleRow({ device }: { device: Device }) {
   const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);
   const profit = Number(device.sold_price ?? 0) - totalCost;
   return (
-    <View className="rounded-2xl border border-zinc-200 bg-white p-4">
-      <View className="flex-row items-center justify-between gap-3">
-        <Text className="flex-1 text-base font-semibold text-zinc-950">
+    <View className="rounded-xl border border-zinc-200 bg-white px-3.5 py-2.5">
+      <View className="flex-row items-center justify-between gap-2">
+        <Text className="flex-1 text-sm font-bold text-zinc-950" numberOfLines={1}>
           {device.model}
         </Text>
-        <Text className="text-lg font-bold text-zinc-950">
+        <Text className="text-sm font-bold text-zinc-950">
           {formatPrice(device.sold_price ?? 0)}
         </Text>
       </View>
-      <View className="mt-1.5 flex-row items-center justify-between gap-3">
-        <View className="flex-1 flex-row items-center gap-2">
-          <Text className="text-sm text-zinc-500">
-            {device.date_sold ? formatDate(device.date_sold) : "—"} ·{" "}
+      <View className="mt-1 flex-row items-center justify-between gap-2">
+        <View className="flex-1 flex-row items-center gap-1.5">
+          <Text className="text-[11px] text-zinc-500" numberOfLines={1}>
+            {device.date_sold ? formatDate(device.date_sold) : "\u2014"} ·{" "}
             {device.customer_name ?? "Walk-in"}
           </Text>
           <WarrantyBadge period={device.warranty_period} dateSold={device.date_sold} />
         </View>
-        <Text className="text-sm font-semibold text-zinc-700">
+        <Text className="text-[11px] font-semibold text-zinc-700">
           +{formatPrice(profit)} net
         </Text>
       </View>
@@ -94,6 +97,7 @@ export default function DashboardScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error, isRefetching, refetch } =
     useMetrics();
+  const isTablet = useIsTablet();
   const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
@@ -132,6 +136,8 @@ export default function DashboardScreen() {
     ]);
   };
 
+  const sales = data?.recentSales ?? [];
+
   const header = (
     <View>
       <ScreenHeader
@@ -158,62 +164,70 @@ export default function DashboardScreen() {
         }
       />
 
-      <View className="flex-row flex-wrap px-3.5 pt-1">
-        <View className="w-1/2 p-1.5">
-          <StatCard
-            label="Total net profit"
-            value={data ? formatPrice(data.totalNetProfit) : "—"}
-            icon="trending-up-outline"
-            trend="sold − buy − repair"
-          />
+      <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6 py-6" : "px-5"}`}>
+        <View className={`flex-row flex-wrap pt-1 ${isTablet ? "gap-4" : "px-3.5"}`}>
+          <View className={`${isTablet ? "w-[calc(25%-12px)]" : "w-1/2 p-1.5"}`}>
+            <StatCard
+              label="Total net profit"
+              value={data ? formatPrice(data.totalNetProfit) : "\u2014"}
+              icon="trending-up-outline"
+              trend="sold - buy - repair"
+            />
+          </View>
+          <View className={`${isTablet ? "w-[calc(25%-12px)]" : "w-1/2 p-1.5"}`}>
+            <StatCard
+              label="Investment in stock"
+              value={data ? formatPrice(data.totalInvestment) : "\u2014"}
+              icon="cash-outline"
+              trend="capital locked up"
+            />
+          </View>
+          <View className={`${isTablet ? "w-[calc(25%-12px)]" : "w-1/2 p-1.5"}`}>
+            <StatCard
+              label="Repair expenses"
+              value={data ? formatPrice(data.totalRepairCost) : "\u2014"}
+              icon="build-outline"
+              trend="all-time repair spend"
+            />
+          </View>
+          <View className={`${isTablet ? "w-[calc(25%-12px)]" : "w-1/2 p-1.5"}`}>
+            <StatCard
+              label="Units available"
+              value={data ? String(data.unitsAvailable) : "\u2014"}
+              icon="phone-portrait-outline"
+              trend="ready to sell"
+            />
+          </View>
         </View>
-        <View className="w-1/2 p-1.5">
-          <StatCard
-            label="Investment in stock"
-            value={data ? formatPrice(data.totalInvestment) : "—"}
-            icon="cash-outline"
-            trend="capital locked up"
-          />
-        </View>
-        <View className="w-1/2 p-1.5">
-          <StatCard
-            label="Repair expenses"
-            value={data ? formatPrice(data.totalRepairCost) : "—"}
-            icon="build-outline"
-            trend="all-time repair spend"
-          />
-        </View>
-        <View className="w-1/2 p-1.5">
-          <StatCard
-            label="Units available"
-            value={data ? String(data.unitsAvailable) : "—"}
-            icon="phone-portrait-outline"
-            trend="ready to sell"
-          />
-        </View>
-      </View>
 
-      <View className="flex-row gap-2.5 px-5 pt-2">
-        <QuickAction
-          icon="add"
-          label="Add Purchased Phone"
-          primary
-          onPress={() => setAddSheetOpen(true)}
-        />
-        <QuickAction
-          icon="receipt-outline"
-          label="View Sales History"
-          onPress={() => router.push("/sales")}
-        />
-      </View>
+        <View className={`flex-row gap-2.5 pt-4 ${isTablet ? "" : "px-5"}`}>
+          <View className={`${isTablet ? "w-[calc(50%-5px)]" : "flex-1"}`}>
+            <QuickAction
+              icon="add"
+              label="Add Purchased Phone"
+              primary
+              onPress={() => setAddSheetOpen(true)}
+              isTablet={isTablet}
+            />
+          </View>
+          <View className={`${isTablet ? "w-[calc(50%-5px)]" : "flex-1"}`}>
+            <QuickAction
+              icon="receipt-outline"
+              label="View Sales History"
+              onPress={() => router.push("/sales")}
+              isTablet={isTablet}
+            />
+          </View>
+        </View>
 
-      <View className="px-5 pb-2 pt-5">
-        <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
-          Activity
-        </Text>
-        <Text className="mt-1 text-2xl font-bold text-zinc-950">
-          Recent sales
-        </Text>
+        <View className={`pb-2 pt-5 ${isTablet ? "" : "px-5"}`}>
+          <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+            Activity
+          </Text>
+          <Text className="mt-1 text-2xl font-bold text-zinc-950">
+            Recent sales
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -251,20 +265,22 @@ export default function DashboardScreen() {
     );
   }
 
-  const sales = data?.recentSales ?? [];
-
   return (
-    <View className="flex-1 bg-zinc-100">
-      <FlatList
-        data={sales}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View className="px-5">
-            <SaleRow device={item} />
-          </View>
-        )}
-        ListHeaderComponent={header}
-        ListEmptyComponent={
+    <ScrollView
+      className="flex-1 bg-zinc-100"
+      contentContainerClassName={`pb-8 ${isTablet ? "" : ""}`}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={() => refetch()}
+          tintColor="#09090b"
+        />
+      }
+    >
+      {header}
+
+      <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6" : "px-5"}`}>
+        {sales.length === 0 ? (
           <EmptyState
             icon="receipt-outline"
             title="No sales yet"
@@ -272,20 +288,24 @@ export default function DashboardScreen() {
             actionLabel="Browse inventory"
             onAction={() => router.push("/inventory")}
           />
-        }
-        contentContainerClassName="gap-3 pb-4"
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={() => refetch()}
-            tintColor="#09090b"
-          />
-        }
-      />
+        ) : (
+          <View className={`flex-row flex-wrap ${isTablet ? "gap-3" : ""}`}>
+            {sales.map((item) => (
+              <View
+                key={item.id}
+                className={`${isTablet ? "w-[calc(50%-6px)]" : "w-full"}`}
+              >
+                <SaleRow device={item} />
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+
       <AddDeviceSheet
         visible={addSheetOpen}
         onClose={() => setAddSheetOpen(false)}
       />
-    </View>
+    </ScrollView>
   );
 }

@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -14,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useSales } from "../../hooks/useSales";
+import { useIsTablet } from "../../hooks/useIsTablet";
 import { useUpdateDevice } from "../../hooks/useInventory";
 import { ScreenHeader } from "../../components/ui/ScreenHeader";
 import { Badge } from "../../components/ui/Badge";
@@ -42,9 +42,9 @@ function WarrantyBadge({ period, dateSold }: { period: WarrantyPeriod | null; da
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <View className="flex-row items-center justify-between py-2">
-      <Text className="text-sm text-zinc-500">{label}</Text>
-      <Text className="text-sm font-medium text-zinc-950">{value}</Text>
+    <View className="flex-row items-center justify-between gap-3 py-2">
+      <Text className="shrink text-sm text-zinc-500" numberOfLines={1}>{label}</Text>
+      <Text className="text-sm font-medium text-zinc-950" numberOfLines={1}>{value}</Text>
     </View>
   );
 }
@@ -106,16 +106,19 @@ function SoldRow({ device, onPress }: { device: Device; onPress: () => void }) {
 export default function SalesHistoryScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error, isRefetching, refetch } = useSales();
+  const isTablet = useIsTablet();
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
 
   const header = (
-    <ScreenHeader
-      eyebrow="Flip ledger"
-      title="Sales History"
-      subtitle={
-        data ? `${data.length} ${data.length === 1 ? "sale" : "sales"} recorded` : undefined
-      }
-    />
+    <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6 py-6" : ""}`}>
+      <ScreenHeader
+        eyebrow="Flip ledger"
+        title="Sales History"
+        subtitle={
+          data ? `${data.length} ${data.length === 1 ? "sale" : "sales"} recorded` : undefined
+        }
+      />
+    </View>
   );
 
   if (isLoading) {
@@ -152,17 +155,21 @@ export default function SalesHistoryScreen() {
   }
 
   return (
-    <View className="flex-1 bg-zinc-100">
-      <FlatList
-        data={data ?? []}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View className="px-4">
-            <SoldRow device={item} onPress={() => setSelectedDevice(item)} />
-          </View>
-        )}
-        ListHeaderComponent={header}
-        ListEmptyComponent={
+    <ScrollView
+      className="flex-1 bg-zinc-100"
+      contentContainerClassName="pb-8"
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={() => refetch()}
+          tintColor="#09090b"
+        />
+      }
+    >
+      {header}
+
+      <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6" : "px-5"}`}>
+        {(data ?? []).length === 0 ? (
           <EmptyState
             icon="checkmark-circle-outline"
             title="No sales yet"
@@ -170,26 +177,26 @@ export default function SalesHistoryScreen() {
             actionLabel="View inventory"
             onAction={() => router.push("/inventory")}
           />
-        }
-        contentContainerClassName="gap-1.5 pb-4"
-        initialNumToRender={15}
-        maxToRenderPerBatch={10}
-        removeClippedSubviews
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={() => refetch()}
-            tintColor="#09090b"
-          />
-        }
-      />
+        ) : (
+          <View className={`flex-row flex-wrap ${isTablet ? "gap-4" : ""}`}>
+            {(data ?? []).map((item) => (
+              <View
+                key={item.id}
+                className={`${isTablet ? "w-[calc(50%-8px)]" : "w-full"}`}
+              >
+                <SoldRow device={item} onPress={() => setSelectedDevice(item)} />
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
 
       <SaleDetailSheet
         device={selectedDevice}
         visible={!!selectedDevice}
         onClose={() => setSelectedDevice(null)}
       />
-    </View>
+    </ScrollView>
   );
 }
 
