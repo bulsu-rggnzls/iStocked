@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   Text,
   View,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useDevices } from "../../hooks/useInventory";
+import { useIsTablet } from "../../hooks/useIsTablet";
 import { ScreenHeader } from "../../components/ui/ScreenHeader";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { BottomSheet } from "../../components/BottomSheet";
@@ -100,6 +101,7 @@ function InventoryRow({
 export default function InventoryScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ search?: string; addImei?: string }>();
+  const isTablet = useIsTablet();
   const [condition, setCondition] = useState<string>("all");
   const [networkLock, setNetworkLock] = useState<string>("all");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -171,7 +173,7 @@ export default function InventoryScreen() {
   };
 
   const header = (
-    <View>
+    <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6 py-6" : ""}`}>
       <ScreenHeader
         eyebrow="Stock on hand"
         title="Inventory"
@@ -190,7 +192,7 @@ export default function InventoryScreen() {
           </Pressable>
         }
       />
-      <View className="px-5 pb-3">
+      <View className={`${isTablet ? "" : "px-5"} pb-3`}>
         <SearchBar
           value={search}
           onChangeText={setSearch}
@@ -199,7 +201,7 @@ export default function InventoryScreen() {
         />
       </View>
 
-      <View className="flex-row items-center justify-between border-y border-zinc-200 bg-white px-5 py-2.5">
+      <View className={`w-full rounded-xl px-4 py-3 bg-white border border-zinc-100 flex flex-row items-center justify-between ${isTablet ? "" : ""}`}>
         <Text className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
           Capital in stock
         </Text>
@@ -247,21 +249,21 @@ export default function InventoryScreen() {
   }
 
   return (
-    <View className="flex-1 bg-zinc-100">
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View className="px-4">
-            <InventoryRow
-              device={item}
-              onPress={() => openDevice(item)}
-              onSell={() => setSaleDevice(item)}
-            />
-          </View>
-        )}
-        ListHeaderComponent={header}
-        ListEmptyComponent={
+    <ScrollView
+      className="flex-1 bg-zinc-100"
+      contentContainerClassName="pb-8"
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={() => refetch()}
+          tintColor="#09090b"
+        />
+      }
+    >
+      {header}
+
+      <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6" : "px-5"}`}>
+        {filtered.length === 0 ? (
           <EmptyState
             icon="phone-portrait-outline"
             title={data && data.length > 0 ? "No devices match" : "No stock on hand"}
@@ -273,19 +275,23 @@ export default function InventoryScreen() {
             actionLabel={data && data.length > 0 ? undefined : "Add a phone"}
             onAction={data && data.length > 0 ? undefined : () => setAddSheetOpen(true)}
           />
-        }
-        contentContainerClassName="gap-1.5 pb-4"
-        initialNumToRender={15}
-        maxToRenderPerBatch={10}
-        removeClippedSubviews
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={() => refetch()}
-            tintColor="#09090b"
-          />
-        }
-      />
+        ) : (
+          <View className={`flex-row flex-wrap ${isTablet ? "gap-4" : ""}`}>
+            {filtered.map((item) => (
+              <View
+                key={item.id}
+                className={`${isTablet ? "w-[calc(50%-8px)]" : "w-full"}`}
+              >
+                <InventoryRow
+                  device={item}
+                  onPress={() => openDevice(item)}
+                  onSell={() => setSaleDevice(item)}
+                />
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
 
       <AddDeviceSheet
         visible={addSheetOpen}
@@ -360,6 +366,6 @@ export default function InventoryScreen() {
           </Pressable>
         </View>
       </BottomSheet>
-    </View>
+    </ScrollView>
   );
 }
