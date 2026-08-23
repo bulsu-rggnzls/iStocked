@@ -39,7 +39,7 @@ export function AppHeader({ title, onBack, right }: AppHeaderProps) {
         <Ionicons name="chevron-back" size={18} color="#09090b" />
         <Text className="text-sm font-semibold text-zinc-950">Back</Text>
       </Pressable>
-      <Text className="flex-1 text-lg font-bold text-zinc-950">{title}</Text>
+      <Text className="flex-1 text-lg font-bold text-zinc-950" numberOfLines={1}>{title}</Text>
       {right}
     </View>
   );
