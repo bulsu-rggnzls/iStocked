@@ -52,15 +52,17 @@ function SpecRow({
   mono?: boolean;
 }) {
   return (
-    <View className="flex-row items-center justify-between py-2.5">
-      <View className="flex-row items-center gap-2.5">
+    <View className="flex-row items-center justify-between gap-3 py-2.5">
+      <View className="flex-row shrink items-center gap-2.5">
         <Ionicons name={icon} size={16} color="#a1a1aa" />
-        <Text className="text-sm text-zinc-500">{label}</Text>
+        <Text className="text-sm text-zinc-500" numberOfLines={1}>{label}</Text>
       </View>
       <Text
         className={`text-sm font-semibold text-zinc-950 ${
           mono ? "font-mono text-xs tracking-wide" : ""
         }`}
+        numberOfLines={1}
+        ellipsizeMode="middle"
       >
         {value}
       </Text>
@@ -345,7 +347,7 @@ export default function DeviceDetailScreen() {
                 <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
                   <Ionicons name="trending-up-outline" size={16} color="#09090b" />
                 </View>
-                <Text className="mt-2 text-2xl font-bold text-zinc-950">
+                <Text className="mt-2 text-2xl font-bold text-zinc-950" numberOfLines={1}>
                   {formatPrice(profit)}
                 </Text>
                 <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
@@ -362,7 +364,7 @@ export default function DeviceDetailScreen() {
                 <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
                   <Ionicons name="cash-outline" size={16} color="#09090b" />
                 </View>
-                <Text className="mt-2 text-2xl font-bold text-zinc-950">
+                <Text className="mt-2 text-2xl font-bold text-zinc-950" numberOfLines={1}>
                   {formatPrice(buy)}
                 </Text>
                 <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
@@ -379,7 +381,7 @@ export default function DeviceDetailScreen() {
                 <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
                   <Ionicons name="pricetag-outline" size={16} color="#09090b" />
                 </View>
-                <Text className="mt-2 text-2xl font-bold text-zinc-950">
+                <Text className="mt-2 text-2xl font-bold text-zinc-950" numberOfLines={1}>
                   {formatPrice(list)}
                 </Text>
                 <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
@@ -393,7 +395,7 @@ export default function DeviceDetailScreen() {
                 <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
                   <Ionicons name="build-outline" size={16} color="#09090b" />
                 </View>
-                <Text className="mt-2 text-2xl font-bold text-zinc-950">
+                <Text className="mt-2 text-2xl font-bold text-zinc-950" numberOfLines={1}>
                   {formatPrice(repair)}
                 </Text>
                 <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
