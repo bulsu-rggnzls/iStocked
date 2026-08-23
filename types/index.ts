@@ -35,6 +35,11 @@ export interface NewDeviceInput {
   color?: string | null;
   network_lock?: string | null;
   repair_cost?: number;
+  sold_price?: number;
+  date_sold?: string | null;
+  customer_name?: string | null;
+  buyer_contact?: string | null;
+  warranty_period?: WarrantyPeriod | null;
 }
 
 export interface RecordSaleInput {
