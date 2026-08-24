@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -14,10 +15,6 @@ import {
   useDeleteDevice,
   useUpdateDevice,
 } from "../../hooks/useInventory";
-import { AppHeader } from "../../components/ui/AppHeader";
-import { StatusBadge } from "../../components/ui/Badge";
-import { Button } from "../../components/ui/Button";
-import { TextField } from "../../components/ui/TextField";
 import { RecordSaleSheet } from "../../components/RecordSaleSheet";
 import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../../lib/networkLock";
 import { formatImei, formatPrice } from "../../lib/format";
@@ -40,36 +37,6 @@ function colorPlaceholder(model: string): string {
   return "Enter color";
 }
 
-function SpecRow({
-  icon,
-  label,
-  value,
-  mono = false,
-}: {
-  icon: React.ComponentProps<typeof Ionicons>["name"];
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
-  return (
-    <View className="flex-row items-center justify-between gap-3 py-2.5">
-      <View className="flex-row shrink items-center gap-2.5">
-        <Ionicons name={icon} size={16} color="#a1a1aa" />
-        <Text className="text-sm text-zinc-500" numberOfLines={1}>{label}</Text>
-      </View>
-      <Text
-        className={`text-sm font-semibold text-zinc-950 ${
-          mono ? "font-mono text-xs tracking-wide" : ""
-        }`}
-        numberOfLines={1}
-        ellipsizeMode="middle"
-      >
-        {value}
-      </Text>
-    </View>
-  );
-}
-
 type Tab = "overview" | "edit";
 
 function SegmentedControl({
@@ -84,20 +51,20 @@ function SegmentedControl({
     { key: "edit", label: "Edit Specs" },
   ];
   return (
-    <View className="flex-row rounded-xl bg-zinc-200 p-1">
+    <View className="w-full bg-zinc-100 p-1 rounded-xl flex-row gap-1 my-4">
       {tabs.map((tab) => {
         const selected = value === tab.key;
         return (
           <Pressable
             key={tab.key}
             onPress={() => onChange(tab.key)}
-            className={`flex-1 items-center rounded-lg py-2 active:opacity-80 ${
-              selected ? "bg-black" : ""
+            className={`flex-1 items-center justify-center rounded-lg py-2 active:opacity-80 ${
+              selected ? "bg-white shadow-sm" : ""
             }`}
           >
             <Text
-              className={`text-sm font-semibold ${
-                selected ? "text-white" : "text-zinc-600"
+              className={`text-sm ${
+                selected ? "font-bold text-zinc-900" : "font-medium text-zinc-500"
               }`}
             >
               {tab.label}
@@ -109,27 +76,55 @@ function SegmentedControl({
   );
 }
 
-function Pill({
+function SpecRow({
+  icon,
+  label,
+  value,
+  mono = false,
+}: {
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <View className="flex flex-row items-center justify-between py-3 text-xs">
+      <View className="flex items-center gap-2 text-zinc-500 font-medium">
+        <Ionicons name={icon} size={14} color="#a1a1aa" />
+        <Text className="text-zinc-500 font-medium">{label}</Text>
+      </View>
+      <Text
+        className={`text-zinc-900 ${mono ? "font-semibold font-mono" : "font-semibold"}`}
+        numberOfLines={1}
+        ellipsizeMode="middle"
+      >
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+function OptionChip({
   label,
   selected,
   onPress,
-  even = false,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
-  even?: boolean;
 }) {
   return (
     <Pressable
       onPress={onPress}
-      className={`items-center rounded-full px-3 py-1.5 active:opacity-80 ${
-        even ? "min-w-[64px] flex-1" : ""
-      } ${selected ? "bg-black" : "border border-zinc-200 bg-white"}`}
+      className={`px-3 py-1.5 rounded-lg border active:opacity-80 ${
+        selected
+          ? "bg-black border-black"
+          : "bg-white border-zinc-200 hover:border-zinc-300"
+      }`}
     >
       <Text
-        className={`text-xs font-medium ${
-          selected ? "text-white" : "text-zinc-600"
+        className={`text-xs ${
+          selected ? "font-semibold text-white" : "font-medium text-zinc-600"
         }`}
       >
         {label}
@@ -138,64 +133,32 @@ function Pill({
   );
 }
 
-function CenteredPillRow({
-  options,
-  value,
-  onChange,
-}: {
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <View className="flex-row flex-wrap justify-start gap-2">
-      {options.map((option) => (
-        <Pill
-          key={option}
-          label={option}
-          selected={value === option}
-          onPress={() => onChange(option)}
-        />
-      ))}
-    </View>
-  );
-}
-
 function PickerField({
   label,
   options,
   value,
   onChange,
-  even = false,
-  center = false,
 }: {
   label: string;
   options: string[];
   value: string;
   onChange: (value: string) => void;
-  even?: boolean;
-  center?: boolean;
 }) {
   return (
     <View className="mb-3">
-      <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+      <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
         {label}
       </Text>
-      {center ? (
-        <CenteredPillRow options={options} value={value} onChange={onChange} />
-      ) : (
-        <View className="flex-row flex-wrap gap-1.5">
-          {options.map((option) => (
-            <Pill
-              key={option}
-              label={option}
-              selected={value === option}
-              onPress={() => onChange(option)}
-              even={even}
-            />
-          ))}
-        </View>
-      )}
+      <View className="flex flex-row flex-wrap gap-2 mt-1.5 w-full">
+        {options.map((option) => (
+          <OptionChip
+            key={option}
+            label={option}
+            selected={value === option}
+            onPress={() => onChange(option)}
+          />
+        ))}
+      </View>
     </View>
   );
 }
@@ -240,8 +203,7 @@ export default function DeviceDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <AppHeader title="Device" />
-        <View className="flex-1 items-center justify-center bg-zinc-100">
+        <View className="flex-1 bg-zinc-100 items-center justify-center">
           <ActivityIndicator size="large" color="#09090b" />
         </View>
       </>
@@ -252,8 +214,7 @@ export default function DeviceDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <AppHeader title="Device" />
-        <View className="flex-1 items-center justify-center bg-zinc-100 px-8">
+        <View className="flex-1 bg-zinc-100 items-center justify-center px-8">
           <Text className="text-center text-base font-semibold text-zinc-950">
             Couldn't load this device
           </Text>
@@ -328,86 +289,77 @@ export default function DeviceDetailScreen() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-1 bg-zinc-100">
-        <AppHeader
-          title={device.model}
-          right={<StatusBadge status={device.status} />}
-        />
+        {/* Header */}
+        <View className="w-full flex-row items-center justify-between px-4 py-3 bg-white border-b border-zinc-100">
+          <Pressable
+            onPress={() => router.back()}
+            className="flex flex-row items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 active:bg-zinc-200"
+          >
+            <Ionicons name="chevron-back" size={14} color="#52525b" />
+            <Text className="text-xs font-semibold text-zinc-700">Back</Text>
+          </Pressable>
+          <View className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50">
+            <View className={`h-1.5 w-1.5 rounded-full ${device.status === "in_stock" ? "bg-emerald-500" : "bg-zinc-400"}`} />
+            <Text className="text-xs font-semibold text-emerald-700">
+              {device.status === "in_stock" ? "In Stock" : "Sold"}
+            </Text>
+          </View>
+        </View>
 
-        <View className="px-5 pb-3">
+        {/* Tab Switcher */}
+        <View className="px-4">
           <SegmentedControl value={tab} onChange={setTab} />
         </View>
 
+        {/* Content */}
         {tab === "overview" ? (
-          <ScrollView className="flex-1 px-5">
-            <View className="flex-row gap-2">
-              <View
-                className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3"
-                style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
-              >
-                <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
-                  <Ionicons name="trending-up-outline" size={16} color="#09090b" />
-                </View>
-                <Text className="mt-2 text-2xl font-bold text-zinc-950" numberOfLines={1}>
-                  {formatPrice(profit)}
-                </Text>
-                <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
+          <ScrollView className="flex-1 px-4">
+            {/* Stat Cards */}
+            <View className="grid grid-cols-2 gap-3 w-full">
+              <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
+                <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
                   Net Profit
                 </Text>
-                <View className="mt-1.5 self-start rounded-full bg-zinc-100 px-2 py-0.5">
-                  <Text className="text-xs font-semibold text-zinc-900">{margin}%</Text>
+                <View className="flex flex-row items-center gap-2 mt-2">
+                  <Text className="text-lg font-bold text-zinc-900" numberOfLines={1}>
+                    {formatPrice(profit)}
+                  </Text>
+                  <View className="bg-emerald-50 px-2 py-0.5 rounded-full">
+                    <Text className="text-[11px] font-semibold text-emerald-600">{margin}%</Text>
+                  </View>
                 </View>
               </View>
-              <View
-                className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3"
-                style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
-              >
-                <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
-                  <Ionicons name="cash-outline" size={16} color="#09090b" />
-                </View>
-                <Text className="mt-2 text-2xl font-bold text-zinc-950" numberOfLines={1}>
-                  {formatPrice(buy)}
-                </Text>
-                <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
+              <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
+                <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
                   Buy Price
                 </Text>
-              </View>
-            </View>
-
-            <View className="mt-2 flex-row gap-2">
-              <View
-                className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3"
-                style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
-              >
-                <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
-                  <Ionicons name="pricetag-outline" size={16} color="#09090b" />
-                </View>
-                <Text className="mt-2 text-2xl font-bold text-zinc-950" numberOfLines={1}>
-                  {formatPrice(list)}
+                <Text className="text-lg font-bold text-zinc-900 mt-2" numberOfLines={1}>
+                  {formatPrice(buy)}
                 </Text>
-                <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
+              </View>
+              <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
+                <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
                   List Price
                 </Text>
-              </View>
-              <View
-                className="flex-1 rounded-2xl border border-zinc-200 bg-white p-3"
-                style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
-              >
-                <View className="h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
-                  <Ionicons name="build-outline" size={16} color="#09090b" />
-                </View>
-                <Text className="mt-2 text-2xl font-bold text-zinc-950" numberOfLines={1}>
-                  {formatPrice(repair)}
+                <Text className="text-lg font-bold text-zinc-900 mt-2" numberOfLines={1}>
+                  {formatPrice(list)}
                 </Text>
-                <Text className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
+              </View>
+              <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
+                <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
                   Repair Cost
+                </Text>
+                <Text className="text-lg font-bold text-zinc-900 mt-2" numberOfLines={1}>
+                  {formatPrice(repair)}
                 </Text>
               </View>
             </View>
 
-            <Text className="mt-5 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+            {/* Specs Card */}
+            <Text className="mt-5 mb-2 text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
               Specs
             </Text>
-            <View className="mt-1.5 rounded-2xl border border-zinc-200 bg-white px-4 divide-y divide-zinc-100">
+            <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm flex flex-col divide-y divide-zinc-100">
               <SpecRow icon="call-outline" label="IMEI" value={formatImei(device.imei)} mono />
               <SpecRow icon="layers-outline" label="Storage" value={storage || "\u2014"} />
               <SpecRow icon="star-outline" label="Condition" value={condition || "\u2014"} />
@@ -419,77 +371,84 @@ export default function DeviceDetailScreen() {
               ) : null}
               <SpecRow icon="globe-outline" label="Network Lock" value={networkLockShort(networkLock) ?? "\u2014"} />
             </View>
+            <View className="h-32" />
           </ScrollView>
         ) : (
-          <ScrollView className="flex-1 px-5">
-            <View className="rounded-2xl border border-zinc-200 bg-white p-4">
-              <View className="flex-row gap-3">
-                <View className="flex-1">
-                  <TextField
-                    label="Buy price (₱)"
+          <ScrollView className="flex-1 px-4">
+            <View className="w-full flex flex-col gap-4 bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
+              <View className="grid grid-cols-2 gap-3 w-full">
+                <View>
+                  <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                    Buy price (₱)
+                  </Text>
+                  <TextInput
                     value={buyPrice}
                     onChangeText={setBuyPrice}
                     keyboardType="decimal-pad"
+                    placeholderTextColor="#a1a1aa"
+                    className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
                   />
                 </View>
-                <View className="flex-1">
-                  <TextField
-                    label="List price (₱)"
+                <View>
+                  <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                    List price (₱)
+                  </Text>
+                  <TextInput
                     value={listPrice}
                     onChangeText={setListPrice}
                     keyboardType="decimal-pad"
-                  />
-                </View>
-              </View>
-
-              <View className="mt-2 flex-row gap-3">
-                <View className="flex-1">
-                  <PickerField
-                    label="Storage"
-                    options={STORAGE_OPTIONS}
-                    value={storage}
-                    onChange={setStorage}
-                  />
-                </View>
-                <View className="flex-1">
-                  <PickerField
-                    label="Condition"
-                    options={CONDITION_OPTIONS}
-                    value={condition}
-                    onChange={setCondition}
-                  />
-                </View>
-              </View>
-
-              <View className="flex-row gap-3">
-                <View className="flex-1">
-                  <TextField
-                    label="Battery health (%)"
-                    value={batteryHealth}
-                    onChangeText={(t) =>
-                      setBatteryHealth(t.replace(/[^0-9]/g, ""))
-                    }
-                    keyboardType="number-pad"
-                    maxLength={3}
-                    placeholder="e.g. 85"
-                  />
-                </View>
-                <View className="flex-1">
-                  <TextField
-                    label="Color"
-                    value={color}
-                    onChangeText={setColor}
-                    placeholder={colorPlaceholder(device.model)}
-                    autoCapitalize="words"
+                    placeholderTextColor="#a1a1aa"
+                    className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
                   />
                 </View>
               </View>
 
               <PickerField
-                label="Network lock"
-                options={NETWORK_LOCK_OPTIONS.map(
-                  (o) => networkLockShort(o) ?? o,
-                )}
+                label="Storage"
+                options={STORAGE_OPTIONS}
+                value={storage}
+                onChange={setStorage}
+              />
+              <PickerField
+                label="Condition"
+                options={CONDITION_OPTIONS}
+                value={condition}
+                onChange={setCondition}
+              />
+
+              <View className="grid grid-cols-2 gap-3 w-full">
+                <View>
+                  <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                    Battery health (%)
+                  </Text>
+                  <TextInput
+                    value={batteryHealth}
+                    onChangeText={(t) => setBatteryHealth(t.replace(/[^0-9]/g, ""))}
+                    keyboardType="number-pad"
+                    maxLength={3}
+                    placeholder="e.g. 85"
+                    placeholderTextColor="#a1a1aa"
+                    className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
+                  />
+                </View>
+                <View>
+                  <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                    Color
+                  </Text>
+                  <TextInput
+                    value={color}
+                    onChangeText={setColor}
+                    placeholder={colorPlaceholder(device.model)}
+                    placeholderTextColor="#a1a1aa"
+                    autoCapitalize="words"
+                    className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
+                  />
+                </View>
+              </View>
+
+              <PickerField
+                label="Network Lock"
+                options={NETWORK_LOCK_OPTIONS.map((o) => networkLockShort(o) ?? o)}
                 value={networkLockShort(networkLock) ?? networkLock}
                 onChange={(short) => {
                   const full = NETWORK_LOCK_OPTIONS.find(
@@ -497,34 +456,38 @@ export default function DeviceDetailScreen() {
                   );
                   setNetworkLock(full ?? short);
                 }}
-                center
               />
 
-              <TextField
-                label="Repair cost (₱)"
-                value={repairCost}
-                onChangeText={(t) =>
-                  setRepairCost(t.replace(/[^0-9.]/g, ""))
-                }
-                keyboardType="decimal-pad"
-                placeholder="0.00"
-              />
+              <View>
+                <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  Repair cost (₱)
+                </Text>
+                <TextInput
+                  value={repairCost}
+                  onChangeText={(t) => setRepairCost(t.replace(/[^0-9.]/g, ""))}
+                  keyboardType="decimal-pad"
+                  placeholder="0.00"
+                  placeholderTextColor="#a1a1aa"
+                  className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
+                />
+              </View>
             </View>
 
             {saveError ? (
               <Text className="mt-3 text-sm text-red-600">{saveError}</Text>
             ) : null}
+            <View className="h-32" />
           </ScrollView>
         )}
 
-        <View className="border-t border-zinc-200 bg-white px-5 py-4">
+        {/* Bottom Action Bar */}
+        <View className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-zinc-200 p-4 flex flex-col gap-2 z-40 max-w-4xl mx-auto">
           {tab === "overview" ? (
-            <View className="gap-2.5">
+            <>
               {device.status === "in_stock" ? (
                 <Pressable
                   onPress={() => setSaleOpen(true)}
-                  className="items-center justify-center rounded-xl bg-black py-3 active:bg-zinc-900"
-                  style={{ height: 48 }}
+                  className="w-full h-11 bg-black rounded-xl items-center justify-center active:bg-zinc-800"
                 >
                   <Text className="text-sm font-semibold text-white">Record Sale</Text>
                 </Pressable>
@@ -532,21 +495,23 @@ export default function DeviceDetailScreen() {
               <Pressable
                 onPress={handleDelete}
                 disabled={deleteMutation.isPending}
-                className="items-center justify-center rounded-xl py-2.5 active:bg-red-50"
+                className="w-full py-2 items-center justify-center active:bg-red-50 rounded-xl"
               >
-                <Text className="text-sm font-medium text-red-600">
+                <Text className="text-xs font-semibold text-red-600">
                   {deleteMutation.isPending ? "Deleting\u2026" : "Delete Device"}
                 </Text>
               </Pressable>
-            </View>
+            </>
           ) : (
-            <Button
-              title={saved ? "Saved" : "Save Changes"}
+            <Pressable
               onPress={handleSave}
-              loading={updateMutation.isPending}
-              disabled={saved}
-              className="h-12"
-            />
+              disabled={updateMutation.isPending || saved}
+              className="w-full h-11 bg-black rounded-xl items-center justify-center active:bg-zinc-800"
+            >
+              <Text className="text-sm font-semibold text-white">
+                {saved ? "Saved" : updateMutation.isPending ? "Saving\u2026" : "Save Changes"}
+              </Text>
+            </Pressable>
           )}
         </View>
       </View>

@@ -46,9 +46,9 @@ function QuickAction({
   return (
     <Pressable
       onPress={onPress}
-      className={`items-center justify-center rounded-2xl px-3 py-3 active:opacity-80 ${
-        isTablet ? "h-32" : ""
-      } ${primary ? "bg-black" : "border border-zinc-200 bg-white"}`}
+      className={`w-full min-h-[56px] px-3 py-2 flex flex-col sm:flex-row items-center justify-center text-center gap-2 rounded-2xl active:opacity-80 ${
+        primary ? "bg-black" : "border border-zinc-200 bg-white"
+      }`}
     >
       <View
         className={`h-8 w-8 items-center justify-center rounded-full ${
@@ -57,7 +57,7 @@ function QuickAction({
       >
         <Ionicons name={icon} size={16} color={primary ? "#ffffff" : "#09090b"} />
       </View>
-      <Text className={`mt-1.5 text-xs font-semibold ${primary ? "text-white" : "text-zinc-950"}`}>
+      <Text className={`text-xs sm:text-sm font-semibold whitespace-nowrap ${primary ? "text-white" : "text-zinc-950"}`}>
         {label}
       </Text>
     </Pressable>
@@ -139,7 +139,7 @@ export default function DashboardScreen() {
   const sales = data?.recentSales ?? [];
 
   const header = (
-    <View>
+      <View className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 box-border">
       <ScreenHeader
         eyebrow="Overview"
         title="Dashboard"
@@ -164,70 +164,56 @@ export default function DashboardScreen() {
         }
       />
 
-      <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6 py-6" : "px-5"}`}>
-        <View className={`flex-row flex-wrap pt-1 ${isTablet ? "gap-4" : "px-3.5"}`}>
-          <View className={`${isTablet ? "w-[calc(25%-12px)]" : "w-1/2 p-1.5"}`}>
-            <StatCard
-              label="Total net profit"
-              value={data ? formatPrice(data.totalNetProfit) : "\u2014"}
-              icon="trending-up-outline"
-              trend="sold - buy - repair"
-            />
-          </View>
-          <View className={`${isTablet ? "w-[calc(25%-12px)]" : "w-1/2 p-1.5"}`}>
-            <StatCard
-              label="Investment in stock"
-              value={data ? formatPrice(data.totalInvestment) : "\u2014"}
-              icon="cash-outline"
-              trend="capital locked up"
-            />
-          </View>
-          <View className={`${isTablet ? "w-[calc(25%-12px)]" : "w-1/2 p-1.5"}`}>
-            <StatCard
-              label="Repair expenses"
-              value={data ? formatPrice(data.totalRepairCost) : "\u2014"}
-              icon="build-outline"
-              trend="all-time repair spend"
-            />
-          </View>
-          <View className={`${isTablet ? "w-[calc(25%-12px)]" : "w-1/2 p-1.5"}`}>
-            <StatCard
-              label="Units available"
-              value={data ? String(data.unitsAvailable) : "\u2014"}
-              icon="phone-portrait-outline"
-              trend="ready to sell"
-            />
-          </View>
-        </View>
+      <View className="w-full grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 pt-1">
+        <StatCard
+          label="Total net profit"
+          value={data ? formatPrice(data.totalNetProfit) : "\u2014"}
+          icon="trending-up-outline"
+          trend="sold - buy - repair"
+        />
+        <StatCard
+          label="Investment in stock"
+          value={data ? formatPrice(data.totalInvestment) : "\u2014"}
+          icon="cash-outline"
+          trend="capital locked up"
+        />
+        <StatCard
+          label="Repair expenses"
+          value={data ? formatPrice(data.totalRepairCost) : "\u2014"}
+          icon="build-outline"
+          trend="all-time repair spend"
+        />
+        <StatCard
+          label="Units available"
+          value={data ? String(data.unitsAvailable) : "\u2014"}
+          icon="phone-portrait-outline"
+          trend="ready to sell"
+        />
+      </View>
 
-        <View className={`flex-row gap-2.5 pt-4 ${isTablet ? "" : "px-5"}`}>
-          <View className={`${isTablet ? "w-[calc(50%-5px)]" : "flex-1"}`}>
-            <QuickAction
-              icon="add"
-              label="Add Purchased Phone"
-              primary
-              onPress={() => setAddSheetOpen(true)}
-              isTablet={isTablet}
-            />
-          </View>
-          <View className={`${isTablet ? "w-[calc(50%-5px)]" : "flex-1"}`}>
-            <QuickAction
-              icon="receipt-outline"
-              label="View Sales History"
-              onPress={() => router.push("/sales")}
-              isTablet={isTablet}
-            />
-          </View>
-        </View>
+      <View className="w-full grid grid-cols-2 gap-3 pt-4">
+        <QuickAction
+          icon="add"
+          label="Add Purchased Phone"
+          primary
+          onPress={() => setAddSheetOpen(true)}
+          isTablet={isTablet}
+        />
+        <QuickAction
+          icon="receipt-outline"
+          label="View Sales History"
+          onPress={() => router.push("/sales")}
+          isTablet={isTablet}
+        />
+      </View>
 
-        <View className={`pb-2 pt-5 ${isTablet ? "" : "px-5"}`}>
-          <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
-            Activity
-          </Text>
-          <Text className="mt-1 text-2xl font-bold text-zinc-950">
-            Recent sales
-          </Text>
-        </View>
+      <View className="w-full pb-2 pt-5">
+        <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+          Activity
+        </Text>
+        <Text className="mt-1 text-2xl font-bold text-zinc-950">
+          Recent sales
+        </Text>
       </View>
     </View>
   );
@@ -249,7 +235,7 @@ export default function DashboardScreen() {
         {header}
         <View className="flex-1 items-center justify-center px-8">
           <Text className="text-center text-base font-semibold text-zinc-950">
-            Couldn't load your dashboard
+            Couldn&apos;t load your dashboard
           </Text>
           <Text className="mt-2 text-center text-sm leading-5 text-red-600">
             {error instanceof Error ? error.message : "Something went wrong."}
@@ -268,7 +254,7 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       className="flex-1 bg-zinc-100"
-      contentContainerClassName={`pb-8 ${isTablet ? "" : ""}`}
+      contentContainerClassName="pb-24 sm:pb-28"
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
@@ -279,7 +265,7 @@ export default function DashboardScreen() {
     >
       {header}
 
-      <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6" : "px-5"}`}>
+    <View className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 box-border">
         {sales.length === 0 ? (
           <EmptyState
             icon="receipt-outline"
@@ -289,12 +275,9 @@ export default function DashboardScreen() {
             onAction={() => router.push("/inventory")}
           />
         ) : (
-          <View className={`flex-row flex-wrap ${isTablet ? "gap-3" : ""}`}>
+          <View className="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
             {sales.map((item) => (
-              <View
-                key={item.id}
-                className={`${isTablet ? "w-[calc(50%-6px)]" : "w-full"}`}
-              >
+              <View key={item.id} className="w-full">
                 <SaleRow device={item} />
               </View>
             ))}

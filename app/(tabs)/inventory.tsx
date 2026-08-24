@@ -17,7 +17,7 @@ import { BottomSheet } from "../../components/BottomSheet";
 import { AddDeviceSheet } from "../../components/AddDeviceSheet";
 import { RecordSaleSheet } from "../../components/RecordSaleSheet";
 import { EmptyState } from "../../components/EmptyState";
-import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../../lib/networkLock";
+import { NETWORK_LOCK_OPTIONS } from "../../lib/networkLock";
 import { formatImei, formatPrice } from "../../lib/format";
 import type { Device } from "../../types";
 
@@ -34,16 +34,6 @@ const NETWORK_FILTER_OPTIONS = [
   ...NETWORK_LOCK_OPTIONS.map((option) => ({ label: option, value: option })),
 ];
 
-function NetworkBadge({ value }: { value: string | null }) {
-  const short = networkLockShort(value);
-  if (!short) return null;
-  return (
-    <View className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-px">
-      <Text className="text-[9px] font-semibold text-zinc-600">{short}</Text>
-    </View>
-  );
-}
-
 function InventoryRow({
   device,
   onPress,
@@ -59,41 +49,36 @@ function InventoryRow({
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center rounded-xl border border-zinc-200 bg-white px-4 py-2.5 active:bg-zinc-100"
+      className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm flex flex-row items-center justify-between p-4 active:border-zinc-200"
     >
-      <View className="flex-1 pr-2">
-        <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
+      <View className="flex flex-col items-start text-left gap-0.5 flex-1 mr-3">
+        <Text className="text-base font-bold text-zinc-900" numberOfLines={1}>
           {device.model}
         </Text>
-        <View className="mt-0.5 flex-row items-center gap-1.5">
-          <Text
-            className="shrink text-[11px] text-zinc-500"
-            numberOfLines={1}
-          >
-            {device.storage} · {device.condition}
+        <Text className="text-xs text-zinc-500 font-mono" numberOfLines={1}>
+          {device.storage} · {device.condition} · {formatImei(device.imei)}
+        </Text>
+      </View>
+
+      <View className="flex flex-row items-center gap-3">
+        <View className="flex flex-col items-end text-right">
+          <Text className="text-base font-bold text-zinc-900" numberOfLines={1}>
+            {formatPrice(device.list_price)}
           </Text>
-          <NetworkBadge value={device.network_lock} />
+          <View className="mt-0.5 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <Text className="text-[11px] font-semibold text-emerald-600" numberOfLines={1}>
+              +{formatPrice(potential)}
+            </Text>
+          </View>
         </View>
-        <Text className="mt-0.5 font-mono text-[10px] tracking-wide text-zinc-400" numberOfLines={1}>
-          {formatImei(device.imei)}
-        </Text>
-      </View>
 
-      <View className="items-end">
-        <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
-          {formatPrice(device.list_price)}
-        </Text>
-        <Text className="mt-0.5 text-[11px] font-semibold text-zinc-600" numberOfLines={1}>
-          +{formatPrice(potential)}
-        </Text>
+        <Pressable
+          onPress={onSell}
+          className="bg-black px-3.5 py-1.5 rounded-lg active:bg-zinc-800"
+        >
+          <Text className="text-xs font-semibold text-white">Sell</Text>
+        </Pressable>
       </View>
-
-      <Pressable
-        onPress={onSell}
-        className="ml-3 rounded-md bg-black px-3 py-2 active:bg-zinc-900"
-      >
-        <Text className="text-xs font-semibold text-white">Sell</Text>
-      </Pressable>
     </Pressable>
   );
 }
@@ -173,7 +158,7 @@ export default function InventoryScreen() {
   };
 
   const header = (
-    <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6 py-6" : ""}`}>
+    <View className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-4">
       <ScreenHeader
         eyebrow="Stock on hand"
         title="Inventory"
@@ -192,23 +177,21 @@ export default function InventoryScreen() {
           </Pressable>
         }
       />
-      <View className={`${isTablet ? "" : "px-5"} pb-3`}>
-        <SearchBar
-          value={search}
-          onChangeText={setSearch}
-          filterCount={activeFilterCount}
-          onFilterPress={openFilterSheet}
-        />
-      </View>
+      <SearchBar
+        value={search}
+        onChangeText={setSearch}
+        filterCount={activeFilterCount}
+        onFilterPress={openFilterSheet}
+      />
 
-      <View className={`w-full rounded-xl px-4 py-3 bg-white border border-zinc-100 flex flex-row items-center justify-between ${isTablet ? "" : ""}`}>
-        <Text className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-          Capital in stock
+      <View className="flex flex-row items-center justify-between px-4 py-3 bg-white rounded-xl border border-zinc-100">
+        <Text className="text-xs font-bold text-zinc-400 tracking-wider">
+          CAPITAL IN STOCK
         </Text>
-        <Text className="text-sm font-bold text-zinc-950">
+        <Text className="text-base font-bold text-zinc-900">
           {formatPrice(capitalInStock)}
         </Text>
-        <Text className="text-[11px] text-zinc-400">
+        <Text className="text-xs font-medium text-zinc-400">
           {data?.length ?? 0} {data?.length === 1 ? "phone" : "phones"} ready
         </Text>
       </View>
@@ -262,7 +245,7 @@ export default function InventoryScreen() {
     >
       {header}
 
-      <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6" : "px-5"}`}>
+      <View className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-4">
         {filtered.length === 0 ? (
           <EmptyState
             icon="phone-portrait-outline"
@@ -276,18 +259,14 @@ export default function InventoryScreen() {
             onAction={data && data.length > 0 ? undefined : () => setAddSheetOpen(true)}
           />
         ) : (
-          <View className={`flex-row flex-wrap ${isTablet ? "gap-4" : ""}`}>
+          <View className="flex flex-col gap-3">
             {filtered.map((item) => (
-              <View
+              <InventoryRow
                 key={item.id}
-                className={`${isTablet ? "w-[calc(50%-8px)]" : "w-full"}`}
-              >
-                <InventoryRow
-                  device={item}
-                  onPress={() => openDevice(item)}
-                  onSell={() => setSaleDevice(item)}
-                />
-              </View>
+                device={item}
+                onPress={() => openDevice(item)}
+                onSell={() => setSaleDevice(item)}
+              />
             ))}
           </View>
         )}

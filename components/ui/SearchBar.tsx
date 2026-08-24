@@ -17,7 +17,7 @@ export function SearchBar({
   onFilterPress,
 }: SearchBarProps) {
   return (
-    <View className="flex-row items-center rounded-xl border border-zinc-200 bg-white px-3.5">
+    <View className="h-12 flex-row items-center rounded-xl border border-zinc-200 bg-white px-4">
       <Ionicons name="search-outline" size={18} color="#71717a" />
       <TextInput
         value={value}
@@ -26,7 +26,7 @@ export function SearchBar({
         placeholderTextColor="#a1a1aa"
         autoCapitalize="none"
         autoCorrect={false}
-        className="flex-1 px-2.5 py-3 text-base text-zinc-950"
+        className="flex-1 px-2.5 text-base text-zinc-950"
       />
       {onFilterPress ? (
         <Pressable
