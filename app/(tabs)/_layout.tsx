@@ -1,109 +1,87 @@
 import { Tabs } from "expo-router";
-import { View, useWindowDimensions } from "react-native";
-import type { ColorValue } from "react-native";
+import { View, useWindowDimensions, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const TABLET_BREAKPOINT = 768;
 
-function TabIcon({
-  name,
-  color,
-  size,
-  focused,
-}: {
-  name: React.ComponentProps<typeof Ionicons>["name"];
-  color: ColorValue;
-  size: number;
-  focused: boolean;
-}) {
+type IoniconsName = React.ComponentProps<typeof Ionicons>["name"];
+
+const TAB_CONFIG: { name: string; icon: IoniconsName; label: string }[] = [
+  { name: "index", icon: "grid-outline", label: "Dashboard" },
+  { name: "inventory", icon: "phone-portrait-outline", label: "Inventory" },
+  { name: "sales", icon: "receipt-outline", label: "Sales" },
+  { name: "scan", icon: "scan-outline", label: "Scan" },
+];
+
+function CustomTabBar({ state, navigation }: any) {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= TABLET_BREAKPOINT;
+
   return (
     <View
-      className={`h-8 w-12 items-center justify-center rounded-full ${
-        focused ? "bg-zinc-100" : ""
+      className={`fixed bottom-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-t border-zinc-200 ${
+        isTablet
+          ? "max-w-xl mx-auto mb-4 rounded-full border shadow-md"
+          : "pb-safe"
       }`}
     >
-      <Ionicons name={name} size={size} color={color} />
+      <View className="flex-1 flex-row items-center justify-around">
+        {state.routes.map((route: any) => {
+          const isFocused = state.index === state.routes.indexOf(route);
+          const color = isFocused ? "#09090b" : "#71717a";
+          const tabConfig = TAB_CONFIG.find((t) => t.name === route.name);
+
+          const onPress = () => {
+            if (!isFocused) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          return (
+            <Pressable
+              key={route.key}
+              onPress={onPress}
+              className="flex-1 flex-col items-center justify-center py-2 gap-1"
+            >
+              <Ionicons
+                name={tabConfig?.icon ?? "ellipse-outline"}
+                size={22}
+                color={color}
+              />
+              <Text
+                className={`${
+                  isTablet ? "text-xs" : "text-[10px]"
+                } font-medium ${
+                  isFocused ? "text-zinc-900 font-semibold" : "text-zinc-500"
+                }`}
+              >
+                {tabConfig?.label ?? route.name}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 export default function TabLayout() {
-  const { width } = useWindowDimensions();
-  const isTablet = width >= TABLET_BREAKPOINT;
-
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#09090b",
-        tabBarInactiveTintColor: "#a1a1aa",
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "500",
-        },
-        tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderTopColor: "#e4e4e7",
-          paddingTop: 8,
-          paddingBottom: 4,
-          ...(isTablet
-            ? {
-                width: "100%",
-                maxWidth: 640,
-                marginLeft: "auto",
-                marginRight: "auto",
-                marginBottom: 16,
-                height: 64,
-                paddingHorizontal: 24,
-                borderRadius: 999,
-                borderStyle: "solid",
-                borderWidth: 1,
-                borderColor: "#e4e4e7",
-                shadowColor: "#000",
-                shadowOpacity: 0.05,
-                shadowRadius: 4,
-                shadowOffset: { width: 0, height: 2 },
-              }
-            : {}),
-        },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Dashboard",
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="grid-outline" color={color} size={size} focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="inventory"
-        options={{
-          title: "Inventory",
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="phone-portrait-outline" color={color} size={size} focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="sales"
-        options={{
-          title: "Sales",
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="receipt-outline" color={color} size={size} focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="scan"
-        options={{
-          title: "Scan",
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name="scan-outline" color={color} size={size} focused={focused} />
-          ),
-        }}
-      />
+      {TAB_CONFIG.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            title: tab.label,
+          }}
+        />
+      ))}
     </Tabs>
   );
 }
