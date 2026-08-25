@@ -110,7 +110,7 @@ export default function SalesHistoryScreen() {
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
 
   const header = (
-    <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6 py-6" : ""}`}>
+    <View className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4">
       <ScreenHeader
         eyebrow="Flip ledger"
         title="Sales History"

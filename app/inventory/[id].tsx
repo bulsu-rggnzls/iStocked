@@ -18,6 +18,10 @@ import {
 import { RecordSaleSheet } from "../../components/RecordSaleSheet";
 import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../../lib/networkLock";
 import { formatImei, formatPrice } from "../../lib/format";
+import {
+  ACCESSORY_OPTIONS,
+  type AccessoryItem,
+} from "../../types";
 
 const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
@@ -133,6 +137,51 @@ function OptionChip({
   );
 }
 
+function AccessoryChips({
+  selected,
+  onToggle,
+}: {
+  selected: AccessoryItem[];
+  onToggle: (item: AccessoryItem) => void;
+}) {
+  return (
+    <View className="mb-3">
+      <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+        Included Accessories
+      </Text>
+      <View className="flex flex-row flex-wrap gap-2 mt-1.5">
+        {ACCESSORY_OPTIONS.map((opt) => {
+          const isSelected = selected.includes(opt.key);
+          return (
+            <Pressable
+              key={opt.key}
+              onPress={() => onToggle(opt.key)}
+              className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-lg border active:opacity-80 ${
+                isSelected
+                  ? "bg-emerald-50 border-emerald-300"
+                  : "bg-white border-zinc-200"
+              }`}
+            >
+              <Ionicons
+                name={isSelected ? "checkmark-circle" : "ellipse-outline"}
+                size={14}
+                color={isSelected ? "#059669" : "#a1a1aa"}
+              />
+              <Text
+                className={`text-xs ${
+                  isSelected ? "font-semibold text-emerald-700" : "font-medium text-zinc-600"
+                }`}
+              >
+                {opt.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 function PickerField({
   label,
   options,
@@ -179,6 +228,9 @@ export default function DeviceDetailScreen() {
   const [color, setColor] = useState("");
   const [networkLock, setNetworkLock] = useState<string>(NETWORK_LOCK_OPTIONS[0]);
   const [repairCost, setRepairCost] = useState("");
+  const [imei2, setImei2] = useState("");
+  const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
+  const [notes, setNotes] = useState("");
   const [saleOpen, setSaleOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -197,6 +249,11 @@ export default function DeviceDetailScreen() {
     setColor(device.color ?? "");
     setNetworkLock(device.network_lock ?? NETWORK_LOCK_OPTIONS[0]);
     setRepairCost(device.repair_cost ? String(device.repair_cost) : "");
+    setImei2(device.imei2 ?? "");
+    setAccessories(
+      device.accessories ? JSON.parse(device.accessories) : [],
+    );
+    setNotes(device.notes ?? "");
   }, [device]);
 
   if (isLoading) {
@@ -252,6 +309,9 @@ export default function DeviceDetailScreen() {
           color: color.trim() || null,
           network_lock: networkLock,
           repair_cost: repair,
+          imei2: imei2.trim() || null,
+          accessories: accessories.length > 0 ? JSON.stringify(accessories) : null,
+          notes: notes.trim() || null,
         },
       },
       {
@@ -361,6 +421,9 @@ export default function DeviceDetailScreen() {
             </Text>
             <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm flex flex-col divide-y divide-zinc-100">
               <SpecRow icon="call-outline" label="IMEI" value={formatImei(device.imei)} mono />
+              {imei2.trim() ? (
+                <SpecRow icon="call-outline" label="IMEI 2" value={formatImei(imei2)} mono />
+              ) : null}
               <SpecRow icon="layers-outline" label="Storage" value={storage || "\u2014"} />
               <SpecRow icon="star-outline" label="Condition" value={condition || "\u2014"} />
               {batteryHealth.trim() ? (
@@ -371,6 +434,38 @@ export default function DeviceDetailScreen() {
               ) : null}
               <SpecRow icon="globe-outline" label="Network Lock" value={networkLockShort(networkLock) ?? "\u2014"} />
             </View>
+
+            {accessories.length > 0 ? (
+              <>
+                <Text className="mt-5 mb-2 text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
+                  Included Accessories
+                </Text>
+                <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
+                  <View className="flex flex-row flex-wrap gap-2">
+                    {accessories.map((item) => {
+                      const opt = ACCESSORY_OPTIONS.find((o) => o.key === item);
+                      return (
+                        <View key={item} className="flex-row items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
+                          <Ionicons name="checkmark-circle" size={14} color="#059669" />
+                          <Text className="text-xs font-semibold text-emerald-700">{opt?.label ?? item}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
+              </>
+            ) : null}
+
+            {notes.trim() ? (
+              <>
+                <Text className="mt-5 mb-2 text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
+                  Defects / Notes
+                </Text>
+                <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
+                  <Text className="text-sm text-zinc-700 leading-5">{notes}</Text>
+                </View>
+              </>
+            ) : null}
             <View className="h-32" />
           </ScrollView>
         ) : (
@@ -400,6 +495,39 @@ export default function DeviceDetailScreen() {
                     placeholderTextColor="#a1a1aa"
                     className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
                   />
+                </View>
+              </View>
+
+              {/* Live Profit & ROI */}
+              <View className="flex-row items-center gap-3 rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3">
+                <View className="flex-1">
+                  <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
+                    Expected Profit
+                  </Text>
+                  <Text
+                    className={`text-base font-bold mt-0.5 ${profit >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                    numberOfLines={1}
+                  >
+                    {formatPrice(profit)}
+                  </Text>
+                </View>
+                <View className="h-8 w-px bg-zinc-200" />
+                <View className="flex-1 items-end">
+                  <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
+                    ROI
+                  </Text>
+                  <View className={`flex-row items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full ${profit >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
+                    <Ionicons
+                      name={profit >= 0 ? "trending-up" : "trending-down"}
+                      size={12}
+                      color={profit >= 0 ? "#059669" : "#dc2626"}
+                    />
+                    <Text
+                      className={`text-sm font-bold ${profit >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                    >
+                      {margin}%
+                    </Text>
+                  </View>
                 </View>
               </View>
 
@@ -457,6 +585,48 @@ export default function DeviceDetailScreen() {
                   setNetworkLock(full ?? short);
                 }}
               />
+
+              <View>
+                <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  IMEI 2 (optional, for dual-SIM)
+                </Text>
+                <TextInput
+                  value={imei2}
+                  onChangeText={(t) => setImei2(t.replace(/\D/g, ""))}
+                  placeholder="15-digit secondary IMEI"
+                  placeholderTextColor="#a1a1aa"
+                  keyboardType="number-pad"
+                  maxLength={15}
+                  className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 font-mono tracking-wide"
+                />
+              </View>
+
+              <AccessoryChips
+                selected={accessories}
+                onToggle={(item) =>
+                  setAccessories((prev) =>
+                    prev.includes(item)
+                      ? prev.filter((a) => a !== item)
+                      : [...prev, item],
+                  )
+                }
+              />
+
+              <View>
+                <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  Defects / Notes
+                </Text>
+                <TextInput
+                  value={notes}
+                  onChangeText={setNotes}
+                  placeholder="e.g. Small scratch on top bezel, replaced screen"
+                  placeholderTextColor="#a1a1aa"
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  className="w-full px-3.5 py-3 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 min-h-[80px]"
+                />
+              </View>
 
               <View>
                 <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">

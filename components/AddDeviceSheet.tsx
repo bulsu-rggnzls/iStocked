@@ -11,7 +11,11 @@ import { BottomSheet } from "./BottomSheet";
 import { Button } from "./ui/Button";
 import { useAddDevice } from "../hooks/useInventory";
 import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../lib/networkLock";
-import type { Device } from "../types";
+import {
+  ACCESSORY_OPTIONS,
+  type AccessoryItem,
+  type Device,
+} from "../types";
 
 const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
@@ -78,6 +82,9 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
   const [batteryHealth, setBatteryHealth] = useState("");
   const [color, setColor] = useState("");
   const [repairCost, setRepairCost] = useState("");
+  const [imei2, setImei2] = useState("");
+  const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
+  const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -93,6 +100,9 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
       setBatteryHealth("");
       setColor("");
       setRepairCost("");
+      setImei2("");
+      setAccessories([]);
+      setNotes("");
       setError(null);
     }
   }, [visible, prefilledImei]);
@@ -119,6 +129,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
       const device = await addDevice.mutateAsync({
         model: model.trim(),
         imei: digits,
+        imei2: imei2.trim() || null,
         storage: storage ?? "",
         condition: condition ?? "",
         buy_price: buy,
@@ -127,6 +138,8 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
         color: color.trim() || null,
         network_lock: networkLock,
         repair_cost: repairCost.trim() ? Number(repairCost) : 0,
+        accessories: accessories.length > 0 ? JSON.stringify(accessories) : null,
+        notes: notes.trim() || null,
       });
       onSaved?.(device);
       onClose();
@@ -303,6 +316,69 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
                   placeholderTextColor="#a1a1aa"
                   keyboardType="decimal-pad"
                   className={inputClass}
+                />
+              </Field>
+
+              <Field label="IMEI 2 (optional, for dual-SIM)">
+                <TextInput
+                  value={imei2}
+                  onChangeText={(t) => setImei2(t.replace(/\D/g, ""))}
+                  placeholder="15-digit secondary IMEI"
+                  placeholderTextColor="#a1a1aa"
+                  keyboardType="number-pad"
+                  maxLength={15}
+                  className={`${inputClass} font-mono tracking-wide`}
+                />
+              </Field>
+
+              <Field label="Included Accessories">
+                <View className="flex-row flex-wrap gap-2">
+                  {ACCESSORY_OPTIONS.map((opt) => {
+                    const isSelected = accessories.includes(opt.key);
+                    return (
+                      <Pressable
+                        key={opt.key}
+                        onPress={() =>
+                          setAccessories((prev) =>
+                            prev.includes(opt.key)
+                              ? prev.filter((a) => a !== opt.key)
+                              : [...prev, opt.key],
+                          )
+                        }
+                        className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-lg border active:opacity-80 ${
+                          isSelected
+                            ? "bg-emerald-50 border-emerald-300"
+                            : "bg-white border-zinc-200"
+                        }`}
+                      >
+                        <Ionicons
+                          name={isSelected ? "checkmark-circle" : "ellipse-outline"}
+                          size={14}
+                          color={isSelected ? "#059669" : "#a1a1aa"}
+                        />
+                        <Text
+                          className={`text-xs ${
+                            isSelected ? "font-semibold text-emerald-700" : "font-medium text-zinc-600"
+                          }`}
+                        >
+                          {opt.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </Field>
+
+              <Field label="Defects / Notes">
+                <TextInput
+                  value={notes}
+                  onChangeText={setNotes}
+                  placeholder="e.g. Small scratch on top bezel, replaced screen"
+                  placeholderTextColor="#a1a1aa"
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  className={`${inputClass} min-h-[80px]`}
                 />
               </Field>
             </View>

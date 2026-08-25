@@ -21,6 +21,7 @@ function buildSalesCsv(sales: Device[]): string {
     [
       "Model",
       "IMEI",
+      "IMEI 2",
       "Storage",
       "Condition",
       "Buy Price",
@@ -30,16 +31,21 @@ function buildSalesCsv(sales: Device[]): string {
       "Customer",
       "Buyer Contact",
       "Warranty",
+      "Accessories",
+      "Notes",
       "Date Sold",
     ].join(","),
   ];
   for (const s of sales) {
     const profit = Number(s.sold_price ?? 0) - Number(s.buy_price) - Number(s.repair_cost ?? 0);
     const warranty = s.warranty_period === "7_day" ? "7-day" : s.warranty_period === "30_day" ? "30-day" : "None";
+    const acc = s.accessories ?? "";
+    const accLabels = acc ? JSON.parse(acc).join("; ") : "";
     rows.push(
       [
         escCsv(s.model),
         s.imei,
+        s.imei2 ?? "",
         s.storage,
         escCsv(s.condition),
         Number(s.buy_price).toFixed(2),
@@ -49,6 +55,8 @@ function buildSalesCsv(sales: Device[]): string {
         escCsv(s.customer_name ?? "Walk-in"),
         escCsv(s.buyer_contact ?? ""),
         warranty,
+        escCsv(accLabels),
+        escCsv(s.notes ?? ""),
         s.date_sold ? new Date(s.date_sold).toISOString().slice(0, 10) : "",
       ].join(","),
     );
@@ -61,6 +69,7 @@ function buildInventoryCsv(devices: Device[]): string {
     [
       "Model",
       "IMEI",
+      "IMEI 2",
       "Storage",
       "Condition",
       "Buy Price",
@@ -69,16 +78,21 @@ function buildInventoryCsv(devices: Device[]): string {
       "List Price",
       "Potential Profit",
       "Network Lock",
+      "Accessories",
+      "Notes",
       "Date Bought",
     ].join(","),
   ];
   for (const d of devices) {
     const totalCost = Number(d.buy_price) + Number(d.repair_cost ?? 0);
     const potential = Number(d.list_price) - totalCost;
+    const acc = d.accessories ?? "";
+    const accLabels = acc ? JSON.parse(acc).join("; ") : "";
     rows.push(
       [
         escCsv(d.model),
         d.imei,
+        d.imei2 ?? "",
         d.storage,
         escCsv(d.condition),
         Number(d.buy_price).toFixed(2),
@@ -87,6 +101,8 @@ function buildInventoryCsv(devices: Device[]): string {
         Number(d.list_price).toFixed(2),
         potential.toFixed(2),
         escCsv(d.network_lock ?? "Open"),
+        escCsv(accLabels),
+        escCsv(d.notes ?? ""),
         d.date_bought ? new Date(d.date_bought).toISOString().slice(0, 10) : "",
       ].join(","),
     );
