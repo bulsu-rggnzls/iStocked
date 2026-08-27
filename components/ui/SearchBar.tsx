@@ -1,5 +1,6 @@
 import { Pressable, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Card } from "./Card";
 
 interface SearchBarProps {
   value: string;
@@ -17,7 +18,7 @@ export function SearchBar({
   onFilterPress,
 }: SearchBarProps) {
   return (
-    <View className="h-12 flex-row items-center rounded-xl border border-zinc-200 bg-white px-4">
+    <Card className="flex flex-row items-center justify-between">
       <Ionicons name="search-outline" size={18} color="#71717a" />
       <TextInput
         value={value}
@@ -46,6 +47,6 @@ export function SearchBar({
           <Text className="text-[10px] font-bold text-white">{filterCount}</Text>
         </View>
       ) : null}
-    </View>
+    </Card>
   );
 }
