@@ -92,13 +92,15 @@ function SpecRow({
   mono?: boolean;
 }) {
   return (
-    <View className="flex flex-row items-center justify-between py-3 text-xs">
-      <View className="flex items-center gap-2 text-zinc-500 font-medium">
-        <Ionicons name={icon} size={14} color="#a1a1aa" />
-        <Text className="text-zinc-500 font-medium">{label}</Text>
+    <View className="flex flex-row items-center justify-between py-3 border-b border-zinc-100 last:border-0">
+      <View className="flex flex-row items-center gap-2">
+        <View className="w-4 h-4 flex items-center justify-center shrink-0">
+          <Ionicons name={icon} size={16} color="#a1a1aa" />
+        </View>
+        <Text className="text-xs font-medium text-zinc-500">{label}</Text>
       </View>
       <Text
-        className={`text-zinc-900 ${mono ? "font-semibold font-mono" : "font-semibold"}`}
+        className={`text-xs font-semibold text-zinc-900 ${mono ? "font-mono" : ""}`}
         numberOfLines={1}
         ellipsizeMode="middle"
       >
@@ -350,17 +352,17 @@ export default function DeviceDetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-1 bg-zinc-100">
         {/* Header */}
-        <View className="w-full flex-row items-center justify-between px-4 py-3 bg-white border-b border-zinc-100">
+        <View className="sticky top-0 bg-zinc-50/80 backdrop-blur-md z-10 px-4 py-3 flex flex-row items-center justify-between border-b border-zinc-200/60">
           <Pressable
             onPress={() => router.back()}
-            className="flex flex-row items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 active:bg-zinc-200"
+            className="flex flex-row items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-zinc-200 shadow-sm active:bg-zinc-50"
           >
-            <Ionicons name="chevron-back" size={14} color="#52525b" />
-            <Text className="text-xs font-semibold text-zinc-700">Back</Text>
+            <Ionicons name="chevron-back" size={14} color="#27272a" />
+            <Text className="text-xs font-medium text-zinc-800">Back</Text>
           </Pressable>
-          <View className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50">
-            <View className={`h-1.5 w-1.5 rounded-full ${device.status === "in_stock" ? "bg-emerald-500" : "bg-zinc-400"}`} />
-            <Text className="text-xs font-semibold text-emerald-700">
+          <View className="flex flex-row items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100/80 border border-emerald-300/50">
+            <View className={`h-1.5 w-1.5 rounded-full ${device.status === "in_stock" ? "bg-emerald-600" : "bg-zinc-400"}`} />
+            <Text className="text-xs font-semibold text-emerald-800">
               {device.status === "in_stock" ? "In Stock" : "Sold"}
             </Text>
           </View>
@@ -373,7 +375,7 @@ export default function DeviceDetailScreen() {
 
         {/* Content */}
         {tab === "overview" ? (
-          <ScrollView className="flex-1 px-4">
+          <ScrollView className="flex-1 px-4" contentContainerClassName="pb-28">
             {/* Stat Cards */}
             <View className="grid grid-cols-2 gap-3 w-full">
               <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
@@ -384,8 +386,8 @@ export default function DeviceDetailScreen() {
                   <Text className="text-lg font-bold text-zinc-900" numberOfLines={1}>
                     {formatPrice(profit)}
                   </Text>
-                  <View className="bg-emerald-50 px-2 py-0.5 rounded-full">
-                    <Text className="text-[11px] font-semibold text-emerald-600">{margin}%</Text>
+                  <View className="bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                    <Text className="text-xs font-semibold text-emerald-700">{margin}%</Text>
                   </View>
                 </View>
               </View>
@@ -419,7 +421,7 @@ export default function DeviceDetailScreen() {
             <Text className="mt-5 mb-2 text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
               Specs
             </Text>
-            <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm flex flex-col divide-y divide-zinc-100">
+            <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm flex flex-col">
               <SpecRow icon="call-outline" label="IMEI" value={formatImei(device.imei)} mono />
               {imei2.trim() ? (
                 <SpecRow icon="call-outline" label="IMEI 2" value={formatImei(imei2)} mono />
@@ -466,10 +468,10 @@ export default function DeviceDetailScreen() {
                 </View>
               </>
             ) : null}
-            <View className="h-32" />
+            <View className="h-8" />
           </ScrollView>
         ) : (
-          <ScrollView className="flex-1 px-4">
+          <ScrollView className="flex-1 px-4" contentContainerClassName="pb-28">
             <View className="w-full flex flex-col gap-4 bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
               <View className="grid grid-cols-2 gap-3 w-full">
                 <View>
@@ -646,18 +648,18 @@ export default function DeviceDetailScreen() {
             {saveError ? (
               <Text className="mt-3 text-sm text-red-600">{saveError}</Text>
             ) : null}
-            <View className="h-32" />
+            <View className="h-8" />
           </ScrollView>
         )}
 
         {/* Bottom Action Bar */}
-        <View className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-zinc-200 p-4 flex flex-col gap-2 z-40 max-w-4xl mx-auto">
+        <View className="sticky bottom-0 bg-white border-t border-zinc-200/80 p-4 space-y-2 z-10">
           {tab === "overview" ? (
             <>
               {device.status === "in_stock" ? (
                 <Pressable
                   onPress={() => setSaleOpen(true)}
-                  className="w-full h-11 bg-black rounded-xl items-center justify-center active:bg-zinc-800"
+                  className="w-full h-11 bg-zinc-900 rounded-xl flex items-center justify-center active:bg-zinc-800"
                 >
                   <Text className="text-sm font-semibold text-white">Record Sale</Text>
                 </Pressable>
@@ -665,9 +667,9 @@ export default function DeviceDetailScreen() {
               <Pressable
                 onPress={handleDelete}
                 disabled={deleteMutation.isPending}
-                className="w-full py-2 items-center justify-center active:bg-red-50 rounded-xl"
+                className="w-full py-2 rounded-lg flex items-center justify-center active:bg-red-50"
               >
-                <Text className="text-xs font-semibold text-red-600">
+                <Text className="text-xs font-semibold text-red-600 text-center">
                   {deleteMutation.isPending ? "Deleting\u2026" : "Delete Device"}
                 </Text>
               </Pressable>
@@ -676,7 +678,7 @@ export default function DeviceDetailScreen() {
             <Pressable
               onPress={handleSave}
               disabled={updateMutation.isPending || saved}
-              className="w-full h-11 bg-black rounded-xl items-center justify-center active:bg-zinc-800"
+              className="w-full h-11 bg-zinc-900 rounded-xl flex items-center justify-center active:bg-zinc-800"
             >
               <Text className="text-sm font-semibold text-white">
                 {saved ? "Saved" : updateMutation.isPending ? "Saving\u2026" : "Save Changes"}
