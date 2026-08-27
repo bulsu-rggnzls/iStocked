@@ -49,24 +49,24 @@ function InventoryRow({
   return (
     <Pressable
       onPress={onPress}
-      className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm flex flex-row items-center justify-between p-4 active:border-zinc-200"
+      className="w-full bg-white rounded-xl border border-zinc-200 flex flex-row items-center justify-between px-3.5 py-2.5 active:bg-zinc-50"
     >
       <View className="flex flex-col items-start text-left gap-0.5 flex-1 mr-3">
-        <Text className="text-base font-bold text-zinc-900" numberOfLines={1}>
+        <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
           {device.model}
         </Text>
-        <Text className="text-xs text-zinc-500 font-mono" numberOfLines={1}>
+        <Text className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]" numberOfLines={1} ellipsizeMode="tail">
           {device.storage} · {device.condition} · {formatImei(device.imei)}
         </Text>
       </View>
 
-      <View className="flex flex-row items-center gap-3">
+      <View className="flex flex-row items-center gap-3 shrink-0">
         <View className="flex flex-col items-end text-right">
-          <Text className="text-base font-bold text-zinc-900" numberOfLines={1}>
+          <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
             {formatPrice(device.list_price)}
           </Text>
-          <View className="mt-0.5 bg-emerald-50 px-2 py-0.5 rounded-full">
-            <Text className="text-[11px] font-semibold text-emerald-600" numberOfLines={1}>
+          <View className="mt-0.5 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+            <Text className="text-xs font-semibold text-emerald-700 whitespace-nowrap" style={{ textDecorationLine: 'none' }} numberOfLines={1}>
               +{formatPrice(potential)}
             </Text>
           </View>
