@@ -11,6 +11,8 @@ import { BottomSheet } from "./BottomSheet";
 import { Button } from "./ui/Button";
 import { useAddDevice } from "../hooks/useInventory";
 import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../lib/networkLock";
+import { Tag } from "./ui/Tag";
+import { genId } from "../lib/db";
 import {
   ACCESSORY_OPTIONS,
   type AccessoryItem,
@@ -39,33 +41,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       </Text>
       {children}
     </View>
-  );
-}
-
-function Pill({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      className={`rounded-full px-3.5 py-2 active:opacity-80 ${
-        selected ? "border border-black bg-black" : "border border-zinc-200 bg-zinc-100"
-      }`}
-    >
-      <Text
-        className={`text-xs font-medium ${
-          selected ? "text-white" : "text-zinc-700"
-        }`}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -109,8 +84,8 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
 
   const handleSave = async () => {
     const digits = imei.replace(/\D/g, "");
-    if (digits.length !== 15) {
-      setError("IMEI must be exactly 15 digits.");
+    if (digits.length !== 0 && digits.length !== 15) {
+      setError("IMEI must be exactly 15 digits if provided.");
       return;
     }
     const buy = Number(buyPrice);
@@ -125,10 +100,11 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
       return;
     }
     setError(null);
+    const finalImei = digits.length === 15 ? digits : `NO-IMEI-${genId()}`;
     try {
       const device = await addDevice.mutateAsync({
         model: model.trim(),
-        imei: digits,
+        imei: finalImei,
         imei2: imei2.trim() || null,
         storage: storage ?? "",
         condition: condition ?? "",
@@ -148,18 +124,10 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
     }
   };
 
-  const canSave =
-    model.trim().length > 0 &&
-    imei.trim().length > 0 &&
-    storage !== null &&
-    condition !== null &&
-    Number(buyPrice) > 0 &&
-    Number(listPrice) > 0;
-
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Add purchased phone">
       <View className="max-h-[76vh]">
-        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerClassName="pb-6">
           <Field label="Brand & model">
             <TextInput
               value={model}
@@ -176,7 +144,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
               <Field label="Storage">
                 <View className="flex-row flex-wrap gap-1.5">
                   {STORAGE_OPTIONS.map((option) => (
-                    <Pill
+                    <Tag
                       key={option}
                       label={option}
                       selected={storage === option}
@@ -190,7 +158,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
               <Field label="Condition">
                 <View className="flex-row flex-wrap gap-1.5">
                   {CONDITION_OPTIONS.map((option) => (
-                    <Pill
+                    <Tag
                       key={option}
                       label={option}
                       selected={condition === option}
@@ -202,12 +170,12 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
             </View>
           </View>
 
-          <Field label="IMEI / Serial number">
+          <Field label="IMEI / Serial number (optional)">
             <View className="relative">
               <TextInput
                 value={imei}
                 onChangeText={(t) => setImei(t.replace(/\D/g, ""))}
-                placeholder="15-digit IMEI"
+                placeholder="15-digit IMEI (optional)"
                 placeholderTextColor="#a1a1aa"
                 keyboardType="number-pad"
                 maxLength={15}
@@ -249,7 +217,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
           <Field label="Network lock">
             <View className="flex-row flex-wrap gap-1.5">
               {NETWORK_LOCK_OPTIONS.map((option) => (
-                <Pill
+                <Tag
                   key={option}
                   label={networkLockShort(option) ?? option}
                   selected={networkLock === option}
@@ -261,16 +229,11 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
 
           <Pressable
             onPress={() => setSpecsOpen((o) => !o)}
-            className="mb-3 flex-row items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 active:bg-zinc-100"
+            className="mb-3 flex flex-row items-center justify-between rounded-xl border border-zinc-200/80 bg-zinc-50 px-4 py-3 active:bg-zinc-100"
           >
-            <View className="flex-row items-center gap-2">
-              <View className="h-5 w-5 items-center justify-center rounded-full bg-black">
-                <Ionicons name={specsOpen ? "remove" : "add"} size={14} color="#ffffff" />
-              </View>
-              <Text className="text-sm font-semibold text-zinc-950">
-                Optional Specs (Battery, Color, Repair)
-              </Text>
-            </View>
+            <Text className="text-sm font-semibold text-zinc-950">
+              Optional Specs (Battery, Color, Repair)
+            </Text>
             <Ionicons
               name={specsOpen ? "chevron-up" : "chevron-down"}
               size={18}
@@ -390,15 +353,15 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
         <View className="mt-3 border-t border-zinc-100 pt-3">
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <Button title="Cancel" variant="secondary" onPress={onClose} />
+              <Button title="Cancel" variant="secondary" onPress={onClose} className="h-11 w-full" />
             </View>
             <View className="flex-1">
               <Button
                 title="Add to stock"
                 onPress={handleSave}
-                disabled={!canSave || addDevice.isPending}
+                disabled={addDevice.isPending}
                 loading={addDevice.isPending}
-                className="h-12"
+                className="h-11 w-full bg-zinc-900"
               />
             </View>
           </View>
