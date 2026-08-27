@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { BottomSheet } from "./BottomSheet";
 import { Button } from "./ui/Button";
 import { useRecordSale } from "../hooks/useSales";
@@ -158,40 +157,26 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
         </Field>
 
         <Field label="Warranty">
-          <View className="gap-2">
+          <View className="grid grid-cols-3 gap-2">
             {WARRANTY_OPTIONS.map((option) => {
               const selected = warrantyPeriod === option.value;
+              const shortLabel = option.value === "none" ? "No" : option.value === "7_day" ? "7-day" : "30-day";
               return (
                 <Pressable
                   key={option.value}
                   onPress={() => setWarrantyPeriod(option.value)}
-                  className={`flex-row items-center justify-between rounded-xl border px-4 py-3 active:opacity-80 ${
-                    selected
-                      ? "border-zinc-900 bg-zinc-950"
-                      : "border-zinc-200 bg-white"
+                  className={`items-center justify-center rounded-full border px-3 py-2 active:opacity-80 ${
+                    selected ? "border-zinc-900 bg-zinc-900" : "border-zinc-200 bg-white"
                   }`}
                 >
-                  <View className="flex-1">
-                    <Text
-                      className={`text-sm font-semibold ${
-                        selected ? "text-white" : "text-zinc-950"
-                      }`}
-                    >
-                      {option.label}
-                    </Text>
-                    <Text
-                      className={`text-xs ${
-                        selected ? "text-zinc-400" : "text-zinc-500"
-                      }`}
-                    >
-                      {option.desc}
-                    </Text>
-                  </View>
-                  {selected ? (
-                    <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
-                  ) : (
-                    <View className="h-5 w-5 rounded-full border border-zinc-300" />
-                  )}
+                  <Text
+                    className={`text-xs font-semibold text-center ${
+                      selected ? "text-white" : "text-zinc-700"
+                    }`}
+                    numberOfLines={1}
+                  >
+                    {shortLabel}
+                  </Text>
                 </Pressable>
               );
             })}
