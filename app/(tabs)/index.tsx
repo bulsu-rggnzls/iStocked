@@ -46,18 +46,18 @@ function QuickAction({
   return (
     <Pressable
       onPress={onPress}
-      className={`w-full min-h-[56px] px-3 py-2 flex flex-col sm:flex-row items-center justify-center text-center gap-2 rounded-2xl active:opacity-80 ${
+      className={`w-full h-11 flex flex-row items-center justify-center gap-2 px-3 rounded-2xl active:opacity-80 ${
         primary ? "bg-black" : "border border-zinc-200 bg-white"
       }`}
     >
       <View
-        className={`h-8 w-8 items-center justify-center rounded-full ${
+        className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-full ${
           primary ? "bg-zinc-800" : "bg-zinc-100"
         }`}
       >
         <Ionicons name={icon} size={16} color={primary ? "#ffffff" : "#09090b"} />
       </View>
-      <Text className={`text-xs sm:text-sm font-semibold whitespace-nowrap ${primary ? "text-white" : "text-zinc-950"}`}>
+      <Text className={`text-xs sm:text-sm font-semibold whitespace-nowrap leading-none ${primary ? "text-white" : "text-zinc-950"}`}>
         {label}
       </Text>
     </Pressable>
@@ -85,9 +85,11 @@ function SaleRow({ device }: { device: Device }) {
           </Text>
           <WarrantyBadge period={device.warranty_period} dateSold={device.date_sold} />
         </View>
-        <Text className="text-[11px] font-semibold text-zinc-700">
-          +{formatPrice(profit)} net
-        </Text>
+        <View className="bg-emerald-50 px-2.5 py-0.5 rounded-full">
+          <Text className="text-xs font-semibold text-emerald-700" style={{ textDecorationLine: 'none' }}>
+            +{formatPrice(profit)} net
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -169,25 +171,21 @@ export default function DashboardScreen() {
           label="Total net profit"
           value={data ? formatPrice(data.totalNetProfit) : "\u2014"}
           icon="trending-up-outline"
-          trend="sold - buy - repair"
         />
         <StatCard
           label="Investment in stock"
           value={data ? formatPrice(data.totalInvestment) : "\u2014"}
           icon="cash-outline"
-          trend="capital locked up"
         />
         <StatCard
           label="Repair expenses"
           value={data ? formatPrice(data.totalRepairCost) : "\u2014"}
           icon="build-outline"
-          trend="all-time repair spend"
         />
         <StatCard
           label="Units available"
           value={data ? String(data.unitsAvailable) : "\u2014"}
           icon="phone-portrait-outline"
-          trend="ready to sell"
         />
       </View>
 
