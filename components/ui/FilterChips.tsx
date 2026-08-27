@@ -24,14 +24,15 @@ export function FilterChips({ options, value, onChange }: FilterChipsProps) {
           <Pressable
             key={option.value}
             onPress={() => onChange(option.value)}
-            className={`rounded-full px-3.5 py-2 active:opacity-80 ${
-              selected ? "border border-black bg-black" : "border border-zinc-200 bg-zinc-100"
+            className={`h-9 flex items-center justify-center px-3.5 rounded-xl active:opacity-80 ${
+              selected ? "bg-zinc-900 shadow-sm" : "bg-zinc-100 active:bg-zinc-200/80"
             }`}
           >
             <Text
-              className={`text-xs font-medium ${
-                selected ? "text-white" : "text-zinc-700"
+              className={`text-xs ${
+                selected ? "font-semibold text-white" : "font-medium text-zinc-700"
               }`}
+              numberOfLines={1}
             >
               {option.label}
             </Text>
