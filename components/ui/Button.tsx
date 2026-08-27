@@ -14,7 +14,7 @@ interface ButtonProps {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-black active:bg-zinc-900",
+  primary: "bg-zinc-900 active:bg-black",
   secondary: "border border-zinc-200 bg-white active:bg-zinc-100",
   danger: "bg-red-600 active:bg-red-700",
   ghost: "bg-transparent active:opacity-70",
