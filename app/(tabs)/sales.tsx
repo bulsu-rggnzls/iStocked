@@ -92,8 +92,8 @@ function SoldRow({ device, onPress }: { device: Device; onPress: () => void }) {
         <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
           {formatPrice(sold)}
         </Text>
-        <View className="mt-1 rounded-full bg-emerald-50 px-2.5 py-1">
-          <Text className="text-xs font-semibold text-emerald-700">
+        <View className="mt-1 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+          <Text className="text-xs font-semibold text-emerald-700" style={{ textDecorationLine: 'none' }}>
             {profit >= 0 ? "+" : "−"}
             {formatPrice(Math.abs(profit))} net
           </Text>
