@@ -58,7 +58,7 @@ function SoldRow({ device, onPress }: { device: Device; onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center rounded-xl border border-zinc-200 bg-white px-4 py-2.5 active:bg-zinc-100"
+      className="flex-row items-center bg-white rounded-2xl p-4 border border-zinc-200/80 shadow-sm active:bg-zinc-100"
     >
       <View className="flex-1 pr-2">
         <View className="flex-row items-center gap-1.5">
@@ -92,8 +92,8 @@ function SoldRow({ device, onPress }: { device: Device; onPress: () => void }) {
         <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
           {formatPrice(sold)}
         </Text>
-        <View className="mt-1 rounded-full bg-emerald-50 px-2.5 py-1">
-          <Text className="text-xs font-semibold text-emerald-700">
+        <View className="mt-1 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+          <Text className="text-xs font-semibold text-emerald-700" style={{ textDecorationLine: 'none' }}>
             {profit >= 0 ? "+" : "−"}
             {formatPrice(Math.abs(profit))} net
           </Text>
@@ -178,7 +178,7 @@ export default function SalesHistoryScreen() {
             onAction={() => router.push("/inventory")}
           />
         ) : (
-          <View className={`flex-row flex-wrap ${isTablet ? "gap-4" : ""}`}>
+          <View className={`${isTablet ? "flex-row flex-wrap gap-4" : "flex flex-col gap-3"}`}>
             {(data ?? []).map((item) => (
               <View
                 key={item.id}
@@ -297,11 +297,15 @@ function SaleDetailSheet({
 
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Transaction Details">
-      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <Text className="mb-1 text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-          Device Info
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        className="flex-1 overflow-y-auto px-4 pt-3 pb-6 space-y-4"
+      >
+        <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5 px-1 block text-left">
+          DEVICE INFO
         </Text>
-        <View className="rounded-xl border border-zinc-200 bg-zinc-50 px-4">
+        <View className="bg-zinc-50/80 border border-zinc-200/80 rounded-2xl p-3.5 space-y-2.5">
           <DetailRow label="Model" value={device.model} />
           <DetailRow label="Storage" value={device.storage} />
           <DetailRow label="Condition" value={device.condition} />
@@ -310,10 +314,10 @@ function SaleDetailSheet({
           {lock ? <DetailRow label="Network" value={lock} /> : null}
         </View>
 
-        <Text className="mb-1 mt-4 text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-          Financial Breakdown
+        <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5 px-1 block text-left">
+          FINANCIAL BREAKDOWN
         </Text>
-        <View className="rounded-xl border border-zinc-200 bg-zinc-50 px-4">
+        <View className="bg-zinc-50/80 border border-zinc-200/80 rounded-2xl p-3.5 space-y-2.5">
           <DetailRow label="Purchase Price" value={formatPrice(device.buy_price)} />
           {Number(device.repair_cost ?? 0) > 0 ? (
             <DetailRow label="Repair / Extra" value={formatPrice(device.repair_cost)} />
@@ -327,10 +331,10 @@ function SaleDetailSheet({
           </View>
         </View>
 
-        <Text className="mb-1 mt-4 text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-          Buyer & Date
+        <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5 px-1 block text-left">
+          BUYER & DATE
         </Text>
-        <View className="rounded-xl border border-zinc-200 bg-zinc-50 px-4">
+        <View className="bg-zinc-50/80 border border-zinc-200/80 rounded-2xl p-3.5 space-y-2.5">
           <DetailRow label="Buyer Name" value={device.customer_name || "Walk-in"} />
           {device.buyer_contact ? (
             <DetailRow label="Contact" value={device.buyer_contact} />
@@ -341,24 +345,23 @@ function SaleDetailSheet({
             <WarrantyBadge period={device.warranty_period} dateSold={device.date_sold} />
           </View>
         </View>
-
-        <View className="mt-5 gap-3">
-          <Pressable
-            onPress={handlePrintReceipt}
-            className="flex-row items-center justify-center gap-2 rounded-xl bg-black py-3 active:bg-zinc-900"
-          >
-            <Ionicons name="print-outline" size={18} color="#ffffff" />
-            <Text className="text-sm font-semibold text-white">Print / Export Receipt</Text>
-          </Pressable>
-          <Pressable
-            onPress={handleRefund}
-            className="flex-row items-center justify-center gap-2 rounded-xl border border-red-200 bg-white py-3 active:bg-red-50"
-          >
-            <Ionicons name="arrow-undo-outline" size={18} color="#dc2626" />
-            <Text className="text-sm font-semibold text-red-600">Refund Transaction</Text>
-          </Pressable>
-        </View>
       </ScrollView>
+      <View className="p-4 bg-white border-t border-zinc-100 flex flex-col gap-2">
+        <Pressable
+          onPress={handlePrintReceipt}
+          className="flex-row items-center justify-center gap-2 rounded-xl bg-black py-3 active:bg-zinc-900"
+        >
+          <Ionicons name="print-outline" size={18} color="#ffffff" />
+          <Text className="text-sm font-semibold text-white">Print / Export Receipt</Text>
+        </Pressable>
+        <Pressable
+          onPress={handleRefund}
+          className="flex-row items-center justify-center gap-2 rounded-xl border border-red-200 bg-white py-3 active:bg-red-50"
+        >
+          <Ionicons name="arrow-undo-outline" size={18} color="#dc2626" />
+          <Text className="text-sm font-semibold text-red-600">Refund Transaction</Text>
+        </Pressable>
+      </View>
     </BottomSheet>
   );
 }

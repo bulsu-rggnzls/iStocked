@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   Text,
@@ -8,9 +9,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheet } from "./BottomSheet";
-import { Button } from "./ui/Button";
 import { useAddDevice } from "../hooks/useInventory";
 import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../lib/networkLock";
+import { Tag } from "./ui/Tag";
+import { genId } from "../lib/db";
 import {
   ACCESSORY_OPTIONS,
   type AccessoryItem,
@@ -19,7 +21,7 @@ import {
 
 const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
-const CONDITION_OPTIONS = ["Brand New", "Like New", "Good", "Fair"];
+const CONDITION_OPTIONS = ["Brand New", "Used"];
 
 const inputClass =
   "rounded-xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-950";
@@ -39,33 +41,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       </Text>
       {children}
     </View>
-  );
-}
-
-function Pill({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      className={`rounded-full px-3.5 py-2 active:opacity-80 ${
-        selected ? "border border-black bg-black" : "border border-zinc-200 bg-zinc-100"
-      }`}
-    >
-      <Text
-        className={`text-xs font-medium ${
-          selected ? "text-white" : "text-zinc-700"
-        }`}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -109,8 +84,8 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
 
   const handleSave = async () => {
     const digits = imei.replace(/\D/g, "");
-    if (digits.length !== 15) {
-      setError("IMEI must be exactly 15 digits.");
+    if (digits.length !== 0 && digits.length !== 15) {
+      setError("IMEI must be exactly 15 digits if provided.");
       return;
     }
     const buy = Number(buyPrice);
@@ -125,10 +100,11 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
       return;
     }
     setError(null);
+    const finalImei = digits.length === 15 ? digits : `NO-IMEI-${genId()}`;
     try {
       const device = await addDevice.mutateAsync({
         model: model.trim(),
-        imei: digits,
+        imei: finalImei,
         imei2: imei2.trim() || null,
         storage: storage ?? "",
         condition: condition ?? "",
@@ -148,260 +124,255 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
     }
   };
 
-  const canSave =
-    model.trim().length > 0 &&
-    imei.trim().length > 0 &&
-    storage !== null &&
-    condition !== null &&
-    Number(buyPrice) > 0 &&
-    Number(listPrice) > 0;
-
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Add purchased phone">
-      <View className="max-h-[76vh]">
-        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-          <Field label="Brand & model">
-            <TextInput
-              value={model}
-              onChangeText={setModel}
-              placeholder="e.g. iPhone 15 Pro Max"
-              placeholderTextColor="#a1a1aa"
-              autoCapitalize="words"
-              className={inputClass}
-            />
-          </Field>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        className="flex-1 overflow-y-auto px-4 py-3 space-y-4"
+        contentContainerClassName="pb-4 space-y-4"
+      >
+        <Field label="Brand & model">
+          <TextInput
+            value={model}
+            onChangeText={setModel}
+            placeholder="e.g. iPhone 15 Pro Max"
+            placeholderTextColor="#a1a1aa"
+            autoCapitalize="words"
+            className={inputClass}
+          />
+        </Field>
 
-          <View className="flex-row gap-3">
-            <View className="flex-1">
-              <Field label="Storage">
-                <View className="flex-row flex-wrap gap-1.5">
-                  {STORAGE_OPTIONS.map((option) => (
-                    <Pill
-                      key={option}
-                      label={option}
-                      selected={storage === option}
-                      onPress={() => setStorage(option)}
-                    />
-                  ))}
-                </View>
-              </Field>
-            </View>
-            <View className="flex-1">
-              <Field label="Condition">
-                <View className="flex-row flex-wrap gap-1.5">
-                  {CONDITION_OPTIONS.map((option) => (
-                    <Pill
-                      key={option}
-                      label={option}
-                      selected={condition === option}
-                      onPress={() => setCondition(option)}
-                    />
-                  ))}
-                </View>
-              </Field>
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Field label="Storage">
+              <View className="flex flex-wrap gap-1.5" style={{ flexDirection: "row" }}>
+                {STORAGE_OPTIONS.map((option) => (
+                  <Tag
+                    key={option}
+                    label={option}
+                    selected={storage === option}
+                    onPress={() => setStorage(option)}
+                  />
+                ))}
+              </View>
+            </Field>
+          </View>
+          <View className="flex-1">
+            <Field label="Condition">
+              <View className="flex flex-wrap gap-1.5" style={{ flexDirection: "row" }}>
+                {CONDITION_OPTIONS.map((option) => (
+                  <Tag
+                    key={option}
+                    label={option}
+                    selected={condition === option}
+                    onPress={() => setCondition(option)}
+                  />
+                ))}
+              </View>
+            </Field>
+          </View>
+        </View>
+
+        <Field label="IMEI / Serial number (optional)">
+          <View className="relative">
+            <TextInput
+              value={imei}
+              onChangeText={(t) => setImei(t.replace(/\D/g, ""))}
+              placeholder="15-digit IMEI (optional)"
+              placeholderTextColor="#a1a1aa"
+              keyboardType="number-pad"
+              maxLength={15}
+              className={`${inputClass} pr-12 font-mono tracking-wide`}
+            />
+            <View className="absolute bottom-0 right-3.5 top-0 justify-center">
+              <Ionicons name="scan-outline" size={20} color="#a1a1aa" />
             </View>
           </View>
+        </Field>
 
-          <Field label="IMEI / Serial number">
-            <View className="relative">
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Field label="Buy price (₱)">
               <TextInput
-                value={imei}
-                onChangeText={(t) => setImei(t.replace(/\D/g, ""))}
-                placeholder="15-digit IMEI"
+                value={buyPrice}
+                onChangeText={(t) => setBuyPrice(t.replace(/[^0-9.]/g, ""))}
+                placeholder="0.00"
+                placeholderTextColor="#a1a1aa"
+                keyboardType="decimal-pad"
+                className={inputClass}
+              />
+            </Field>
+          </View>
+          <View className="flex-1">
+            <Field label="List price (₱)">
+              <TextInput
+                value={listPrice}
+                onChangeText={(t) => setListPrice(t.replace(/[^0-9.]/g, ""))}
+                placeholder="0.00"
+                placeholderTextColor="#a1a1aa"
+                keyboardType="decimal-pad"
+                className={inputClass}
+              />
+            </Field>
+          </View>
+        </View>
+
+        <Field label="Network lock">
+          <View className="flex flex-wrap gap-1.5" style={{ flexDirection: "row" }}>
+            {NETWORK_LOCK_OPTIONS.map((option) => (
+              <Tag
+                key={option}
+                label={networkLockShort(option) ?? option}
+                selected={networkLock === option}
+                onPress={() => setNetworkLock(option)}
+              />
+            ))}
+          </View>
+        </Field>
+
+        <Pressable
+          onPress={() => setSpecsOpen((o) => !o)}
+          className="mb-3 flex flex-row items-center justify-between rounded-xl border border-zinc-200/80 bg-zinc-50 px-4 py-3 active:bg-zinc-100"
+        >
+          <Text className="text-sm font-semibold text-zinc-950">
+            Optional Specs (Battery, Color, Repair)
+          </Text>
+          <Ionicons
+            name={specsOpen ? "chevron-up" : "chevron-down"}
+            size={18}
+            color="#71717a"
+          />
+        </Pressable>
+
+        {specsOpen ? (
+          <View>
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <Field label="Battery health (%)">
+                  <TextInput
+                    value={batteryHealth}
+                    onChangeText={(t) => setBatteryHealth(t.replace(/[^0-9]/g, ""))}
+                    placeholder="e.g. 85"
+                    placeholderTextColor="#a1a1aa"
+                    keyboardType="number-pad"
+                    maxLength={3}
+                    className={inputClass}
+                  />
+                </Field>
+              </View>
+              <View className="flex-1">
+                <Field label="Color">
+                  <TextInput
+                    value={color}
+                    onChangeText={setColor}
+                    placeholder="e.g. Natural Titanium"
+                    placeholderTextColor="#a1a1aa"
+                    autoCapitalize="words"
+                    className={inputClass}
+                  />
+                </Field>
+              </View>
+            </View>
+
+            <Field label="Repair / extra cost (₱)">
+              <TextInput
+                value={repairCost}
+                onChangeText={(t) => setRepairCost(t.replace(/[^0-9.]/g, ""))}
+                placeholder="0.00"
+                placeholderTextColor="#a1a1aa"
+                keyboardType="decimal-pad"
+                className={inputClass}
+              />
+            </Field>
+
+            <Field label="IMEI 2 (optional, for dual-SIM)">
+              <TextInput
+                value={imei2}
+                onChangeText={(t) => setImei2(t.replace(/\D/g, ""))}
+                placeholder="15-digit secondary IMEI"
                 placeholderTextColor="#a1a1aa"
                 keyboardType="number-pad"
                 maxLength={15}
-                className={`${inputClass} pr-12 font-mono tracking-wide`}
+                className={`${inputClass} font-mono tracking-wide`}
               />
-              <View className="absolute bottom-0 right-3.5 top-0 justify-center">
-                <Ionicons name="scan-outline" size={20} color="#a1a1aa" />
-              </View>
-            </View>
-          </Field>
+            </Field>
 
-          <View className="flex-row gap-3">
-            <View className="flex-1">
-              <Field label="Buy price (₱)">
-                <TextInput
-                  value={buyPrice}
-                  onChangeText={(t) => setBuyPrice(t.replace(/[^0-9.]/g, ""))}
-                  placeholder="0.00"
-                  placeholderTextColor="#a1a1aa"
-                  keyboardType="decimal-pad"
-                  className={inputClass}
-                />
-              </Field>
-            </View>
-            <View className="flex-1">
-              <Field label="List price (₱)">
-                <TextInput
-                  value={listPrice}
-                  onChangeText={(t) => setListPrice(t.replace(/[^0-9.]/g, ""))}
-                  placeholder="0.00"
-                  placeholderTextColor="#a1a1aa"
-                  keyboardType="decimal-pad"
-                  className={inputClass}
-                />
-              </Field>
-            </View>
-          </View>
-
-          <Field label="Network lock">
-            <View className="flex-row flex-wrap gap-1.5">
-              {NETWORK_LOCK_OPTIONS.map((option) => (
-                <Pill
-                  key={option}
-                  label={networkLockShort(option) ?? option}
-                  selected={networkLock === option}
-                  onPress={() => setNetworkLock(option)}
-                />
-              ))}
-            </View>
-          </Field>
-
-          <Pressable
-            onPress={() => setSpecsOpen((o) => !o)}
-            className="mb-3 flex-row items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 active:bg-zinc-100"
-          >
-            <View className="flex-row items-center gap-2">
-              <View className="h-5 w-5 items-center justify-center rounded-full bg-black">
-                <Ionicons name={specsOpen ? "remove" : "add"} size={14} color="#ffffff" />
-              </View>
-              <Text className="text-sm font-semibold text-zinc-950">
-                Optional Specs (Battery, Color, Repair)
-              </Text>
-            </View>
-            <Ionicons
-              name={specsOpen ? "chevron-up" : "chevron-down"}
-              size={18}
-              color="#71717a"
-            />
-          </Pressable>
-
-          {specsOpen ? (
-            <View>
-              <View className="flex-row gap-3">
-                <View className="flex-1">
-                  <Field label="Battery health (%)">
-                    <TextInput
-                      value={batteryHealth}
-                      onChangeText={(t) => setBatteryHealth(t.replace(/[^0-9]/g, ""))}
-                      placeholder="e.g. 85"
-                      placeholderTextColor="#a1a1aa"
-                      keyboardType="number-pad"
-                      maxLength={3}
-                      className={inputClass}
-                    />
-                  </Field>
-                </View>
-                <View className="flex-1">
-                  <Field label="Color">
-                    <TextInput
-                      value={color}
-                      onChangeText={setColor}
-                      placeholder="e.g. Natural Titanium"
-                      placeholderTextColor="#a1a1aa"
-                      autoCapitalize="words"
-                      className={inputClass}
-                    />
-                  </Field>
-                </View>
-              </View>
-
-              <Field label="Repair / extra cost (₱)">
-                <TextInput
-                  value={repairCost}
-                  onChangeText={(t) => setRepairCost(t.replace(/[^0-9.]/g, ""))}
-                  placeholder="0.00"
-                  placeholderTextColor="#a1a1aa"
-                  keyboardType="decimal-pad"
-                  className={inputClass}
-                />
-              </Field>
-
-              <Field label="IMEI 2 (optional, for dual-SIM)">
-                <TextInput
-                  value={imei2}
-                  onChangeText={(t) => setImei2(t.replace(/\D/g, ""))}
-                  placeholder="15-digit secondary IMEI"
-                  placeholderTextColor="#a1a1aa"
-                  keyboardType="number-pad"
-                  maxLength={15}
-                  className={`${inputClass} font-mono tracking-wide`}
-                />
-              </Field>
-
-              <Field label="Included Accessories">
-                <View className="flex-row flex-wrap gap-2">
-                  {ACCESSORY_OPTIONS.map((opt) => {
-                    const isSelected = accessories.includes(opt.key);
-                    return (
-                      <Pressable
-                        key={opt.key}
-                        onPress={() =>
-                          setAccessories((prev) =>
-                            prev.includes(opt.key)
-                              ? prev.filter((a) => a !== opt.key)
-                              : [...prev, opt.key],
-                          )
-                        }
-                        className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-lg border active:opacity-80 ${
-                          isSelected
-                            ? "bg-emerald-50 border-emerald-300"
-                            : "bg-white border-zinc-200"
+            <Field label="Included Accessories">
+              <View className="flex flex-wrap gap-1.5" style={{ flexDirection: "row" }}>
+                {ACCESSORY_OPTIONS.map((opt) => {
+                  const isSelected = accessories.includes(opt.key);
+                  return (
+                    <Pressable
+                      key={opt.key}
+                      onPress={() =>
+                        setAccessories((prev) =>
+                          prev.includes(opt.key)
+                            ? prev.filter((a) => a !== opt.key)
+                            : [...prev, opt.key],
+                        )
+                      }
+                      className={`flex-row items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg font-medium border active:opacity-80 ${
+                        isSelected
+                          ? "bg-emerald-50 border-emerald-300"
+                          : "bg-white border-zinc-200"
+                      }`}
+                    >
+                      <Ionicons
+                        name={isSelected ? "checkmark-circle" : "ellipse-outline"}
+                        size={14}
+                        color={isSelected ? "#059669" : "#a1a1aa"}
+                      />
+                      <Text
+                        className={`text-xs ${
+                          isSelected ? "font-semibold text-emerald-700" : "font-medium text-zinc-600"
                         }`}
                       >
-                        <Ionicons
-                          name={isSelected ? "checkmark-circle" : "ellipse-outline"}
-                          size={14}
-                          color={isSelected ? "#059669" : "#a1a1aa"}
-                        />
-                        <Text
-                          className={`text-xs ${
-                            isSelected ? "font-semibold text-emerald-700" : "font-medium text-zinc-600"
-                          }`}
-                        >
-                          {opt.label}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </Field>
+                        {opt.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Field>
 
-              <Field label="Defects / Notes">
-                <TextInput
-                  value={notes}
-                  onChangeText={setNotes}
-                  placeholder="e.g. Small scratch on top bezel, replaced screen"
-                  placeholderTextColor="#a1a1aa"
-                  multiline
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                  className={`${inputClass} min-h-[80px]`}
-                />
-              </Field>
-            </View>
-          ) : null}
-
-          {error ? <Text className="mb-3 text-sm text-red-600">{error}</Text> : null}
-        </ScrollView>
-
-        <View className="mt-3 border-t border-zinc-100 pt-3">
-          <View className="flex-row gap-3">
-            <View className="flex-1">
-              <Button title="Cancel" variant="secondary" onPress={onClose} />
-            </View>
-            <View className="flex-1">
-              <Button
-                title="Add to stock"
-                onPress={handleSave}
-                disabled={!canSave || addDevice.isPending}
-                loading={addDevice.isPending}
-                className="h-12"
+            <Field label="Defects / Notes">
+              <TextInput
+                value={notes}
+                onChangeText={setNotes}
+                placeholder="e.g. Small scratch on top bezel, replaced screen"
+                placeholderTextColor="#a1a1aa"
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                className={`${inputClass} min-h-[80px]`}
               />
-            </View>
+            </Field>
           </View>
+        ) : null}
+
+        {error ? <Text className="mb-3 text-sm text-red-600">{error}</Text> : null}
+      </ScrollView>
+
+      <View className="shrink-0 p-4 bg-white border-t border-zinc-100 flex items-center gap-2">
+        <View className="flex-row gap-2 w-full">
+          <Pressable
+            onPress={onClose}
+            className="flex-1 h-10 text-xs font-semibold rounded-xl w-full border border-zinc-200 bg-white items-center justify-center active:bg-zinc-100"
+          >
+            <Text className="text-xs font-semibold text-zinc-950">Cancel</Text>
+          </Pressable>
+          <Pressable
+            onPress={handleSave}
+            disabled={addDevice.isPending}
+            className="flex-1 h-10 text-xs font-semibold rounded-xl w-full bg-zinc-900 items-center justify-center active:bg-black disabled:opacity-60"
+          >
+            {addDevice.isPending ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text className="text-xs font-semibold text-white">Add to stock</Text>
+            )}
+          </Pressable>
         </View>
       </View>
     </BottomSheet>

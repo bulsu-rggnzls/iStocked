@@ -24,9 +24,7 @@ import type { Device } from "../../types";
 const CONDITION_OPTIONS = [
   { label: "All conditions", value: "all" },
   { label: "Brand New", value: "Brand New" },
-  { label: "Like New", value: "Like New" },
-  { label: "Good", value: "Good" },
-  { label: "Fair", value: "Fair" },
+  { label: "Used", value: "Used" },
 ];
 
 const NETWORK_FILTER_OPTIONS = [
@@ -49,24 +47,24 @@ function InventoryRow({
   return (
     <Pressable
       onPress={onPress}
-      className="w-full bg-white rounded-2xl border border-zinc-100 shadow-sm flex flex-row items-center justify-between p-4 active:border-zinc-200"
+      className="w-full bg-white rounded-xl border border-zinc-200 flex flex-row items-center justify-between px-3.5 py-2.5 active:bg-zinc-50"
     >
       <View className="flex flex-col items-start text-left gap-0.5 flex-1 mr-3">
-        <Text className="text-base font-bold text-zinc-900" numberOfLines={1}>
+        <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
           {device.model}
         </Text>
-        <Text className="text-xs text-zinc-500 font-mono" numberOfLines={1}>
+        <Text className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]" numberOfLines={1} ellipsizeMode="tail">
           {device.storage} · {device.condition} · {formatImei(device.imei)}
         </Text>
       </View>
 
-      <View className="flex flex-row items-center gap-3">
+      <View className="flex flex-row items-center gap-3 shrink-0">
         <View className="flex flex-col items-end text-right">
-          <Text className="text-base font-bold text-zinc-900" numberOfLines={1}>
+          <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
             {formatPrice(device.list_price)}
           </Text>
-          <View className="mt-0.5 bg-emerald-50 px-2 py-0.5 rounded-full">
-            <Text className="text-[11px] font-semibold text-emerald-600" numberOfLines={1}>
+          <View className="mt-0.5 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+            <Text className="text-xs font-semibold text-emerald-700 whitespace-nowrap" style={{ textDecorationLine: 'none' }} numberOfLines={1}>
               +{formatPrice(potential)}
             </Text>
           </View>
@@ -288,58 +286,68 @@ export default function InventoryScreen() {
         onClose={() => setFilterSheetOpen(false)}
         title="Filter inventory"
       >
-        <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-          Condition
-        </Text>
-        {CONDITION_OPTIONS.map((option) => {
-          const selected = draftCondition === option.value;
-          return (
-            <Pressable
-              key={option.value}
-              onPress={() => setDraftCondition(option.value)}
-              className="flex-row items-center justify-between rounded-xl px-3 py-2.5 active:bg-zinc-100"
-            >
-              <Text className="text-sm text-zinc-950">{option.label}</Text>
-              {selected ? (
-                <Ionicons name="checkmark-circle" size={20} color="#09090b" />
-              ) : (
-                <View className="h-5 w-5 rounded-full border border-zinc-300" />
-              )}
-            </Pressable>
-          );
-        })}
+        <ScrollView className="px-4 pt-4 pb-6 space-y-6 overflow-y-auto" showsVerticalScrollIndicator={false}>
+          <View>
+            <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-2 block px-1">
+              Condition
+            </Text>
+            <View className="space-y-1">
+              {CONDITION_OPTIONS.map((option) => {
+                const selected = draftCondition === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => setDraftCondition(option.value)}
+                    className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-zinc-50 transition-colors cursor-pointer text-xs font-medium text-zinc-800 flex-row active:bg-zinc-100"
+                  >
+                    <Text className="text-xs font-medium text-zinc-800">{option.label}</Text>
+                    {selected ? (
+                      <Ionicons name="checkmark-circle" size={20} color="#09090b" />
+                    ) : (
+                      <View className="h-5 w-5 rounded-full border border-zinc-300" />
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
 
-        <Text className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-          Network lock
-        </Text>
-        {NETWORK_FILTER_OPTIONS.map((option) => {
-          const selected = draftNetworkLock === option.value;
-          return (
-            <Pressable
-              key={option.value}
-              onPress={() => setDraftNetworkLock(option.value)}
-              className="flex-row items-center justify-between rounded-xl px-3 py-2.5 active:bg-zinc-100"
-            >
-              <Text className="text-sm text-zinc-950">{option.label}</Text>
-              {selected ? (
-                <Ionicons name="checkmark-circle" size={20} color="#09090b" />
-              ) : (
-                <View className="h-5 w-5 rounded-full border border-zinc-300" />
-              )}
-            </Pressable>
-          );
-        })}
+          <View>
+            <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-2 block px-1">
+              Network lock
+            </Text>
+            <View className="space-y-1">
+              {NETWORK_FILTER_OPTIONS.map((option) => {
+                const selected = draftNetworkLock === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => setDraftNetworkLock(option.value)}
+                    className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-zinc-50 transition-colors cursor-pointer text-xs font-medium text-zinc-800 flex-row active:bg-zinc-100"
+                  >
+                    <Text className="text-xs font-medium text-zinc-800">{option.label}</Text>
+                    {selected ? (
+                      <Ionicons name="checkmark-circle" size={20} color="#09090b" />
+                    ) : (
+                      <View className="h-5 w-5 rounded-full border border-zinc-300" />
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        </ScrollView>
 
-        <View className="mt-5 flex-row gap-3">
+        <View className="px-4 pt-3 pb-4 border-t border-zinc-100 bg-white flex-row gap-3">
           <Pressable
             onPress={resetFilters}
-            className="flex-1 items-center rounded-xl border border-zinc-200 bg-white py-3 active:bg-zinc-100"
+            className="flex-1 h-11 rounded-xl text-sm font-semibold border border-zinc-200 text-zinc-700 bg-white hover:bg-zinc-50 items-center justify-center active:bg-zinc-100"
           >
-            <Text className="text-sm font-semibold text-zinc-950">Reset</Text>
+            <Text className="text-sm font-semibold text-zinc-700">Reset</Text>
           </Pressable>
           <Pressable
             onPress={applyFilters}
-            className="flex-1 items-center rounded-xl bg-black py-3 active:bg-zinc-900"
+            className="flex-1 h-11 rounded-xl text-sm font-semibold bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm items-center justify-center active:bg-zinc-900"
           >
             <Text className="text-sm font-semibold text-white">Apply Filters</Text>
           </Pressable>
