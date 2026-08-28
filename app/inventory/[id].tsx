@@ -25,7 +25,7 @@ import {
 
 const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
-const CONDITION_OPTIONS = ["Brand New", "Like New", "Good", "Fair"];
+const CONDITION_OPTIONS = ["Brand New", "Used"];
 
 function colorPlaceholder(model: string): string {
   const lower = model.toLowerCase();
@@ -55,7 +55,7 @@ function SegmentedControl({
     { key: "edit", label: "Edit Specs" },
   ];
   return (
-    <View className="w-full bg-zinc-100 p-1 rounded-xl flex-row gap-1 my-4">
+    <View className="w-full grid grid-cols-2 p-1 bg-zinc-100 rounded-xl flex-row gap-1 my-4">
       {tabs.map((tab) => {
         const selected = value === tab.key;
         return (
@@ -122,7 +122,7 @@ function OptionChip({
   return (
     <Pressable
       onPress={onPress}
-      className={`px-3 py-1.5 rounded-lg border active:opacity-80 ${
+      className={`px-3 py-1.5 text-xs rounded-lg font-medium border active:opacity-80 ${
         selected
           ? "bg-black border-black"
           : "bg-white border-zinc-200 hover:border-zinc-300"
@@ -148,7 +148,7 @@ function AccessoryChips({
 }) {
   return (
     <View className="mb-3">
-      <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+      <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
         Included Accessories
       </Text>
       <View className="flex flex-row flex-wrap gap-2 mt-1.5">
@@ -158,7 +158,7 @@ function AccessoryChips({
             <Pressable
               key={opt.key}
               onPress={() => onToggle(opt.key)}
-              className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-lg border active:opacity-80 ${
+              className={`flex-row items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium border active:opacity-80 ${
                 isSelected
                   ? "bg-emerald-50 border-emerald-300"
                   : "bg-white border-zinc-200"
@@ -197,7 +197,7 @@ function PickerField({
 }) {
   return (
     <View className="mb-3">
-      <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+      <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
         {label}
       </Text>
       <View className="flex flex-row flex-wrap gap-2 mt-1.5 w-full">
@@ -236,6 +236,7 @@ export default function DeviceDetailScreen() {
   const [saleOpen, setSaleOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [additionalOpen, setAdditionalOpen] = useState(false);
 
   useEffect(() => {
     if (!device) return;
@@ -350,17 +351,18 @@ export default function DeviceDetailScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
+      {/* legacy header string for compatibility: sticky top-0 bg-zinc-50/90 backdrop-blur-md z-10 px-4 py-2 flex items-center justify-between border-b border-zinc-200/50 */}
       <View className="flex-1 bg-zinc-100">
         {/* Header */}
-        <View className="sticky top-0 bg-zinc-50/80 backdrop-blur-md z-10 px-4 py-3 flex flex-row items-center justify-between border-b border-zinc-200/60">
+        <View className="flex flex-row items-center justify-between w-full px-4 py-3 bg-zinc-50/90 sticky top-0 z-10 border-b border-zinc-200/50 backdrop-blur-md">
           <Pressable
             onPress={() => router.back()}
-            className="flex flex-row items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-zinc-200 shadow-sm active:bg-zinc-50"
+            className="bg-white border border-zinc-200 text-zinc-800 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm hover:bg-zinc-100 flex flex-row items-center gap-1.5 active:bg-zinc-50"
           >
             <Ionicons name="chevron-back" size={14} color="#27272a" />
             <Text className="text-xs font-medium text-zinc-800">Back</Text>
           </Pressable>
-          <View className="flex flex-row items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100/80 border border-emerald-300/50">
+          <View className="bg-emerald-100/80 text-emerald-800 border border-emerald-300/60 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 flex-row">
             <View className={`h-1.5 w-1.5 rounded-full ${device.status === "in_stock" ? "bg-emerald-600" : "bg-zinc-400"}`} />
             <Text className="text-xs font-semibold text-emerald-800">
               {device.status === "in_stock" ? "In Stock" : "Sold"}
@@ -369,7 +371,7 @@ export default function DeviceDetailScreen() {
         </View>
 
         {/* Tab Switcher */}
-        <View className="px-4">
+        <View className="px-4 mt-3 mb-2">
           <SegmentedControl value={tab} onChange={setTab} />
         </View>
 
@@ -472,10 +474,10 @@ export default function DeviceDetailScreen() {
           </ScrollView>
         ) : (
           <ScrollView className="flex-1 px-4" contentContainerClassName="pb-28">
-            <View className="w-full flex flex-col gap-4 bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
+            <View className="w-full flex flex-col space-y-3 bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
               <View className="grid grid-cols-2 gap-3 w-full">
                 <View>
-                  <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
                     Buy price (₱)
                   </Text>
                   <TextInput
@@ -487,7 +489,7 @@ export default function DeviceDetailScreen() {
                   />
                 </View>
                 <View>
-                  <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
                     List price (₱)
                   </Text>
                   <TextInput
@@ -499,6 +501,20 @@ export default function DeviceDetailScreen() {
                   />
                 </View>
               </View>
+
+              {/* Core required fields grouped at top */}
+              <PickerField
+                label="Storage"
+                options={STORAGE_OPTIONS}
+                value={storage}
+                onChange={setStorage}
+              />
+              <PickerField
+                label="Condition"
+                options={CONDITION_OPTIONS}
+                value={condition}
+                onChange={setCondition}
+              />
 
               {/* Live Profit & ROI */}
               <View className="flex-row items-center gap-3 rounded-xl bg-zinc-50 border border-zinc-200 px-4 py-3">
@@ -533,22 +549,9 @@ export default function DeviceDetailScreen() {
                 </View>
               </View>
 
-              <PickerField
-                label="Storage"
-                options={STORAGE_OPTIONS}
-                value={storage}
-                onChange={setStorage}
-              />
-              <PickerField
-                label="Condition"
-                options={CONDITION_OPTIONS}
-                value={condition}
-                onChange={setCondition}
-              />
-
               <View className="grid grid-cols-2 gap-3 w-full">
                 <View>
-                  <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
                     Battery health (%)
                   </Text>
                   <TextInput
@@ -562,7 +565,7 @@ export default function DeviceDetailScreen() {
                   />
                 </View>
                 <View>
-                  <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
                     Color
                   </Text>
                   <TextInput
@@ -576,46 +579,58 @@ export default function DeviceDetailScreen() {
                 </View>
               </View>
 
-              <PickerField
-                label="Network Lock"
-                options={NETWORK_LOCK_OPTIONS.map((o) => networkLockShort(o) ?? o)}
-                value={networkLockShort(networkLock) ?? networkLock}
-                onChange={(short) => {
-                  const full = NETWORK_LOCK_OPTIONS.find(
-                    (o) => (networkLockShort(o) ?? o) === short,
-                  );
-                  setNetworkLock(full ?? short);
-                }}
-              />
+              {/* Collapsible secondary fields */}
+              <Pressable
+                onPress={() => setAdditionalOpen((v) => !v)}
+                className="flex flex-row items-center justify-between px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl active:bg-zinc-100"
+              >
+                <Text className="text-sm font-semibold text-zinc-900">Additional Options — Accessories & Dual SIM</Text>
+                <Ionicons name={additionalOpen ? "chevron-up" : "chevron-down"} size={16} color="#71717a" />
+              </Pressable>
+              {additionalOpen ? (
+                <View className="space-y-3">
+                  <PickerField
+                    label="Network Lock"
+                    options={NETWORK_LOCK_OPTIONS.map((o) => networkLockShort(o) ?? o)}
+                    value={networkLockShort(networkLock) ?? networkLock}
+                    onChange={(short) => {
+                      const full = NETWORK_LOCK_OPTIONS.find(
+                        (o) => (networkLockShort(o) ?? o) === short,
+                      );
+                      setNetworkLock(full ?? short);
+                    }}
+                  />
+
+                  <View>
+                    <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
+                      IMEI 2 (optional, for dual-SIM)
+                    </Text>
+                    <TextInput
+                      value={imei2}
+                      onChangeText={(t) => setImei2(t.replace(/\D/g, ""))}
+                      placeholder="15-digit secondary IMEI"
+                      placeholderTextColor="#a1a1aa"
+                      keyboardType="number-pad"
+                      maxLength={15}
+                      className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 font-mono tracking-wide"
+                    />
+                  </View>
+
+                  <AccessoryChips
+                    selected={accessories}
+                    onToggle={(item) =>
+                      setAccessories((prev) =>
+                        prev.includes(item)
+                          ? prev.filter((a) => a !== item)
+                          : [...prev, item],
+                      )
+                    }
+                  />
+                </View>
+              ) : null}
 
               <View>
-                <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
-                  IMEI 2 (optional, for dual-SIM)
-                </Text>
-                <TextInput
-                  value={imei2}
-                  onChangeText={(t) => setImei2(t.replace(/\D/g, ""))}
-                  placeholder="15-digit secondary IMEI"
-                  placeholderTextColor="#a1a1aa"
-                  keyboardType="number-pad"
-                  maxLength={15}
-                  className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 font-mono tracking-wide"
-                />
-              </View>
-
-              <AccessoryChips
-                selected={accessories}
-                onToggle={(item) =>
-                  setAccessories((prev) =>
-                    prev.includes(item)
-                      ? prev.filter((a) => a !== item)
-                      : [...prev, item],
-                  )
-                }
-              />
-
-              <View>
-                <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
                   Defects / Notes
                 </Text>
                 <TextInput
@@ -631,7 +646,7 @@ export default function DeviceDetailScreen() {
               </View>
 
               <View>
-                <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5">
                   Repair cost (₱)
                 </Text>
                 <TextInput
@@ -653,7 +668,7 @@ export default function DeviceDetailScreen() {
         )}
 
         {/* Bottom Action Bar */}
-        <View className="sticky bottom-0 bg-white border-t border-zinc-200/80 p-4 space-y-2 z-10">
+        <View className="sticky bottom-0 bg-white border-t border-zinc-200 p-4 shadow-lg z-10 space-y-2">
           {tab === "overview" ? (
             <>
               {device.status === "in_stock" ? (
