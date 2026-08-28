@@ -33,17 +33,19 @@ export function BottomSheet({
           className="absolute inset-0 bg-black/40"
         />
         <View
-          className={`rounded-t-3xl bg-white pt-6 px-5 pb-5 ${
+          className={`max-h-[85vh] sm:max-h-[90vh] flex flex-col rounded-t-2xl bg-white overflow-hidden ${
             isTablet ? "mx-auto max-w-lg my-auto rounded-2xl" : ""
           }`}
-          style={{ paddingBottom: Math.max(insets.bottom, 20) }}
+          style={{ paddingBottom: Math.max(insets.bottom, 0) }}
         >
-          <View className="mx-auto mb-4 h-1 w-10 rounded-full bg-zinc-200" />
-          <View className="pb-3 flex flex-row items-center justify-between border-b border-zinc-100 mb-4">
-            <Text className="text-lg font-bold text-zinc-950">{title}</Text>
-            <Pressable onPress={onClose} hitSlop={8}>
-              <Ionicons name="close" size={24} color="#71717a" />
-            </Pressable>
+          <View className="shrink-0 px-4 pt-3 pb-3 border-b border-zinc-100 relative">
+            <View className="mx-auto mb-2 h-1 w-10 rounded-full bg-zinc-200" />
+            <View className="flex flex-row items-center justify-between">
+              <Text className="text-lg font-bold text-zinc-950">{title}</Text>
+              <Pressable onPress={onClose} hitSlop={8}>
+                <Ionicons name="close" size={24} color="#71717a" />
+              </Pressable>
+            </View>
           </View>
           {children}
         </View>
