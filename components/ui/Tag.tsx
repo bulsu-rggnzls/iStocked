@@ -10,7 +10,7 @@ export function Tag({ label, selected = false, onPress }: TagProps) {
   return (
     <Pressable
       onPress={onPress}
-      className={`h-9 flex items-center justify-center px-3.5 rounded-xl active:opacity-80 ${
+      className={`flex items-center justify-center px-2.5 py-1.5 text-xs rounded-lg font-medium active:opacity-80 ${
         selected ? "bg-zinc-900 shadow-sm" : "bg-zinc-100 active:bg-zinc-200/80"
       }`}
     >
