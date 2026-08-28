@@ -41,6 +41,7 @@ export const STATUS_META: Record<DeviceStatus, { label: string; tone: BadgeTone 
 
 export const CONDITION_META: Record<string, { tone: BadgeTone }> = {
   "Brand New": { tone: "brand" },
+  Used: { tone: "gray" },
   "Like New": { tone: "emerald" },
   Good: { tone: "amber" },
   Fair: { tone: "gray" },
