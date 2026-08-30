@@ -29,8 +29,8 @@ export function TextField({
           {...inputProps}
           secureTextEntry={hidden}
           placeholderTextColor={inputProps.placeholderTextColor ?? "#a1a1aa"}
-          className={`rounded-xl border bg-white px-4 py-3.5 text-base text-zinc-950 ${
-            error ? "border-red-400" : "border-zinc-200"
+          className={`h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full ${
+            error ? "border-red-400" : ""
           } ${secure ? "pr-12" : ""}`}
         />
         {secure ? (

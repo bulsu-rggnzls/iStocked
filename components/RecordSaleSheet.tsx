@@ -6,7 +6,7 @@ import { formatPrice } from "../lib/format";
 import type { Device, WarrantyPeriod } from "../types";
 
 const inputClass =
-  "h-10 px-3.5 rounded-xl border-zinc-200 text-xs font-medium focus:ring-2 focus:ring-zinc-900 w-full border bg-white text-zinc-950";
+  "h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full";
 
 interface RecordSaleSheetProps {
   device: Device | null;
@@ -88,22 +88,18 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        className="flex-1 overflow-y-auto px-4 pt-2 pb-20 space-y-3"
-        contentContainerClassName="pb-4 space-y-3"
+        className="overflow-y-auto px-4 pt-2 pb-4 space-y-3.5"
+        contentContainerClassName="pb-4 space-y-3.5"
       >
         <View className="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-3.5 flex items-center justify-between text-left">
-          <View className="flex flex-col items-center text-center flex-1">
-            <Text className="text-sm font-bold text-zinc-900 text-center">
-              {device.model}
-            </Text>
-            <Text className="text-xs font-mono text-zinc-400 text-center">
-              {device.imei}
-            </Text>
+          <View className="flex flex-col text-left">
+            <Text className="text-sm font-bold text-zinc-900">{device.model}</Text>
+            <Text className="text-xs font-mono text-zinc-400">{device.imei}</Text>
           </View>
           <View className="flex flex-col text-right">
-            <Text className="text-xs text-zinc-600 text-right">Cost: {formatPrice(totalCost)}</Text>
+            <Text className="text-xs text-zinc-600 font-medium">Cost: {formatPrice(totalCost)}</Text>
             {Number(device.repair_cost ?? 0) > 0 ? (
-              <Text className="text-xs text-zinc-400 text-right">+ repair {formatPrice(device.repair_cost)}</Text>
+              <Text className="text-xs text-zinc-400">+ repair {formatPrice(device.repair_cost)}</Text>
             ) : null}
           </View>
         </View>
@@ -182,16 +178,14 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
         </View>
 
         <View className="bg-emerald-50 border border-emerald-200/80 rounded-2xl px-4 py-3 flex items-center justify-between text-left">
-          <Text className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Profit</Text>
-          <Text className="text-base font-extrabold text-emerald-700">
-            {formatPrice(profit)}
-          </Text>
+          <Text className="text-xs font-bold text-emerald-800 uppercase tracking-wider">PROFIT</Text>
+          <Text className="text-base font-extrabold text-emerald-700">{formatPrice(profit)}</Text>
         </View>
 
         {error ? <Text className="mb-3 text-sm text-red-600">{error}</Text> : null}
       </ScrollView>
 
-      <View className="shrink-0 p-4 bg-white/95 backdrop-blur-md border-t border-zinc-100 flex gap-2 z-10">
+      <View className="p-4 bg-white border-t border-zinc-100 flex gap-2">
         <View className="flex-row gap-2 w-full">
           <Pressable
             onPress={onClose}

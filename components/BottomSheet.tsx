@@ -33,7 +33,7 @@ export function BottomSheet({
           className="absolute inset-0 bg-black/40"
         />
         <View
-          className={`max-h-[85vh] sm:max-h-[90vh] flex flex-col rounded-t-2xl bg-white overflow-hidden ${
+          className={`flex flex-col max-h-[85vh] rounded-t-2xl bg-white overflow-hidden ${
             isTablet ? "mx-auto max-w-lg my-auto rounded-2xl" : ""
           }`}
           style={{ paddingBottom: Math.max(insets.bottom, 0) }}

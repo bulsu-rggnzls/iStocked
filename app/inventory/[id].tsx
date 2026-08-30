@@ -485,7 +485,7 @@ export default function DeviceDetailScreen() {
                     onChangeText={setBuyPrice}
                     keyboardType="decimal-pad"
                     placeholderTextColor="#a1a1aa"
-                    className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
+                    className="h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full"
                   />
                 </View>
                 <View>
@@ -497,7 +497,7 @@ export default function DeviceDetailScreen() {
                     onChangeText={setListPrice}
                     keyboardType="decimal-pad"
                     placeholderTextColor="#a1a1aa"
-                    className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
+                    className="h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full"
                   />
                 </View>
               </View>
@@ -561,7 +561,7 @@ export default function DeviceDetailScreen() {
                     maxLength={3}
                     placeholder="e.g. 85"
                     placeholderTextColor="#a1a1aa"
-                    className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
+                    className="h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full"
                   />
                 </View>
                 <View>
@@ -574,7 +574,7 @@ export default function DeviceDetailScreen() {
                     placeholder={colorPlaceholder(device.model)}
                     placeholderTextColor="#a1a1aa"
                     autoCapitalize="words"
-                    className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
+                    className="h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full"
                   />
                 </View>
               </View>
@@ -612,7 +612,7 @@ export default function DeviceDetailScreen() {
                       placeholderTextColor="#a1a1aa"
                       keyboardType="number-pad"
                       maxLength={15}
-                      className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 font-mono tracking-wide"
+                      className="h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full font-mono tracking-wide"
                     />
                   </View>
 
@@ -641,7 +641,7 @@ export default function DeviceDetailScreen() {
                   multiline
                   numberOfLines={3}
                   textAlignVertical="top"
-                  className="w-full px-3.5 py-3 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 min-h-[80px]"
+                  className="w-full px-3.5 py-3 bg-white border border-zinc-200 rounded-xl text-sm font-medium text-zinc-950 min-h-[80px]"
                 />
               </View>
 
@@ -655,7 +655,7 @@ export default function DeviceDetailScreen() {
                   keyboardType="decimal-pad"
                   placeholder="0.00"
                   placeholderTextColor="#a1a1aa"
-                  className="w-full h-11 px-3.5 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900"
+                  className="h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full"
                 />
               </View>
             </View>
