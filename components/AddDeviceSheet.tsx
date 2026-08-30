@@ -24,7 +24,7 @@ const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 const CONDITION_OPTIONS = ["Brand New", "Used"];
 
 const inputClass =
-  "rounded-xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-950";
+  "h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full";
 
 interface AddDeviceSheetProps {
   visible: boolean;
