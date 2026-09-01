@@ -88,20 +88,21 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        bounces={false}
+        alwaysBounceVertical={false}
+        overScrollMode="never"
         className="overflow-y-auto px-4 pt-2 pb-4 space-y-3.5"
         contentContainerClassName="pb-4 space-y-3.5"
       >
-        <View className="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-3.5 flex items-center justify-between text-left">
-          <View className="flex flex-col text-left">
-            <Text className="text-sm font-bold text-zinc-900">{device.model}</Text>
-            <Text className="text-xs font-mono text-zinc-400">{device.imei}</Text>
-          </View>
-          <View className="flex flex-col text-right">
-            <Text className="text-xs text-zinc-600 font-medium">Cost: {formatPrice(totalCost)}</Text>
+        <View className="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-4 text-center flex flex-col items-center justify-center space-y-1">
+          <Text className="text-sm font-bold text-zinc-900 text-center">{device.model}</Text>
+          <Text className="text-xs font-mono text-zinc-400 text-center">{device.imei}</Text>
+          <Text className="text-xs text-zinc-500 font-medium text-center">
+            Cost: {formatPrice(totalCost)}
             {Number(device.repair_cost ?? 0) > 0 ? (
-              <Text className="text-xs text-zinc-400">+ repair {formatPrice(device.repair_cost)}</Text>
+              <Text className="text-zinc-400"> + repair {formatPrice(device.repair_cost)}</Text>
             ) : null}
-          </View>
+          </Text>
         </View>
 
         <View className="flex flex-col space-y-3">
