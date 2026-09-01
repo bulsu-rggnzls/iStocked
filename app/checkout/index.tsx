@@ -104,7 +104,7 @@ export default function CheckoutScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-1 bg-zinc-100">
         <AppHeader title="Record Sale" />
-        <ScrollView contentContainerClassName="p-5 pb-6">
+        <ScrollView contentContainerClassName="p-5 pb-6" bounces={false} alwaysBounceVertical={false} overScrollMode="never" showsVerticalScrollIndicator={false}>
           <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
             Item summary
           </Text>
