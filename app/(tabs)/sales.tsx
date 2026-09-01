@@ -158,6 +158,10 @@ export default function SalesHistoryScreen() {
     <ScrollView
       className="flex-1 bg-zinc-100"
       contentContainerClassName="pb-8"
+      bounces={false}
+      alwaysBounceVertical={false}
+      overScrollMode="never"
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
@@ -300,6 +304,9 @@ function SaleDetailSheet({
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        bounces={false}
+        alwaysBounceVertical={false}
+        overScrollMode="never"
         className="flex-1 overflow-y-auto px-4 pt-3 pb-6 space-y-4"
       >
         <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5 px-1 block text-left">

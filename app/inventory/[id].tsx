@@ -377,7 +377,7 @@ export default function DeviceDetailScreen() {
 
         {/* Content */}
         {tab === "overview" ? (
-          <ScrollView className="flex-1 px-4" contentContainerClassName="pb-28">
+          <ScrollView className="flex-1 px-4" contentContainerClassName="pb-6" bounces={false} alwaysBounceVertical={false} overScrollMode="never" showsVerticalScrollIndicator={false}>
             {/* Stat Cards */}
             <View className="grid grid-cols-2 gap-3 w-full">
               <View className="w-full bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
@@ -470,10 +470,10 @@ export default function DeviceDetailScreen() {
                 </View>
               </>
             ) : null}
-            <View className="h-8" />
+            <View className="h-4" />
           </ScrollView>
         ) : (
-          <ScrollView className="flex-1 px-4" contentContainerClassName="pb-28">
+          <ScrollView className="flex-1 px-4" contentContainerClassName="pb-6" bounces={false} alwaysBounceVertical={false} overScrollMode="never" showsVerticalScrollIndicator={false}>
             <View className="w-full flex flex-col space-y-3 bg-white rounded-2xl p-4 border border-zinc-100 shadow-sm">
               <View className="grid grid-cols-2 gap-3 w-full">
                 <View>
@@ -663,7 +663,7 @@ export default function DeviceDetailScreen() {
             {saveError ? (
               <Text className="mt-3 text-sm text-red-600">{saveError}</Text>
             ) : null}
-            <View className="h-8" />
+            <View className="h-4" />
           </ScrollView>
         )}
 
