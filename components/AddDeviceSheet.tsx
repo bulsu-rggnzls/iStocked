@@ -129,6 +129,9 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        bounces={false}
+        alwaysBounceVertical={false}
+        overScrollMode="never"
         className="flex-1 overflow-y-auto px-4 py-3 space-y-4"
         contentContainerClassName="pb-4 space-y-4"
       >
