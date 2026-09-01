@@ -233,6 +233,10 @@ export default function InventoryScreen() {
     <ScrollView
       className="flex-1 bg-zinc-100"
       contentContainerClassName="pb-8"
+      bounces={false}
+      alwaysBounceVertical={false}
+      overScrollMode="never"
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
@@ -286,7 +290,7 @@ export default function InventoryScreen() {
         onClose={() => setFilterSheetOpen(false)}
         title="Filter inventory"
       >
-        <ScrollView className="px-4 pt-4 pb-6 space-y-6 overflow-y-auto" showsVerticalScrollIndicator={false}>
+        <ScrollView className="px-4 pt-4 pb-6 space-y-6 overflow-y-auto" showsVerticalScrollIndicator={false} bounces={false} alwaysBounceVertical={false} overScrollMode="never">
           <View>
             <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-2 block px-1">
               Condition
