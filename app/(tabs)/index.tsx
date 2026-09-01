@@ -252,7 +252,11 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       className="flex-1 bg-zinc-100"
-      contentContainerClassName="pb-24 sm:pb-28"
+      contentContainerClassName="pb-8"
+      bounces={false}
+      alwaysBounceVertical={false}
+      overScrollMode="never"
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
