@@ -16,6 +16,10 @@ export function FilterChips({ options, value, onChange }: FilterChipsProps) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      bounces={false}
+      alwaysBounceHorizontal={false}
+      alwaysBounceVertical={false}
+      overScrollMode="never"
       contentContainerClassName="gap-2 px-5 py-1"
     >
       {options.map((option) => {
