@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -7,62 +7,68 @@ import {
   ScrollView,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useSales } from "../../hooks/useSales";
-import { useIsTablet } from "../../hooks/useIsTablet";
 import { useUpdateDevice } from "../../hooks/useInventory";
-import { ScreenHeader } from "../../components/ui/ScreenHeader";
-import { Badge } from "../../components/ui/Badge";
 import { BottomSheet } from "../../components/BottomSheet";
 import { EmptyState } from "../../components/EmptyState";
 import { networkLockShort } from "../../lib/networkLock";
 import { formatDate, formatImei, formatPrice } from "../../lib/format";
 import type { Device, WarrantyPeriod } from "../../types";
 
-function WarrantyBadge({ period, dateSold }: { period: WarrantyPeriod | null; dateSold: string | null }) {
+function WarrantyTag({ period, dateSold }: { period: WarrantyPeriod | null; dateSold: string | null }) {
   if (!period || period === "none" || !dateSold) return null;
   const days = period === "7_day" ? 7 : 30;
   const soldDate = new Date(dateSold);
   const expiry = new Date(soldDate.getTime() + days * 24 * 60 * 60 * 1000);
-  const now = new Date();
-  const active = now < expiry;
+  const active = new Date() < expiry;
 
   return (
-    <Badge
-      label={active ? `${days}d warranty` : `${days}d expired`}
-      tone={active ? "emerald" : "gray"}
-      dot
-    />
+    <Text className={`text-[11px] font-semibold ${active ? "text-emerald-700" : "text-zinc-400"}`}>
+      {active ? `${days}d warranty` : `${days}d warranty expired`}
+    </Text>
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <View className="flex-row items-center justify-between gap-3 py-2">
       <Text className="shrink text-sm text-zinc-500" numberOfLines={1}>{label}</Text>
-      <Text className="text-sm font-medium text-zinc-950" numberOfLines={1}>{value}</Text>
+      <Text
+        className={`text-sm text-zinc-950 ${strong ? "font-bold" : "font-medium"}`}
+        numberOfLines={1}
+      >
+        {value}
+      </Text>
     </View>
   );
 }
 
-function SoldRow({ device, onPress }: { device: Device; onPress: () => void }) {
+function LedgerRow({ device, onPress, last }: { device: Device; onPress: () => void; last: boolean }) {
   const sold = Number(device.sold_price ?? 0);
   const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);
   const profit = sold - totalCost;
+  const positive = profit >= 0;
   const lock = networkLockShort(device.network_lock);
 
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center bg-white rounded-2xl p-4 border border-zinc-200/80 shadow-sm active:bg-zinc-100"
+      className={`flex-row items-center gap-3 py-2.5 active:opacity-70 ${last ? "" : "border-b border-dashed border-zinc-200"}`}
     >
-      <View className="flex-1 pr-2">
+      <View className="w-9 h-9 shrink-0 items-center justify-center rounded-full bg-zinc-100">
+        <Ionicons name="checkmark" size={15} color="#3f3f46" />
+      </View>
+
+      <View className="flex-1">
         <View className="flex-row items-center gap-1.5">
-          <Text className="shrink text-sm font-bold text-zinc-950" numberOfLines={1}>
+          <Text numberOfLines={1} className="shrink text-sm font-semibold text-zinc-950">
             {device.model}
           </Text>
           {lock ? (
@@ -71,33 +77,25 @@ function SoldRow({ device, onPress }: { device: Device; onPress: () => void }) {
             </View>
           ) : null}
         </View>
-        <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
-          {device.date_sold ? formatDate(device.date_sold) : "—"} ·{" "}
-          {device.customer_name ?? "Walk-in"}
-        </Text>
-        {device.buyer_contact ? (
-          <Text className="mt-0.5 text-[10px] text-zinc-400" numberOfLines={1}>
-            {device.buyer_contact}
+        <View className="mt-0.5 flex-row items-center gap-1.5">
+          <Text numberOfLines={1} className="shrink text-[11px] text-zinc-500">
+            {device.date_sold ? formatDate(device.date_sold) : "\u2014"} · {device.customer_name ?? "Walk-in"}
           </Text>
-        ) : null}
-        <View className="mt-1 flex-row items-center gap-1.5">
-          <WarrantyBadge period={device.warranty_period} dateSold={device.date_sold} />
-          {Number(device.repair_cost ?? 0) > 0 ? (
-            <Badge label={`Repair ₱${Number(device.repair_cost).toFixed(0)}`} tone="amber" />
-          ) : null}
+          <WarrantyTag period={device.warranty_period} dateSold={device.date_sold} />
         </View>
       </View>
 
       <View className="items-end">
-        <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
+        <Text numberOfLines={1} className="text-sm font-bold text-zinc-950">
           {formatPrice(sold)}
         </Text>
-        <View className="mt-1 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-          <Text className="text-xs font-semibold text-emerald-700" style={{ textDecorationLine: 'none' }}>
-            {profit >= 0 ? "+" : "−"}
-            {formatPrice(Math.abs(profit))} net
-          </Text>
-        </View>
+        <Text
+          numberOfLines={1}
+          className={`text-[11px] font-semibold ${positive ? "text-emerald-700" : "text-red-700"}`}
+        >
+          {positive ? "+" : "\u2212"}
+          {formatPrice(Math.abs(profit))} net
+        </Text>
       </View>
     </Pressable>
   );
@@ -106,50 +104,43 @@ function SoldRow({ device, onPress }: { device: Device; onPress: () => void }) {
 export default function SalesHistoryScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error, isRefetching, refetch } = useSales();
-  const isTablet = useIsTablet();
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+  const insets = useSafeAreaInsets();
 
-  const header = (
-    <View className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4">
-      <ScreenHeader
-        eyebrow="Flip ledger"
-        title="Sales History"
-        subtitle={
-          data ? `${data.length} ${data.length === 1 ? "sale" : "sales"} recorded` : undefined
-        }
-      />
-    </View>
+  const totalProfit = (data ?? []).reduce(
+    (sum, d) => sum + Number(d.sold_price ?? 0) - Number(d.buy_price) - Number(d.repair_cost ?? 0),
+    0,
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
   );
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-zinc-100">
-        {header}
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#09090b" />
-        </View>
+      <View className="flex-1 items-center justify-center bg-zinc-100">
+        <ActivityIndicator size="large" color="#09090b" />
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View className="flex-1 bg-zinc-100">
-        {header}
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-base font-semibold text-zinc-950">
-            Couldn't load sales history
-          </Text>
-          <Text className="mt-2 text-center text-sm leading-5 text-red-600">
-            {error instanceof Error ? error.message : "Something went wrong."}
-          </Text>
-          <Pressable
-            onPress={() => refetch()}
-            className="mt-5 rounded-xl bg-black px-6 py-3 active:opacity-80"
-          >
-            <Text className="font-semibold text-white">Retry</Text>
-          </Pressable>
-        </View>
+      <View className="flex-1 items-center justify-center bg-zinc-100 px-8">
+        <Text className="text-center text-base font-semibold text-zinc-950">
+          Couldn&apos;t load sales history
+        </Text>
+        <Text className="mt-2 text-center text-sm leading-5 text-red-600">
+          {error instanceof Error ? error.message : "Something went wrong."}
+        </Text>
+        <Pressable
+          onPress={() => refetch()}
+          className="mt-5 rounded-xl bg-black px-6 py-3 active:opacity-80"
+        >
+          <Text className="font-semibold text-white">Retry</Text>
+        </Pressable>
       </View>
     );
   }
@@ -157,7 +148,7 @@ export default function SalesHistoryScreen() {
   return (
     <ScrollView
       className="flex-1 bg-zinc-100"
-      contentContainerClassName="pb-8"
+      contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
       bounces={false}
       alwaysBounceVertical={false}
       overScrollMode="never"
@@ -170,29 +161,77 @@ export default function SalesHistoryScreen() {
         />
       }
     >
-      {header}
-
-      <View className={`${isTablet ? "max-w-4xl mx-auto w-full px-6" : "px-5"}`}>
-        {(data ?? []).length === 0 ? (
-          <EmptyState
-            icon="checkmark-circle-outline"
-            title="No sales yet"
-            message="Sales you record from stock will show up here."
-            actionLabel="View inventory"
-            onAction={() => router.push("/inventory")}
-          />
-        ) : (
-          <View className={`${isTablet ? "flex-row flex-wrap gap-4" : "flex flex-col gap-3"}`}>
-            {(data ?? []).map((item) => (
-              <View
-                key={item.id}
-                className={`${isTablet ? "w-[calc(50%-8px)]" : "w-full"}`}
-              >
-                <SoldRow device={item} onPress={() => setSelectedDevice(item)} />
-              </View>
-            ))}
+      {/* Header */}
+      <View className="px-4" style={{ paddingTop: insets.top + 16 }}>
+        <View className="flex-row items-start justify-between">
+          <View className="flex-1 pr-4">
+            <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+              Flip ledger
+            </Text>
+            <Text className="mt-1 text-3xl font-bold text-zinc-950">Sales history</Text>
           </View>
-        )}
+        </View>
+      </View>
+
+      {/* Totals strip */}
+      <View className="px-4 pt-4">
+        <View className="rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm">
+          <View className="flex-row gap-4">
+            <View className="flex-1">
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+                Net profit
+              </Text>
+              <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
+                {formatPrice(totalProfit)}
+              </Text>
+              <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
+                {data?.length ?? 0} {data?.length === 1 ? "sale" : "sales"} recorded
+              </Text>
+            </View>
+            <View className="w-px bg-zinc-200" />
+            <View className="flex-1">
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+                Avg. per sale
+              </Text>
+              <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
+                {formatPrice(data?.length ? totalProfit / data.length : 0)}
+              </Text>
+              <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
+                across all time
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* List */}
+      <View className="px-4 pt-5">
+        <Text className="pb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+          Transactions
+        </Text>
+
+        <View className="rounded-2xl border border-zinc-200 bg-white px-4">
+          {(data ?? []).length === 0 ? (
+            <View className="py-2">
+              <EmptyState
+                icon="checkmark-circle-outline"
+                title="No sales yet"
+                message="Sales you record from stock will show up here."
+                actionLabel="View inventory"
+                onAction={() => router.push("/inventory")}
+              />
+            </View>
+          ) : (
+            (data ?? []).map((item, i) => (
+              <LedgerRow
+                key={item.id}
+                device={item}
+                last={i === (data ?? []).length - 1}
+                onPress={() => setSelectedDevice(item)}
+              />
+            ))
+          )}
+        </View>
       </View>
 
       <SaleDetailSheet
@@ -214,6 +253,8 @@ function SaleDetailSheet({
   onClose: () => void;
 }) {
   const updateDevice = useUpdateDevice();
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   if (!device) return null;
 
   const sold = Number(device.sold_price ?? 0);
@@ -262,14 +303,17 @@ function SaleDetailSheet({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: "Share receipt" });
       }
-    } catch {
-      Alert.alert("Error", "Could not generate receipt.");
+    } catch (err) {
+      Alert.alert(
+        "Could not generate receipt",
+        err instanceof Error ? err.message : "An unknown error occurred.",
+      );
     }
   };
 
   const handleRefund = () => {
     Alert.alert(
-      "Refund Transaction",
+      "Refund transaction",
       "This will revert the sale and return the device to inventory. Continue?",
       [
         { text: "Cancel", style: "cancel" },
@@ -300,19 +344,21 @@ function SaleDetailSheet({
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Transaction Details">
+    <BottomSheet visible={visible} onClose={onClose} title="Transaction details">
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         bounces={false}
         alwaysBounceVertical={false}
         overScrollMode="never"
-        className="flex-1 overflow-y-auto px-4 pt-3 pb-6 space-y-4"
+        className="px-4 pt-3"
+        style={{ flexShrink: 1, maxHeight: Math.round(height * 0.45) }}
       >
-        <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5 px-1 block text-left">
-          DEVICE INFO
+        <Text className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+          Device info
         </Text>
-        <View className="bg-zinc-50/80 border border-zinc-200/80 rounded-2xl p-3.5 space-y-2.5">
+        <View className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-3.5">
           <DetailRow label="Model" value={device.model} />
           <DetailRow label="Storage" value={device.storage} />
           <DetailRow label="Condition" value={device.condition} />
@@ -321,52 +367,56 @@ function SaleDetailSheet({
           {lock ? <DetailRow label="Network" value={lock} /> : null}
         </View>
 
-        <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5 px-1 block text-left">
-          FINANCIAL BREAKDOWN
+        <Text className="mb-1.5 mt-4 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+          Financial breakdown
         </Text>
-        <View className="bg-zinc-50/80 border border-zinc-200/80 rounded-2xl p-3.5 space-y-2.5">
-          <DetailRow label="Purchase Price" value={formatPrice(device.buy_price)} />
+        <View className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-3.5">
+          <DetailRow label="Purchase price" value={formatPrice(device.buy_price)} />
           {Number(device.repair_cost ?? 0) > 0 ? (
-            <DetailRow label="Repair / Extra" value={formatPrice(device.repair_cost)} />
+            <DetailRow label="Repair / extra" value={formatPrice(device.repair_cost)} />
           ) : null}
-          <DetailRow label="Selling Price" value={formatPrice(sold)} />
-          <View className="border-t border-zinc-200">
+          <DetailRow label="Selling price" value={formatPrice(sold)} />
+          <View className="border-t border-dashed border-zinc-200">
             <DetailRow
-              label="Net Profit"
-              value={`${profit >= 0 ? "+" : ""}${formatPrice(profit)}`}
+              label="Net profit"
+              value={`${profit >= 0 ? "+" : "\u2212"}${formatPrice(Math.abs(profit))}`}
+              strong
             />
           </View>
         </View>
 
-        <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-1.5 px-1 block text-left">
-          BUYER & DATE
+        <Text className="mb-1.5 mt-4 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+          Buyer &amp; date
         </Text>
-        <View className="bg-zinc-50/80 border border-zinc-200/80 rounded-2xl p-3.5 space-y-2.5">
-          <DetailRow label="Buyer Name" value={device.customer_name || "Walk-in"} />
+        <View className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-3.5">
+          <DetailRow label="Buyer name" value={device.customer_name || "Walk-in"} />
           {device.buyer_contact ? (
             <DetailRow label="Contact" value={device.buyer_contact} />
           ) : null}
-          <DetailRow label="Sale Date" value={device.date_sold ? formatDate(device.date_sold) : "\u2014"} />
+          <DetailRow label="Sale date" value={device.date_sold ? formatDate(device.date_sold) : "\u2014"} />
           <View className="flex-row items-center justify-between py-2">
             <Text className="text-sm text-zinc-500">Warranty</Text>
-            <WarrantyBadge period={device.warranty_period} dateSold={device.date_sold} />
+            <WarrantyTag period={device.warranty_period} dateSold={device.date_sold} />
           </View>
         </View>
       </ScrollView>
-      <View className="p-4 bg-white border-t border-zinc-100 flex flex-col gap-2">
+      <View
+        className="shrink-0 flex-col gap-2 border-t border-zinc-100 bg-white px-4 pt-3"
+        style={{ paddingBottom: Math.max(insets.bottom, 32) }}
+      >
         <Pressable
           onPress={handlePrintReceipt}
-          className="flex-row items-center justify-center gap-2 rounded-xl bg-black py-3 active:bg-zinc-900"
+          className="h-11 flex-row items-center justify-center gap-2 rounded-2xl bg-black active:opacity-80"
         >
-          <Ionicons name="print-outline" size={18} color="#ffffff" />
-          <Text className="text-sm font-semibold text-white">Print / Export Receipt</Text>
+          <Ionicons name="document-text-outline" size={16} color="#ffffff" />
+          <Text className="text-xs font-semibold text-white">Save / share PDF receipt</Text>
         </Pressable>
         <Pressable
           onPress={handleRefund}
-          className="flex-row items-center justify-center gap-2 rounded-xl border border-red-200 bg-white py-3 active:bg-red-50"
+          className="h-11 flex-row items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white active:bg-red-50"
         >
-          <Ionicons name="arrow-undo-outline" size={18} color="#dc2626" />
-          <Text className="text-sm font-semibold text-red-600">Refund Transaction</Text>
+          <Ionicons name="arrow-undo-outline" size={16} color="#dc2626" />
+          <Text className="text-xs font-semibold text-red-600">Refund transaction</Text>
         </Pressable>
       </View>
     </BottomSheet>
