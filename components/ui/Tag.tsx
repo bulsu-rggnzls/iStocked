@@ -10,14 +10,19 @@ export function Tag({ label, selected = false, onPress }: TagProps) {
   return (
     <Pressable
       onPress={onPress}
-      className={`flex items-center justify-center px-2.5 py-1.5 text-xs rounded-lg font-medium active:opacity-80 ${
-        selected ? "bg-zinc-900 shadow-sm" : "bg-zinc-100 active:bg-zinc-200/80"
-      }`}
+      className="h-9 shrink-0 items-center justify-center rounded-lg px-3.5 active:opacity-80"
+      style={{
+        backgroundColor: selected ? "#18181b" : "#f4f4f5",
+      }}
     >
       <Text
-        className={`text-xs ${
-          selected ? "font-semibold text-white" : "font-medium text-zinc-700"
-        }`}
+        className="text-xs"
+        style={{
+          color: selected ? "#ffffff" : "#3f3f46",
+          fontWeight: selected ? "600" : "500",
+          includeFontPadding: false,
+          textAlignVertical: "center",
+        }}
         numberOfLines={1}
       >
         {label}

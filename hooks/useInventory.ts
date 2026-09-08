@@ -57,6 +57,7 @@ export function useUpdateDevice() {
     }) => updateDevice(id, data),
     onSuccess: (device: Device) => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.setQueryData(["devices", device.id], device);
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
     },

@@ -7,12 +7,13 @@ interface StatCardProps {
   label: string;
   value: string;
   icon: IconName;
+  className?: string;
 }
 
-export function StatCard({ label, value, icon }: StatCardProps) {
+export function StatCard({ label, value, icon, className }: StatCardProps) {
   return (
     <View
-      className="h-32 flex-col justify-between rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm"
+      className={`h-32 flex-col justify-between rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm ${className ?? ""}`}
     >
       <View className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0">
         <Ionicons name={icon} size={16} color="#334155" />

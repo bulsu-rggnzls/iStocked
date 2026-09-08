@@ -7,12 +7,13 @@ export interface Metrics {
   totalRepairCost: number;
   unitsAvailable: number;
   unitsSold: number;
+  potentialProfit: number;
   recentSales: Device[];
 }
 
 export async function fetchMetrics(): Promise<Metrics> {
   const db = await ensureDb();
-  const [recentSales, investmentRow, profitRow, repairRow, stockRow, soldRow] =
+  const [recentSales, investmentRow, profitRow, repairRow, stockRow, soldRow, potentialRow] =
     await Promise.all([
       db.getAllAsync<Device>(
         "SELECT * FROM devices WHERE status = 'sold' ORDER BY date_sold DESC, created_at DESC LIMIT 15",
@@ -32,6 +33,9 @@ export async function fetchMetrics(): Promise<Metrics> {
       db.getFirstAsync<{ c: number }>(
         "SELECT COUNT(*) AS c FROM devices WHERE status = 'sold'",
       ),
+      db.getFirstAsync<{ c: number | null }>(
+        "SELECT SUM(list_price - buy_price - repair_cost) AS c FROM devices WHERE status = 'in_stock'",
+      ),
     ]);
 
   return {
@@ -40,6 +44,7 @@ export async function fetchMetrics(): Promise<Metrics> {
     totalRepairCost: Number(repairRow?.c ?? 0),
     unitsAvailable: stockRow?.c ?? 0,
     unitsSold: soldRow?.c ?? 0,
+    potentialProfit: Number(potentialRow?.c ?? 0),
     recentSales,
   };
 }

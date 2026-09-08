@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import { View, useWindowDimensions, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TABLET_BREAKPOINT = 768;
 
@@ -16,14 +17,29 @@ const TAB_CONFIG: { name: string; icon: IoniconsName; label: string }[] = [
 function CustomTabBar({ state, navigation }: any) {
   const { width } = useWindowDimensions();
   const isTablet = width >= TABLET_BREAKPOINT;
+  const insets = useSafeAreaInsets();
 
   return (
     <View
-      className={`fixed bottom-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-t border-zinc-200 ${
-        isTablet
-          ? "max-w-xl mx-auto mb-4 rounded-full border shadow-md"
-          : "pb-safe"
-      }`}
+      className="inset-x-0 bottom-0 z-50 border-t border-zinc-200"
+      style={{
+        position: "absolute",
+        left: isTablet ? "10%" : 0,
+        right: isTablet ? "10%" : 0,
+        bottom: isTablet ? 16 + insets.bottom : 0,
+        zIndex: 1000,
+        backgroundColor: "rgba(255,255,255,0.94)",
+        borderRadius: isTablet ? 999 : 0,
+        borderWidth: 1,
+        borderColor: "#e4e4e7",
+        marginHorizontal: isTablet ? 16 : 0,
+        shadowColor: "#000",
+        shadowOpacity: isTablet ? 0.08 : 0,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: isTablet ? 4 : 0,
+        paddingBottom: Math.max(insets.bottom, 8),
+      }}
     >
       <View className="flex-1 flex-row items-center justify-around">
         {state.routes.map((route: any) => {
@@ -49,11 +65,8 @@ function CustomTabBar({ state, navigation }: any) {
                 color={color}
               />
               <Text
-                className={`${
-                  isTablet ? "text-xs" : "text-[10px]"
-                } font-medium ${
-                  isFocused ? "text-zinc-900 font-semibold" : "text-zinc-500"
-                }`}
+                className={`${isTablet ? "text-xs" : "text-[10px]"}`}
+                style={{ color, fontWeight: isFocused ? "600" : "500" }}
               >
                 {tabConfig?.label ?? route.name}
               </Text>

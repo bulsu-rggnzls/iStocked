@@ -156,9 +156,8 @@ export default function ScanScreen() {
         </View>
         <Pressable
           onPress={() => setTorch((t) => !t)}
-          className={`h-11 w-11 items-center justify-center rounded-full active:opacity-80 ${
-            torch ? "bg-white" : "bg-white/15"
-          }`}
+          className="h-11 w-11 items-center justify-center rounded-full active:opacity-80"
+          style={{ backgroundColor: torch ? "#ffffff" : "rgba(255,255,255,0.15)" }}
         >
           <Ionicons
             name={torch ? "flashlight" : "flashlight-outline"}
@@ -204,20 +203,20 @@ export default function ScanScreen() {
         onClose={() => setManualOpen(false)}
         title="Enter IMEI"
       >
-        <TextInput
-          value={manualImei}
-          onChangeText={(t) => setManualImei(t.replace(/\D/g, ""))}
-          placeholder="15-digit IMEI"
-          placeholderTextColor="#a1a1aa"
-          keyboardType="number-pad"
-          maxLength={15}
-          autoFocus
-          className="rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-950"
-        />
-        {manualError ? (
-          <Text className="mt-2 text-sm text-red-600">{manualError}</Text>
-        ) : null}
-        <View className="mt-4">
+        <View className="gap-4 pb-8">
+          <TextInput
+            value={manualImei}
+            onChangeText={(t) => setManualImei(t.replace(/\D/g, ""))}
+            placeholder="15-digit IMEI"
+            placeholderTextColor="#a1a1aa"
+            keyboardType="number-pad"
+            maxLength={15}
+            autoFocus
+            className="rounded-xl border border-zinc-200 bg-white px-4 py-3.5 text-base text-zinc-950"
+          />
+          {manualError ? (
+            <Text className="text-sm text-red-600">{manualError}</Text>
+          ) : null}
           <Button
             title="Look up device"
             onPress={handleManualLookup}
@@ -231,45 +230,47 @@ export default function ScanScreen() {
         onClose={closeSheet}
         title={device ? "Device found" : lookupError ? "No match" : "Checking"}
       >
-        {isLookingUp ? (
-          <View className="items-center py-8">
-            <ActivityIndicator size="large" color="#09090b" />
-            <Text className="mt-3 text-sm text-zinc-500">Looking up device…</Text>
-          </View>
-        ) : device ? (
-          <>
-            <ScanResultCard device={device} />
-            <View className="mt-5 flex-row gap-3">
-              <View className="flex-1">
-                <Button title="View item" variant="secondary" onPress={viewItem} />
-              </View>
-              <View className="flex-1">
-                <Button title="Add to sale" onPress={addToSale} />
-              </View>
+        <View className="px-4 pb-8 pt-3">
+          {isLookingUp ? (
+            <View className="items-center py-6">
+              <ActivityIndicator size="large" color="#09090b" />
+              <Text className="mt-3 text-sm text-zinc-500">Looking up device…</Text>
             </View>
-          </>
-        ) : (
-          <>
-            <Text className="text-sm leading-6 text-zinc-500">
-              No device in your inventory matches{" "}
-              <Text className="font-mono text-zinc-950">
-                {formatImei(scannedImei ?? "")}
+          ) : device ? (
+            <>
+              <ScanResultCard device={device} />
+              <View className="mt-5 flex-row gap-3">
+                <View className="flex-1">
+                  <Button title="View item" variant="secondary" onPress={viewItem} />
+                </View>
+                <View className="flex-1">
+                  <Button title="Add to sale" onPress={addToSale} />
+                </View>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text className="text-sm leading-6 text-zinc-500">
+                No device in your inventory matches{" "}
+                <Text className="font-mono text-zinc-950">
+                  {formatImei(scannedImei ?? "")}
+                </Text>
+                .
               </Text>
-              .
-            </Text>
-            <View className="mt-5 gap-3">
-              <Button
-                title="Search inventory for this IMEI"
-                variant="secondary"
-                onPress={prefillSearch}
-              />
-              <Button
-                title="Quick add to inventory"
-                onPress={quickAdd}
-              />
-            </View>
-          </>
-        )}
+              <View className="mt-5 gap-3">
+                <Button
+                  title="Search inventory for this IMEI"
+                  variant="secondary"
+                  onPress={prefillSearch}
+                />
+                <Button
+                  title="Quick add to inventory"
+                  onPress={quickAdd}
+                />
+              </View>
+            </>
+          )}
+        </View>
       </BottomSheet>
     </View>
   );
