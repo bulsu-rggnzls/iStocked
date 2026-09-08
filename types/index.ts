@@ -49,6 +49,7 @@ export interface NewDeviceInput {
   color?: string | null;
   network_lock?: string | null;
   repair_cost?: number;
+  date_bought?: string;
   sold_price?: number;
   date_sold?: string | null;
   customer_name?: string | null;
