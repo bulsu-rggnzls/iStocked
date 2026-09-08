@@ -29,7 +29,7 @@ export function TextField({
           {...inputProps}
           secureTextEntry={hidden}
           placeholderTextColor={inputProps.placeholderTextColor ?? "#a1a1aa"}
-          className={`h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full ${
+          className={`h-12 px-4 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full ${
             error ? "border-red-400" : ""
           } ${secure ? "pr-12" : ""}`}
         />
