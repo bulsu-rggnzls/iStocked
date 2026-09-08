@@ -73,7 +73,7 @@ export async function addDevice(input: NewDeviceInput) {
     input.repair_cost ?? 0,
     input.accessories ?? null,
     input.notes?.trim() || null,
-    now,
+    input.date_bought ?? now,
     now,
   );
   const row = await db.getFirstAsync<Device>(
