@@ -13,8 +13,9 @@ import { useDevice } from "../../hooks/useInventory";
 import { useRecordSale } from "../../hooks/useSales";
 import { Button } from "../../components/ui/Button";
 import { TextField } from "../../components/ui/TextField";
+import { DateField } from "../../components/ui/DateField";
 import { AppHeader } from "../../components/ui/AppHeader";
-import { formatImei, formatPrice } from "../../lib/format";
+import { formatImei, formatPrice, todayIso } from "../../lib/format";
 import type { WarrantyPeriod } from "../../types";
 
 const WARRANTY_OPTIONS: { label: string; value: WarrantyPeriod; desc: string }[] = [
@@ -39,7 +40,7 @@ export default function CheckoutScreen() {
   useEffect(() => {
     if (device) {
       setSoldPrice(String(device.list_price));
-      setDateSold(new Date().toISOString().slice(0, 10));
+      setDateSold(todayIso());
     }
   }, [device]);
 
@@ -88,8 +89,8 @@ export default function CheckoutScreen() {
         soldPrice: price,
         buyerContact: buyerContact.trim(),
         warrantyPeriod,
-        dateSold: dateSold.trim()
-          ? new Date(`${dateSold.trim()}T00:00:00`).toISOString()
+        dateSold: dateSold
+          ? new Date(`${dateSold}T00:00:00`).toISOString()
           : undefined,
       },
       {
@@ -169,12 +170,7 @@ export default function CheckoutScreen() {
               />
             </View>
             <View className="mt-4">
-              <TextField
-                label="Date sold (YYYY-MM-DD)"
-                value={dateSold}
-                onChangeText={setDateSold}
-                placeholder="YYYY-MM-DD"
-              />
+              <DateField label="Date sold" value={dateSold} onChange={setDateSold} />
             </View>
 
             <Text className="mb-1.5 mt-4 text-[11px] font-bold uppercase tracking-wide text-zinc-500">
@@ -187,24 +183,22 @@ export default function CheckoutScreen() {
                   <Pressable
                     key={option.value}
                     onPress={() => setWarrantyPeriod(option.value)}
-                    className={`flex-row items-center justify-between rounded-xl border px-4 py-3 active:opacity-80 ${
-                      selected
-                        ? "border-zinc-900 bg-zinc-950"
-                        : "border-zinc-200 bg-white"
-                    }`}
+                    className="flex-row items-center justify-between rounded-xl border px-4 py-3 active:opacity-80"
+                    style={{
+                      backgroundColor: selected ? "#09090b" : "#ffffff",
+                      borderColor: selected ? "#09090b" : "#e4e4e7",
+                    }}
                   >
                     <View className="flex-1">
                       <Text
-                        className={`text-sm font-semibold ${
-                          selected ? "text-white" : "text-zinc-950"
-                        }`}
+                        className="text-sm font-semibold"
+                        style={{ color: selected ? "#ffffff" : "#09090b" }}
                       >
                         {option.label}
                       </Text>
                       <Text
-                        className={`text-xs ${
-                          selected ? "text-zinc-400" : "text-zinc-500"
-                        }`}
+                        className="text-xs"
+                        style={{ color: selected ? "#a1a1aa" : "#71717a" }}
                       >
                         {option.desc}
                       </Text>
@@ -240,8 +234,11 @@ export default function CheckoutScreen() {
             </View>
             <View className="items-end">
               <Text className="text-xs text-zinc-500">Profit</Text>
-              <Text className="text-sm font-semibold text-zinc-900">
-                {formatPrice(profit)}
+              <Text
+                className={`text-sm font-semibold ${profit >= 0 ? "text-emerald-700" : "text-red-700"}`}
+              >
+                {profit >= 0 ? "+" : "\u2212"}
+                {formatPrice(Math.abs(profit))}
               </Text>
             </View>
           </View>
