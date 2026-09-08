@@ -19,9 +19,13 @@ export function AppHeader({ title, onBack, right }: AppHeaderProps) {
       onBack();
       return;
     }
-    if (router.canGoBack()) {
-      router.back();
-    } else {
+    try {
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace("/");
+      }
+    } catch {
       router.replace("/");
     }
   };
