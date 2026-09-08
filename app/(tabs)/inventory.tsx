@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -7,11 +7,10 @@ import {
   Text,
   View,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDevices } from "../../hooks/useInventory";
-import { useIsTablet } from "../../hooks/useIsTablet";
-import { ScreenHeader } from "../../components/ui/ScreenHeader";
 import { SearchBar } from "../../components/ui/SearchBar";
 import { BottomSheet } from "../../components/BottomSheet";
 import { AddDeviceSheet } from "../../components/AddDeviceSheet";
@@ -32,14 +31,16 @@ const NETWORK_FILTER_OPTIONS = [
   ...NETWORK_LOCK_OPTIONS.map((option) => ({ label: option, value: option })),
 ];
 
-function InventoryRow({
+function ShelfRow({
   device,
   onPress,
   onSell,
+  last,
 }: {
   device: Device;
   onPress: () => void;
   onSell: () => void;
+  last: boolean;
 }) {
   const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);
   const potential = Number(device.list_price) - totalCost;
@@ -47,36 +48,40 @@ function InventoryRow({
   return (
     <Pressable
       onPress={onPress}
-      className="w-full bg-white rounded-xl border border-zinc-200 flex flex-row items-center justify-between px-3.5 py-2.5 active:bg-zinc-50"
+      className={`flex-row items-center gap-3 py-2.5 active:opacity-70 ${last ? "" : "border-b border-dashed border-zinc-200"}`}
     >
-      <View className="flex flex-col items-start text-left gap-0.5 flex-1 mr-3">
-        <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
+      <View className="w-9 h-9 shrink-0 items-center justify-center rounded-full bg-zinc-100">
+        <Ionicons name="phone-portrait-outline" size={15} color="#3f3f46" />
+      </View>
+
+      <View className="flex-1">
+        <Text numberOfLines={1} className="text-sm font-semibold text-zinc-950">
           {device.model}
         </Text>
-        <Text className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]" numberOfLines={1} ellipsizeMode="tail">
+        <Text numberOfLines={1} className="mt-0.5 text-[11px] text-zinc-500">
           {device.storage} · {device.condition} · {formatImei(device.imei)}
         </Text>
       </View>
 
-      <View className="flex flex-row items-center gap-3 shrink-0">
-        <View className="flex flex-col items-end text-right">
-          <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
-            {formatPrice(device.list_price)}
-          </Text>
-          <View className="mt-0.5 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-            <Text className="text-xs font-semibold text-emerald-700 whitespace-nowrap" style={{ textDecorationLine: 'none' }} numberOfLines={1}>
-              +{formatPrice(potential)}
-            </Text>
-          </View>
-        </View>
-
-        <Pressable
-          onPress={onSell}
-          className="bg-black px-3.5 py-1.5 rounded-lg active:bg-zinc-800"
+      <View className="items-end">
+        <Text numberOfLines={1} className="text-sm font-bold text-zinc-950">
+          {formatPrice(device.list_price)}
+        </Text>
+        <Text
+          numberOfLines={1}
+          className={`text-[11px] font-semibold ${potential >= 0 ? "text-emerald-700" : "text-red-700"}`}
         >
-          <Text className="text-xs font-semibold text-white">Sell</Text>
-        </Pressable>
+          {potential >= 0 ? "+" : "\u2212"}
+          {formatPrice(Math.abs(potential))}
+        </Text>
       </View>
+
+      <Pressable
+        onPress={onSell}
+        className="rounded-xl bg-black px-3.5 py-2 active:opacity-80"
+      >
+        <Text className="text-xs font-semibold text-white">Sell</Text>
+      </Pressable>
     </Pressable>
   );
 }
@@ -84,7 +89,7 @@ function InventoryRow({
 export default function InventoryScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ search?: string; addImei?: string }>();
-  const isTablet = useIsTablet();
+  const insets = useSafeAreaInsets();
   const [condition, setCondition] = useState<string>("all");
   const [networkLock, setNetworkLock] = useState<string>("all");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -128,12 +133,27 @@ export default function InventoryScreen() {
   }, [data, debouncedSearch]);
 
   const capitalInStock = useMemo(
-    () => (data ?? []).reduce((sum, d) => sum + Number(d.buy_price) + Number(d.repair_cost ?? 0), 0),
-    [data],
+    () => filtered.reduce((sum, d) => sum + Number(d.buy_price) + Number(d.repair_cost ?? 0), 0),
+    [filtered],
+  );
+
+  const potentialProfit = useMemo(
+    () =>
+      filtered.reduce(
+        (sum, d) => sum + Number(d.list_price) - Number(d.buy_price) - Number(d.repair_cost ?? 0),
+        0,
+      ),
+    [filtered],
   );
 
   const openDevice = (device: Device) =>
     router.push({ pathname: "/inventory/[id]", params: { id: device.id } });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const activeFilterCount =
     (condition !== "all" ? 1 : 0) + (networkLock !== "all" ? 1 : 0);
@@ -155,76 +175,29 @@ export default function InventoryScreen() {
     setDraftNetworkLock("all");
   };
 
-  const header = (
-    <View className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-4">
-      <ScreenHeader
-        eyebrow="Stock on hand"
-        title="Inventory"
-        subtitle={
-          data
-            ? `${filtered.length} of ${data.length} ${data.length === 1 ? "phone" : "phones"}`
-            : undefined
-        }
-        trailing={
-          <Pressable
-            onPress={() => setAddSheetOpen(true)}
-            className="flex-row items-center gap-1 rounded-xl bg-black px-4 py-2.5 active:bg-zinc-900"
-          >
-            <Ionicons name="add" size={18} color="#ffffff" />
-            <Text className="text-sm font-semibold text-white">Buy Phone</Text>
-          </Pressable>
-        }
-      />
-      <SearchBar
-        value={search}
-        onChangeText={setSearch}
-        filterCount={activeFilterCount}
-        onFilterPress={openFilterSheet}
-      />
-
-      <View className="flex flex-row items-center justify-between px-4 py-3 bg-white rounded-xl border border-zinc-100">
-        <Text className="text-xs font-bold text-zinc-400 tracking-wider">
-          CAPITAL IN STOCK
-        </Text>
-        <Text className="text-base font-bold text-zinc-900">
-          {formatPrice(capitalInStock)}
-        </Text>
-        <Text className="text-xs font-medium text-zinc-400">
-          {data?.length ?? 0} {data?.length === 1 ? "phone" : "phones"} ready
-        </Text>
-      </View>
-    </View>
-  );
-
   if (isLoading) {
     return (
-      <View className="flex-1 bg-zinc-100">
-        {header}
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#09090b" />
-        </View>
+      <View className="flex-1 items-center justify-center bg-zinc-100">
+        <ActivityIndicator size="large" color="#09090b" />
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View className="flex-1 bg-zinc-100">
-        {header}
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-base font-semibold text-zinc-950">
-            Couldn't load inventory
-          </Text>
-          <Text className="mt-2 text-center text-sm leading-5 text-red-600">
-            {error instanceof Error ? error.message : "Something went wrong."}
-          </Text>
-          <Pressable
-            onPress={() => refetch()}
-            className="mt-5 rounded-xl bg-black px-6 py-3 active:opacity-80"
-          >
-            <Text className="font-semibold text-white">Retry</Text>
-          </Pressable>
-        </View>
+      <View className="flex-1 items-center justify-center bg-zinc-100 px-8">
+        <Text className="text-center text-base font-semibold text-zinc-950">
+          Couldn&apos;t load inventory
+        </Text>
+        <Text className="mt-2 text-center text-sm leading-5 text-red-600">
+          {error instanceof Error ? error.message : "Something went wrong."}
+        </Text>
+        <Pressable
+          onPress={() => refetch()}
+          className="mt-5 rounded-xl bg-black px-6 py-3 active:opacity-80"
+        >
+          <Text className="font-semibold text-white">Retry</Text>
+        </Pressable>
       </View>
     );
   }
@@ -232,7 +205,7 @@ export default function InventoryScreen() {
   return (
     <ScrollView
       className="flex-1 bg-zinc-100"
-      contentContainerClassName="pb-8"
+      contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
       bounces={false}
       alwaysBounceVertical={false}
       overScrollMode="never"
@@ -245,33 +218,105 @@ export default function InventoryScreen() {
         />
       }
     >
-      {header}
+      {/* Header */}
+      <View className="px-4" style={{ paddingTop: insets.top + 16 }}>
+        <View className="flex-row items-start justify-between">
+          <View className="flex-1 pr-4">
+            <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+              Stock on hand
+            </Text>
+            <Text className="mt-1 text-3xl font-bold text-zinc-950">Inventory</Text>
+          </View>
+          <Pressable
+            onPress={() => setAddSheetOpen(true)}
+            className="h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white active:bg-zinc-100"
+            accessibilityLabel="Add purchased phone"
+          >
+            <Ionicons name="add" size={20} color="#09090b" />
+          </Pressable>
+        </View>
 
-      <View className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-4">
-        {filtered.length === 0 ? (
-          <EmptyState
-            icon="phone-portrait-outline"
-            title={data && data.length > 0 ? "No devices match" : "No stock on hand"}
-            message={
-              data && data.length > 0
-                ? "Try a different search or filter."
-                : "Log your first purchased phone to start flipping."
-            }
-            actionLabel={data && data.length > 0 ? undefined : "Add a phone"}
-            onAction={data && data.length > 0 ? undefined : () => setAddSheetOpen(true)}
+        <View className="mt-3.5">
+          <SearchBar
+            value={search}
+            onChangeText={setSearch}
+            filterCount={activeFilterCount}
+            onFilterPress={openFilterSheet}
           />
-        ) : (
-          <View className="flex flex-col gap-3">
-            {filtered.map((item) => (
-              <InventoryRow
+        </View>
+      </View>
+
+      {/* Capital summary */}
+      <View className="px-4 pt-4">
+        <View className="rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm">
+          <View className="flex-row gap-4">
+            <View className="flex-1">
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+                Capital in stock
+              </Text>
+              <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
+                {formatPrice(capitalInStock)}
+              </Text>
+              <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
+                {filtered.length} {filtered.length === 1 ? "unit" : "units"} on shelf
+              </Text>
+            </View>
+            <View className="w-px bg-zinc-200" />
+            <View className="flex-1">
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+                If all sells
+              </Text>
+              <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
+                {formatPrice(potentialProfit)}
+              </Text>
+              <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
+                profit at list price
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* List */}
+      <View className="px-4 pt-5">
+        <View className="flex-row items-center justify-between pb-2">
+          <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+            On the shelf
+          </Text>
+          {filtered.length > 0 ? (
+            <Text className="text-xs font-medium text-zinc-500">
+              {filtered.length} of {data?.length ?? 0} shown
+            </Text>
+          ) : null}
+        </View>
+
+        <View className="rounded-2xl border border-zinc-200 bg-white px-4">
+          {filtered.length === 0 ? (
+            <View className="py-2">
+              <EmptyState
+                icon="phone-portrait-outline"
+                title={data && data.length > 0 ? "No devices match" : "No stock on hand"}
+                message={
+                  data && data.length > 0
+                    ? "Try a different search or filter."
+                    : "Log your first purchased phone to start flipping."
+                }
+                actionLabel={data && data.length > 0 ? undefined : "Add a phone"}
+                onAction={data && data.length > 0 ? undefined : () => setAddSheetOpen(true)}
+              />
+            </View>
+          ) : (
+            filtered.map((item, i) => (
+              <ShelfRow
                 key={item.id}
                 device={item}
+                last={i === filtered.length - 1}
                 onPress={() => openDevice(item)}
                 onSell={() => setSaleDevice(item)}
               />
-            ))}
-          </View>
-        )}
+            ))
+          )}
+        </View>
       </View>
 
       <AddDeviceSheet
@@ -290,19 +335,25 @@ export default function InventoryScreen() {
         onClose={() => setFilterSheetOpen(false)}
         title="Filter inventory"
       >
-        <ScrollView className="px-4 pt-4 pb-6 space-y-6 overflow-y-auto" showsVerticalScrollIndicator={false} bounces={false} alwaysBounceVertical={false} overScrollMode="never">
+        <ScrollView
+          className="px-4 pt-4"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+          alwaysBounceVertical={false}
+          overScrollMode="never"
+        >
           <View>
-            <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-2 block px-1">
+            <Text className="mb-2 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
               Condition
             </Text>
-            <View className="space-y-1">
+            <View className="gap-1">
               {CONDITION_OPTIONS.map((option) => {
                 const selected = draftCondition === option.value;
                 return (
                   <Pressable
                     key={option.value}
                     onPress={() => setDraftCondition(option.value)}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-zinc-50 transition-colors cursor-pointer text-xs font-medium text-zinc-800 flex-row active:bg-zinc-100"
+                    className="flex-row items-center justify-between rounded-xl px-3 py-2.5 active:bg-zinc-100"
                   >
                     <Text className="text-xs font-medium text-zinc-800">{option.label}</Text>
                     {selected ? (
@@ -316,18 +367,18 @@ export default function InventoryScreen() {
             </View>
           </View>
 
-          <View>
-            <Text className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase mb-2 block px-1">
+          <View className="mt-6">
+            <Text className="mb-2 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
               Network lock
             </Text>
-            <View className="space-y-1">
+            <View className="gap-1">
               {NETWORK_FILTER_OPTIONS.map((option) => {
                 const selected = draftNetworkLock === option.value;
                 return (
                   <Pressable
                     key={option.value}
                     onPress={() => setDraftNetworkLock(option.value)}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-zinc-50 transition-colors cursor-pointer text-xs font-medium text-zinc-800 flex-row active:bg-zinc-100"
+                    className="flex-row items-center justify-between rounded-xl px-3 py-2.5 active:bg-zinc-100"
                   >
                     <Text className="text-xs font-medium text-zinc-800">{option.label}</Text>
                     {selected ? (
@@ -342,18 +393,18 @@ export default function InventoryScreen() {
           </View>
         </ScrollView>
 
-        <View className="px-4 pt-3 pb-4 border-t border-zinc-100 bg-white flex-row gap-3">
+        <View className="flex-row gap-3 border-t border-zinc-100 bg-white px-4 pb-4 pt-3">
           <Pressable
             onPress={resetFilters}
-            className="flex-1 h-11 rounded-xl text-sm font-semibold border border-zinc-200 text-zinc-700 bg-white hover:bg-zinc-50 items-center justify-center active:bg-zinc-100"
+            className="h-11 flex-1 items-center justify-center rounded-2xl border border-zinc-200 bg-white active:bg-zinc-100"
           >
-            <Text className="text-sm font-semibold text-zinc-700">Reset</Text>
+            <Text className="text-xs font-semibold text-zinc-950">Reset</Text>
           </Pressable>
           <Pressable
             onPress={applyFilters}
-            className="flex-1 h-11 rounded-xl text-sm font-semibold bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm items-center justify-center active:bg-zinc-900"
+            className="h-11 flex-1 items-center justify-center rounded-2xl bg-black active:opacity-80"
           >
-            <Text className="text-sm font-semibold text-white">Apply Filters</Text>
+            <Text className="text-xs font-semibold text-white">Apply filters</Text>
           </Pressable>
         </View>
       </BottomSheet>
