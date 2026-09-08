@@ -6,12 +6,17 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheet } from "./BottomSheet";
 import { useAddDevice } from "../hooks/useInventory";
 import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../lib/networkLock";
+import { todayIso } from "../lib/format";
 import { Tag } from "./ui/Tag";
+import { FormField } from "./ui/FormField";
+import { DateField } from "./ui/DateField";
 import { genId } from "../lib/db";
 import {
   ACCESSORY_OPTIONS,
@@ -23,9 +28,6 @@ const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
 const CONDITION_OPTIONS = ["Brand New", "Used"];
 
-const inputClass =
-  "h-10 px-3.5 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full";
-
 interface AddDeviceSheetProps {
   visible: boolean;
   onClose: () => void;
@@ -35,8 +37,8 @@ interface AddDeviceSheetProps {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <View className="mb-3">
-      <Text className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+    <View>
+      <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
         {label}
       </Text>
       {children}
@@ -46,12 +48,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: AddDeviceSheetProps) {
   const addDevice = useAddDevice();
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const [model, setModel] = useState("");
   const [imei, setImei] = useState("");
   const [storage, setStorage] = useState<string | null>(null);
   const [condition, setCondition] = useState<string | null>(null);
   const [buyPrice, setBuyPrice] = useState("");
   const [listPrice, setListPrice] = useState("");
+  const [dateBought, setDateBought] = useState(todayIso());
   const [networkLock, setNetworkLock] = useState<string>(NETWORK_LOCK_OPTIONS[0]);
   const [specsOpen, setSpecsOpen] = useState(false);
   const [batteryHealth, setBatteryHealth] = useState("");
@@ -70,6 +75,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
       setCondition(null);
       setBuyPrice("");
       setListPrice("");
+      setDateBought(todayIso());
       setNetworkLock(NETWORK_LOCK_OPTIONS[0]);
       setSpecsOpen(false);
       setBatteryHealth("");
@@ -114,6 +120,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
         color: color.trim() || null,
         network_lock: networkLock,
         repair_cost: repairCost.trim() ? Number(repairCost) : 0,
+        date_bought: dateBought,
         accessories: accessories.length > 0 ? JSON.stringify(accessories) : null,
         notes: notes.trim() || null,
       });
@@ -129,20 +136,20 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
         bounces={false}
         alwaysBounceVertical={false}
         overScrollMode="never"
-        className="flex-1 overflow-y-auto px-4 py-3 space-y-4"
-        contentContainerClassName="pb-4 space-y-4"
+        className="px-4 py-3"
+        contentContainerClassName="pb-4 gap-4"
+        style={{ flexShrink: 1, maxHeight: Math.round(height * 0.55) }}
       >
         <Field label="Brand & model">
-          <TextInput
+          <FormField
             value={model}
             onChangeText={setModel}
             placeholder="e.g. iPhone 15 Pro Max"
-            placeholderTextColor="#a1a1aa"
             autoCapitalize="words"
-            className={inputClass}
           />
         </Field>
 
@@ -178,48 +185,45 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
         </View>
 
         <Field label="IMEI / Serial number (optional)">
-          <View className="relative">
-            <TextInput
-              value={imei}
-              onChangeText={(t) => setImei(t.replace(/\D/g, ""))}
-              placeholder="15-digit IMEI (optional)"
-              placeholderTextColor="#a1a1aa"
-              keyboardType="number-pad"
-              maxLength={15}
-              className={`${inputClass} pr-12 font-mono tracking-wide`}
-            />
-            <View className="absolute bottom-0 right-3.5 top-0 justify-center">
-              <Ionicons name="scan-outline" size={20} color="#a1a1aa" />
-            </View>
-          </View>
+          <FormField
+            value={imei}
+            onChangeText={(t) => setImei(t.replace(/\D/g, ""))}
+            placeholder="15-digit IMEI (optional)"
+            keyboardType="number-pad"
+            maxLength={15}
+            style={{ fontFamily: "Poppins_400Regular", letterSpacing: 1 }}
+            suffixIcon={<Ionicons name="scan-outline" size={18} color="#a1a1aa" />}
+          />
         </Field>
 
         <View className="flex-row gap-3">
           <View className="flex-1">
             <Field label="Buy price (₱)">
-              <TextInput
+              <FormField
                 value={buyPrice}
                 onChangeText={(t) => setBuyPrice(t.replace(/[^0-9.]/g, ""))}
                 placeholder="0.00"
-                placeholderTextColor="#a1a1aa"
                 keyboardType="decimal-pad"
-                className={inputClass}
+                prefix="₱"
               />
             </Field>
           </View>
           <View className="flex-1">
             <Field label="List price (₱)">
-              <TextInput
+              <FormField
                 value={listPrice}
                 onChangeText={(t) => setListPrice(t.replace(/[^0-9.]/g, ""))}
                 placeholder="0.00"
-                placeholderTextColor="#a1a1aa"
                 keyboardType="decimal-pad"
-                className={inputClass}
+                prefix="₱"
               />
             </Field>
           </View>
         </View>
+
+        <Field label="Date bought">
+          <DateField value={dateBought} onChange={setDateBought} />
+        </Field>
 
         <Field label="Network lock">
           <View className="flex flex-wrap gap-1.5" style={{ flexDirection: "row" }}>
@@ -249,55 +253,49 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
         </Pressable>
 
         {specsOpen ? (
-          <View>
+          <View className="gap-3">
             <View className="flex-row gap-3">
               <View className="flex-1">
                 <Field label="Battery health (%)">
-                  <TextInput
+                  <FormField
                     value={batteryHealth}
                     onChangeText={(t) => setBatteryHealth(t.replace(/[^0-9]/g, ""))}
                     placeholder="e.g. 85"
-                    placeholderTextColor="#a1a1aa"
                     keyboardType="number-pad"
                     maxLength={3}
-                    className={inputClass}
                   />
                 </Field>
               </View>
               <View className="flex-1">
                 <Field label="Color">
-                  <TextInput
+                  <FormField
                     value={color}
                     onChangeText={setColor}
                     placeholder="e.g. Natural Titanium"
-                    placeholderTextColor="#a1a1aa"
                     autoCapitalize="words"
-                    className={inputClass}
                   />
                 </Field>
               </View>
             </View>
 
             <Field label="Repair / extra cost (₱)">
-              <TextInput
+              <FormField
                 value={repairCost}
                 onChangeText={(t) => setRepairCost(t.replace(/[^0-9.]/g, ""))}
                 placeholder="0.00"
-                placeholderTextColor="#a1a1aa"
                 keyboardType="decimal-pad"
-                className={inputClass}
+                prefix="₱"
               />
             </Field>
 
             <Field label="IMEI 2 (optional, for dual-SIM)">
-              <TextInput
+              <FormField
                 value={imei2}
                 onChangeText={(t) => setImei2(t.replace(/\D/g, ""))}
                 placeholder="15-digit secondary IMEI"
-                placeholderTextColor="#a1a1aa"
                 keyboardType="number-pad"
                 maxLength={15}
-                className={`${inputClass} font-mono tracking-wide`}
+                style={{ fontFamily: "Poppins_400Regular", letterSpacing: 1 }}
               />
             </Field>
 
@@ -315,11 +313,11 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
                             : [...prev, opt.key],
                         )
                       }
-                      className={`flex-row items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg font-medium border active:opacity-80 ${
-                        isSelected
-                          ? "bg-emerald-50 border-emerald-300"
-                          : "bg-white border-zinc-200"
-                      }`}
+                      className="flex-row items-center gap-1.5 rounded-lg border px-2.5 py-1.5 active:opacity-80"
+                      style={{
+                        backgroundColor: isSelected ? "#ecfdf5" : "#ffffff",
+                        borderColor: isSelected ? "#6ee7b7" : "#e4e4e7",
+                      }}
                     >
                       <Ionicons
                         name={isSelected ? "checkmark-circle" : "ellipse-outline"}
@@ -327,9 +325,11 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
                         color={isSelected ? "#059669" : "#a1a1aa"}
                       />
                       <Text
-                        className={`text-xs ${
-                          isSelected ? "font-semibold text-emerald-700" : "font-medium text-zinc-600"
-                        }`}
+                        className="text-xs"
+                        style={{
+                          color: isSelected ? "#047857" : "#52525b",
+                          fontWeight: isSelected ? "600" : "500",
+                        }}
                       >
                         {opt.label}
                       </Text>
@@ -348,7 +348,8 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
-                className={`${inputClass} min-h-[80px]`}
+                scrollEnabled
+                className="h-24 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-950"
               />
             </Field>
           </View>
@@ -357,7 +358,10 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
         {error ? <Text className="mb-3 text-sm text-red-600">{error}</Text> : null}
       </ScrollView>
 
-      <View className="shrink-0 p-4 bg-white border-t border-zinc-100 flex items-center gap-2">
+      <View
+        className="shrink-0 flex-row items-center gap-2 border-t border-zinc-100 bg-white px-4 pt-3"
+        style={{ paddingBottom: Math.max(insets.bottom, 32) }}
+      >
         <View className="flex-row gap-2 w-full">
           <Pressable
             onPress={onClose}
