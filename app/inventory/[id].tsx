@@ -429,7 +429,7 @@ export default function DeviceDetailScreen() {
                   <Text className="text-[11px] font-mono text-zinc-500">
                     {device.imei.startsWith("NO-IMEI")
                       ? "No IMEI"
-                      : `IMEI ····${device.imei.slice(-5)}`}
+                      : formatImei(device.imei)}
                   </Text>
                   <Text className="mt-1 text-sm font-bold text-zinc-950">{storage || "\u2014"}</Text>
                   <Text className="mt-0.5 text-xs font-semibold text-zinc-600">{condition || "\u2014"}</Text>
@@ -524,7 +524,7 @@ export default function DeviceDetailScreen() {
               </View>
             </View>
 
-            {(imei2.trim() || batteryHealth.trim() || networkLock) ? (
+            {(imei2.trim() || device.serial_number || batteryHealth.trim() || networkLock) ? (
               <>
                 <Text className="mt-3 mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
                   Details
@@ -532,6 +532,9 @@ export default function DeviceDetailScreen() {
                 <View className="w-full bg-white rounded-2xl px-4 border border-zinc-100 shadow-sm flex flex-col">
                   {imei2.trim() ? (
                     <SpecRow icon="call-outline" label="IMEI 2" value={formatImei(imei2)} mono />
+                  ) : null}
+                  {device.serial_number ? (
+                    <SpecRow icon="key-outline" label="Serial Number" value={device.serial_number} mono />
                   ) : null}
                   {batteryHealth.trim() ? (
                     <SpecRow icon="battery-half-outline" label="Battery Health" value={`${batteryHealth}%`} />
