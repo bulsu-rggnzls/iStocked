@@ -19,6 +19,7 @@ export interface Device {
   condition: string;
   imei: string;
   imei2: string | null;
+  serial_number: string | null;
   buy_price: number;
   list_price: number;
   sold_price: number | null;
@@ -43,6 +44,7 @@ export interface NewDeviceInput {
   condition: string;
   imei: string;
   imei2?: string | null;
+  serial_number?: string | null;
   buy_price: number;
   list_price: number;
   battery_health?: number | null;

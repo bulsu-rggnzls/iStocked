@@ -33,6 +33,10 @@ interface AddDeviceSheetProps {
   onClose: () => void;
   onSaved?: (device: Device) => void;
   prefilledImei?: string | null;
+  prefilledModel?: string | null;
+  prefilledStorage?: string | null;
+  prefilledColor?: string | null;
+  prefilledSerial?: string | null;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -46,7 +50,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: AddDeviceSheetProps) {
+export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei, prefilledModel, prefilledStorage, prefilledColor, prefilledSerial }: AddDeviceSheetProps) {
   const addDevice = useAddDevice();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
@@ -63,15 +67,16 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
   const [color, setColor] = useState("");
   const [repairCost, setRepairCost] = useState("");
   const [imei2, setImei2] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
   const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
-      setModel("");
+      setModel(prefilledModel?.trim() ?? "");
       setImei(prefilledImei?.replace(/\D/g, "") ?? "");
-      setStorage(null);
+      setStorage(prefilledStorage ?? null);
       setCondition(null);
       setBuyPrice("");
       setListPrice("");
@@ -79,14 +84,15 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
       setNetworkLock(NETWORK_LOCK_OPTIONS[0]);
       setSpecsOpen(false);
       setBatteryHealth("");
-      setColor("");
+      setColor(prefilledColor ?? "");
       setRepairCost("");
       setImei2("");
+      setSerialNumber(prefilledSerial?.trim() ?? "");
       setAccessories([]);
       setNotes("");
       setError(null);
     }
-  }, [visible, prefilledImei]);
+  }, [visible, prefilledImei, prefilledModel, prefilledStorage, prefilledColor, prefilledSerial]);
 
   const handleSave = async () => {
     const digits = imei.replace(/\D/g, "");
@@ -112,6 +118,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
         model: model.trim(),
         imei: finalImei,
         imei2: imei2.trim() || null,
+        serial_number: serialNumber.trim() || null,
         storage: storage ?? "",
         condition: condition ?? "",
         buy_price: buy,
@@ -295,6 +302,16 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei }: Add
                 placeholder="15-digit secondary IMEI"
                 keyboardType="number-pad"
                 maxLength={15}
+                style={{ fontFamily: "Poppins_400Regular", letterSpacing: 1 }}
+              />
+            </Field>
+
+            <Field label="Serial number (optional, from box)">
+              <FormField
+                value={serialNumber}
+                onChangeText={(t) => setSerialNumber(t.replace(/[^A-Z0-9]/gi, "").toUpperCase())}
+                placeholder="e.g. F2LX80GHQ1L5"
+                autoCapitalize="characters"
                 style={{ fontFamily: "Poppins_400Regular", letterSpacing: 1 }}
               />
             </Field>

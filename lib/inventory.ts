@@ -58,11 +58,12 @@ export async function addDevice(input: NewDeviceInput) {
   const id = genId();
   const now = new Date().toISOString();
   await db.runAsync(
-    "INSERT INTO devices (id, model, imei, imei2, storage, condition, buy_price, list_price, battery_health, color, network_lock, repair_cost, accessories, notes, status, date_bought, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?)",
+    "INSERT INTO devices (id, model, imei, imei2, serial_number, storage, condition, buy_price, list_price, battery_health, color, network_lock, repair_cost, accessories, notes, status, date_bought, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?)",
     id,
     input.model,
     input.imei,
     input.imei2?.trim() || null,
+    input.serial_number?.trim() || null,
     input.storage,
     input.condition,
     input.buy_price,
@@ -96,6 +97,7 @@ export async function updateDevice(
     "model",
     "imei",
     "imei2",
+    "serial_number",
     "storage",
     "condition",
     "buy_price",

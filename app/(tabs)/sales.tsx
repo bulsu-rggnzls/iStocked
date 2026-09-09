@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -118,6 +118,31 @@ export default function SalesHistoryScreen() {
     }, [refetch]),
   );
 
+  const groupedByMonth = useMemo(() => {
+    const groups = new Map<
+      string,
+      { key: string; label: string; items: Device[]; profit: number; count: number }
+    >();
+    for (const d of data ?? []) {
+      const date = d.date_sold ? new Date(d.date_sold) : new Date();
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          label: date.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+          items: [],
+          profit: 0,
+          count: 0,
+        });
+      }
+      const g = groups.get(key)!;
+      g.items.push(d);
+      g.count += 1;
+      g.profit += Number(d.sold_price ?? 0) - Number(d.buy_price) - Number(d.repair_cost ?? 0);
+    }
+    return Array.from(groups.values());
+  }, [data]);
+
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-zinc-100">
@@ -204,14 +229,14 @@ export default function SalesHistoryScreen() {
         </View>
       </View>
 
-      {/* List */}
+      {/* Monthly compiled */}
       <View className="px-4 pt-5">
         <Text className="pb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
           Transactions
         </Text>
 
-        <View className="rounded-2xl border border-zinc-200 bg-white px-4">
-          {(data ?? []).length === 0 ? (
+        {groupedByMonth.length === 0 ? (
+          <View className="rounded-2xl border border-zinc-200 bg-white px-4">
             <View className="py-2">
               <EmptyState
                 icon="checkmark-circle-outline"
@@ -221,17 +246,39 @@ export default function SalesHistoryScreen() {
                 onAction={() => router.push("/inventory")}
               />
             </View>
-          ) : (
-            (data ?? []).map((item, i) => (
-              <LedgerRow
-                key={item.id}
-                device={item}
-                last={i === (data ?? []).length - 1}
-                onPress={() => setSelectedDevice(item)}
-              />
-            ))
-          )}
-        </View>
+          </View>
+        ) : (
+          <View className="gap-5">
+            {groupedByMonth.map((group) => (
+              <View key={group.key}>
+                <View className="flex-row items-center justify-between pb-2">
+                  <Text className="text-sm font-bold text-zinc-950">{group.label}</Text>
+                  <View className="flex-row items-center gap-2">
+                    <Text className="text-[11px] font-medium text-zinc-500">
+                      {group.count} {group.count === 1 ? "sale" : "sales"}
+                    </Text>
+                    <Text
+                      className={`text-sm font-bold ${group.profit >= 0 ? "text-emerald-700" : "text-red-700"}`}
+                    >
+                      {group.profit >= 0 ? "+" : "\u2212"}
+                      {formatPrice(Math.abs(group.profit))} net
+                    </Text>
+                  </View>
+                </View>
+                <View className="rounded-2xl border border-zinc-200 bg-white px-4">
+                  {group.items.map((item, i) => (
+                    <LedgerRow
+                      device={item}
+                      key={item.id}
+                      last={i === group.items.length - 1}
+                      onPress={() => setSelectedDevice(item)}
+                    />
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
       <SaleDetailSheet

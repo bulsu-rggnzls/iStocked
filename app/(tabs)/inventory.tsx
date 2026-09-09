@@ -17,7 +17,7 @@ import { AddDeviceSheet } from "../../components/AddDeviceSheet";
 import { RecordSaleSheet } from "../../components/RecordSaleSheet";
 import { EmptyState } from "../../components/EmptyState";
 import { NETWORK_LOCK_OPTIONS } from "../../lib/networkLock";
-import { formatImei, formatPrice } from "../../lib/format";
+import { formatPrice } from "../../lib/format";
 import type { Device } from "../../types";
 
 const CONDITION_OPTIONS = [
@@ -59,7 +59,7 @@ function ShelfRow({
           {device.model}
         </Text>
         <Text numberOfLines={1} className="mt-0.5 text-[11px] text-zinc-500">
-          {device.storage} · {device.condition} · {formatImei(device.imei)}
+          {device.storage} · {device.condition}
         </Text>
       </View>
 
