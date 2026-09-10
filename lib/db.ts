@@ -82,7 +82,11 @@ export async function ensureDb(): Promise<SQLiteDatabase> {
     await addColumnIfMissing(database, "devices", "serial_number", "TEXT");
     await addColumnIfMissing(database, "devices", "accessories", "TEXT");
     await addColumnIfMissing(database, "devices", "notes", "TEXT");
-    await database.execAsync("PRAGMA user_version = 6");
+    await addColumnIfMissing(database, "devices", "updated_at", "TEXT");
+    await database.execAsync(
+      "UPDATE devices SET updated_at = created_at WHERE updated_at IS NULL",
+    );
+    await database.execAsync("PRAGMA user_version = 7");
 
     await seedIfEmpty(database);
     initialized = true;
@@ -108,7 +112,7 @@ async function seedIfEmpty(database: SQLiteDatabase) {
   ];
   for (const [model, imei, storage, condition, buy, list, battery, color, lock, repair] of inStock) {
     await database.runAsync(
-      "INSERT INTO devices (id, model, imei, storage, condition, buy_price, list_price, battery_health, color, network_lock, repair_cost, status, date_bought, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?)",
+      "INSERT INTO devices (id, model, imei, storage, condition, buy_price, list_price, battery_health, color, network_lock, repair_cost, status, date_bought, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?, ?)",
       genId(),
       model,
       imei,
@@ -122,11 +126,12 @@ async function seedIfEmpty(database: SQLiteDatabase) {
       repair,
       daysAgo(9),
       now,
+      now,
     );
   }
 
   await database.runAsync(
-    "INSERT INTO devices (id, model, imei, storage, condition, buy_price, list_price, sold_price, battery_health, color, network_lock, repair_cost, status, date_bought, date_sold, customer_name, buyer_contact, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'sold', ?, ?, ?, ?, ?)",
+    "INSERT INTO devices (id, model, imei, storage, condition, buy_price, list_price, sold_price, battery_health, color, network_lock, repair_cost, status, date_bought, date_sold, customer_name, buyer_contact, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'sold', ?, ?, ?, ?, ?, ?)",
     genId(),
     "iPhone 14",
     "356891104820193",
@@ -143,6 +148,7 @@ async function seedIfEmpty(database: SQLiteDatabase) {
     daysAgo(3),
     "Juan dela Cruz",
     "FB: juancruz.ph",
+    now,
     now,
   );
 }
