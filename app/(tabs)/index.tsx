@@ -148,6 +148,13 @@ export default function DashboardScreen() {
             </Text>
             <Text className="mt-1 text-3xl font-bold text-zinc-950">Dashboard</Text>
           </View>
+          <Pressable
+            onPress={() => router.push("/settings")}
+            className="h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white active:bg-zinc-100"
+            accessibilityLabel="Settings"
+          >
+            <Ionicons name="settings-outline" size={20} color="#09090b" />
+          </Pressable>
         </View>
       </View>
 

@@ -8,6 +8,7 @@ import {
   updateDevice,
   type DeviceFilters,
 } from "../lib/inventory";
+import { pushDevice, deleteRemoteDevice } from "../lib/sync";
 import type { Device, NewDeviceInput } from "../types";
 
 export function useDevices(filters: DeviceFilters = {}) {
@@ -41,6 +42,7 @@ export function useAddDevice() {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
       queryClient.setQueryData(["devices", device.id], device);
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      void pushDevice(device).catch(() => {});
     },
   });
 }
@@ -60,6 +62,7 @@ export function useUpdateDevice() {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.setQueryData(["devices", device.id], device);
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      void pushDevice(device).catch(() => {});
     },
   });
 }
@@ -68,10 +71,11 @@ export function useDeleteDevice() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteDevice(id),
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      void deleteRemoteDevice(id).catch(() => {});
     },
   });
 }

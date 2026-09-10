@@ -32,11 +32,17 @@ export function BottomSheet({
           }`}
           style={{ maxHeight: "90%" }}
         >
-          {/* Inside-only keyboard avoidance: grows padding on iOS (capped by maxHeight), no-op on Android */}
+          {/* Inside-only keyboard avoidance: grows padding on iOS (capped by maxHeight), no-op on Android.
+              flexShrink lets this wrapper yield height when the sheet hits its cap, so the inner
+              ScrollView actually shrinks and the footer is never clipped. */}
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : undefined}
             keyboardVerticalOffset={0}
-            style={{ paddingBottom: Math.max(insets.bottom, 0) }}
+            style={{
+              paddingBottom: Math.max(insets.bottom, 0),
+              flexShrink: 1,
+              minHeight: 0,
+            }}
           >
             {/* Fixed header: pinned top, outside the scroll area */}
             <View className="shrink-0 px-4 pt-3 pb-3 border-b border-zinc-100">
