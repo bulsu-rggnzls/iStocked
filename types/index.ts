@@ -36,6 +36,7 @@ export interface Device {
   accessories: string | null;
   notes: string | null;
   created_at: string;
+  updated_at: string | null;
 }
 
 export interface NewDeviceInput {
