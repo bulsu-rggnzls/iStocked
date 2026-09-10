@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSalesHistory, recordSale } from "../lib/sales";
+import { pushDevice } from "../lib/sync";
 import type { RecordSaleInput } from "../types";
 
 export function useSales() {
@@ -13,10 +14,11 @@ export function useRecordSale() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: RecordSaleInput) => recordSale(input),
-    onSuccess: () => {
+    onSuccess: (device) => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      void pushDevice(device).catch(() => {});
     },
   });
 }
