@@ -3,6 +3,7 @@ import "../global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import * as WebBrowser from "expo-web-browser";
 import {
   Poppins_400Regular,
   Poppins_500Medium,
@@ -10,6 +11,9 @@ import {
   Poppins_700Bold,
   useFonts,
 } from "@expo-google-fonts/poppins";
+
+// Completes the OAuth return when the browser redirects back into the app
+WebBrowser.maybeCompleteAuthSession();
 
 const queryClient = new QueryClient();
 
@@ -36,6 +40,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="inventory/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="checkout/index" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </QueryClientProvider>
