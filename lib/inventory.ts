@@ -58,7 +58,7 @@ export async function addDevice(input: NewDeviceInput) {
   const id = genId();
   const now = new Date().toISOString();
   await db.runAsync(
-    "INSERT INTO devices (id, model, imei, imei2, serial_number, storage, condition, buy_price, list_price, battery_health, color, network_lock, repair_cost, accessories, notes, status, date_bought, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?)",
+    "INSERT INTO devices (id, model, imei, imei2, serial_number, storage, condition, buy_price, list_price, battery_health, color, network_lock, repair_cost, accessories, notes, status, date_bought, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_stock', ?, ?, ?)",
     id,
     input.model,
     input.imei,
@@ -75,6 +75,7 @@ export async function addDevice(input: NewDeviceInput) {
     input.accessories ?? null,
     input.notes?.trim() || null,
     input.date_bought ?? now,
+    now,
     now,
   );
   const row = await db.getFirstAsync<Device>(
@@ -119,6 +120,8 @@ export async function updateDevice(
   }
 
   if (sets.length > 0) {
+    sets.push("updated_at = ?");
+    params.push(new Date().toISOString());
     params.push(id);
     await db.runAsync(
       `UPDATE devices SET ${sets.join(", ")} WHERE id = ?`,
