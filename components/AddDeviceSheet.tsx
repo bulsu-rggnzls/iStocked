@@ -148,7 +148,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei, prefi
         alwaysBounceVertical={false}
         overScrollMode="never"
         className="px-4 py-3"
-        contentContainerClassName="pb-4 gap-4"
+        contentContainerClassName="pb-10 gap-4"
         style={{ flexShrink: 1, maxHeight: Math.round(height * 0.55) }}
       >
         <Field label="Brand & model">
