@@ -98,7 +98,7 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
         alwaysBounceVertical={false}
         overScrollMode="never"
         className="px-4 pt-2"
-        contentContainerClassName="pb-4 gap-4"
+        contentContainerClassName="pb-10 gap-4"
         style={{ flexShrink: 1, maxHeight: Math.round(height * 0.55) }}
       >
         {/* Device summary — horizontal, left-aligned */}
