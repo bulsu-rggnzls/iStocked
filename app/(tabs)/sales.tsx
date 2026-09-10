@@ -347,8 +347,14 @@ function SaleDetailSheet({
 
     try {
       const { uri } = await Print.printToFileAsync({ html });
+      // Android requires an explicit file:// scheme for the share sheet to read the file
+      const fileUri = uri.startsWith("file://") ? uri : `file://${uri}`;
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: "Share receipt" });
+        await Sharing.shareAsync(fileUri, {
+          mimeType: "application/pdf",
+          dialogTitle: "Share receipt",
+          UTI: "com.adobe.pdf",
+        });
       }
     } catch (err) {
       Alert.alert(
@@ -400,6 +406,7 @@ function SaleDetailSheet({
         alwaysBounceVertical={false}
         overScrollMode="never"
         className="px-4 pt-3"
+        contentContainerClassName="pb-10"
         style={{ flexShrink: 1, maxHeight: Math.round(height * 0.45) }}
       >
         <Text className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
