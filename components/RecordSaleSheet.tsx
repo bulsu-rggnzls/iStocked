@@ -123,6 +123,22 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
           </View>
         </View>
 
+        {/* Financials first — date + price together */}
+        <Field label="Sale date">
+          <DateField value={dateSold} onChange={setDateSold} />
+        </Field>
+
+        <Field label="Final sold price (₱)">
+          <TextInput
+            value={soldPrice}
+            onChangeText={(t) => setSoldPrice(t.replace(/[^0-9.]/g, ""))}
+            placeholder="0.00"
+            placeholderTextColor="#a1a1aa"
+            keyboardType="decimal-pad"
+            className={inputClass}
+          />
+        </Field>
+
         <Field label="Customer name">
           <TextInput
             value={customerName}
@@ -144,21 +160,6 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
             autoCorrect={false}
             className={inputClass}
           />
-        </Field>
-
-        <Field label="Final sold price (₱)">
-          <TextInput
-            value={soldPrice}
-            onChangeText={(t) => setSoldPrice(t.replace(/[^0-9.]/g, ""))}
-            placeholder="0.00"
-            placeholderTextColor="#a1a1aa"
-            keyboardType="decimal-pad"
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Date sold">
-          <DateField value={dateSold} onChange={setDateSold} />
         </Field>
 
         {/* Warranty chips */}

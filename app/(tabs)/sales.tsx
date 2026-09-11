@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import { Paths, File } from "expo-file-system";
 import { useSales } from "../../hooks/useSales";
 import { useUpdateDevice } from "../../hooks/useInventory";
 import { BottomSheet } from "../../components/BottomSheet";
@@ -105,12 +106,9 @@ export default function SalesHistoryScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error, isRefetching, refetch } = useSales();
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const insets = useSafeAreaInsets();
-
-  const totalProfit = (data ?? []).reduce(
-    (sum, d) => sum + Number(d.sold_price ?? 0) - Number(d.buy_price) - Number(d.repair_cost ?? 0),
-    0,
-  );
 
   useFocusEffect(
     useCallback(() => {
@@ -142,6 +140,45 @@ export default function SalesHistoryScreen() {
     }
     return Array.from(groups.values());
   }, [data]);
+
+  // Year navigation: derive available years, filter months for the selected year
+  const availableYears = useMemo(
+    () => [...new Set(groupedByMonth.map((g) => Number(g.key.slice(0, 4))))].sort((a, b) => b - a),
+    [groupedByMonth],
+  );
+
+  const monthsThisYear = useMemo(
+    () => groupedByMonth.filter((g) => g.key.startsWith(String(selectedYear))),
+    [groupedByMonth, selectedYear],
+  );
+
+  const filteredGroups = selectedMonth
+    ? groupedByMonth.filter((g) => g.key === selectedMonth)
+    : monthsThisYear;
+
+  const selectedGroup = selectedMonth
+    ? groupedByMonth.find((g) => g.key === selectedMonth) ?? null
+    : null;
+
+  // Short month label for compact chips ("Sep" not "September")
+  const shortMonth = (isoKey: string) => {
+    const date = new Date(`${isoKey}-01T00:00:00`);
+    return date.toLocaleDateString("en-US", { month: "short" });
+  };
+
+  const changeYear = (year: number) => {
+    setSelectedYear(year);
+    if (selectedMonth && !selectedMonth.startsWith(String(year))) {
+      setSelectedMonth(null);
+    }
+  };
+
+  // Year-scoped totals: "All" shows the selected year's numbers, not all-time
+  const yearTotal = monthsThisYear.reduce((s, g) => s + g.profit, 0);
+  const yearCount = monthsThisYear.reduce((s, g) => s + g.count, 0);
+
+  const displayTotal = selectedGroup ? selectedGroup.profit : yearTotal;
+  const displayCount = selectedGroup ? selectedGroup.count : yearCount;
 
   if (isLoading) {
     return (
@@ -204,30 +241,99 @@ export default function SalesHistoryScreen() {
           <View className="flex-row gap-4">
             <View className="flex-1">
               <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
-                Net profit
+                {selectedGroup
+                  ? selectedGroup.label
+                  : selectedYear === new Date().getFullYear()
+                    ? "This year"
+                    : String(selectedYear)}
               </Text>
               <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
-                {formatPrice(totalProfit)}
+                {formatPrice(displayTotal)}
               </Text>
               <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
-                {data?.length ?? 0} {data?.length === 1 ? "sale" : "sales"} recorded
+                {displayCount} {displayCount === 1 ? "sale" : "sales"}
               </Text>
             </View>
             <View className="w-px bg-zinc-200" />
             <View className="flex-1">
               <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
-                Avg. per sale
+                {selectedGroup ? "Per sale" : "Avg. per sale"}
               </Text>
               <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
-                {formatPrice(data?.length ? totalProfit / data.length : 0)}
+                {formatPrice(displayCount ? displayTotal / displayCount : 0)}
               </Text>
               <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
-                across all time
+                {selectedGroup ? "in this month" : "across this year"}
               </Text>
             </View>
           </View>
         </View>
       </View>
+
+      {/* Month filter */}
+      {groupedByMonth.length > 0 ? (
+        <View className="px-4 pt-4">
+          {/* Year toggle */}
+          <View className="mb-3 flex-row items-center justify-between">
+            <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+              Period
+            </Text>
+            <View className="flex-row items-center gap-3">
+              <Pressable
+                onPress={() => changeYear(Math.max(Math.min(...availableYears), selectedYear - 1))}
+                hitSlop={8}
+                className="active:opacity-60"
+              >
+                <Ionicons name="chevron-back" size={18} color="#71717a" />
+              </Pressable>
+              <Text className="text-sm font-bold text-zinc-950 min-w-[3ch] text-center">
+                {selectedYear}
+              </Text>
+              <Pressable
+                onPress={() => changeYear(Math.min(Math.max(...availableYears), selectedYear + 1))}
+                hitSlop={8}
+                className="active:opacity-60"
+              >
+                <Ionicons name="chevron-forward" size={18} color="#71717a" />
+              </Pressable>
+            </View>
+          </View>
+          {/* Month pills (scrollable, short labels) */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="gap-2"
+          >
+            <Pressable
+              onPress={() => setSelectedMonth(null)}
+              className="h-9 shrink-0 items-center justify-center rounded-full border px-4 active:opacity-80"
+              style={{
+                backgroundColor: selectedMonth === null ? "#09090b" : "#ffffff",
+                borderColor: selectedMonth === null ? "#09090b" : "#e4e4e7",
+              }}
+            >
+              <Text className="text-xs font-semibold" style={{ color: selectedMonth === null ? "#ffffff" : "#3f3f46" }}>
+                All
+              </Text>
+            </Pressable>
+            {monthsThisYear.map((g) => (
+              <Pressable
+                key={g.key}
+                onPress={() => setSelectedMonth(selectedMonth === g.key ? null : g.key)}
+                className="h-9 shrink-0 items-center justify-center rounded-full border px-4 active:opacity-80"
+                style={{
+                  backgroundColor: selectedMonth === g.key ? "#09090b" : "#ffffff",
+                  borderColor: selectedMonth === g.key ? "#09090b" : "#e4e4e7",
+                }}
+              >
+                <Text className="text-xs font-semibold" style={{ color: selectedMonth === g.key ? "#ffffff" : "#3f3f46" }}>
+                  {shortMonth(g.key)}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      ) : null}
 
       {/* Monthly compiled */}
       <View className="px-4 pt-5">
@@ -235,7 +341,7 @@ export default function SalesHistoryScreen() {
           Transactions
         </Text>
 
-        {groupedByMonth.length === 0 ? (
+        {filteredGroups.length === 0 ? (
           <View className="rounded-2xl border border-zinc-200 bg-white px-4">
             <View className="py-2">
               <EmptyState
@@ -249,7 +355,7 @@ export default function SalesHistoryScreen() {
           </View>
         ) : (
           <View className="gap-5">
-            {groupedByMonth.map((group) => (
+            {filteredGroups.map((group) => (
               <View key={group.key}>
                 <View className="flex-row items-center justify-between pb-2">
                   <Text className="text-sm font-bold text-zinc-950">{group.label}</Text>
@@ -347,15 +453,15 @@ function SaleDetailSheet({
 
     try {
       const { uri } = await Print.printToFileAsync({ html });
-      // Android requires an explicit file:// scheme for the share sheet to read the file
-      const fileUri = uri.startsWith("file://") ? uri : `file://${uri}`;
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri, {
-          mimeType: "application/pdf",
-          dialogTitle: "Share receipt",
-          UTI: "com.adobe.pdf",
-        });
-      }
+      // Copy to a directory expo-sharing's FileProvider can actually read
+      // (expo-print's internal cache isn't exposed through the Android share sheet)
+      const source = new File(uri);
+      const dest = new File(Paths.cache, "receipt.pdf");
+      await source.copy(dest, { overwrite: true });
+      await Sharing.shareAsync(dest.uri, {
+        mimeType: "application/pdf",
+        dialogTitle: "Share receipt",
+      });
     } catch (err) {
       Alert.alert(
         "Could not generate receipt",
