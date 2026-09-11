@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Platform, ScrollView, Text, View } from "react-native";
 import { AppHeader } from "../components/ui/AppHeader";
 import { Button } from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
 import { oauthRedirectUri, signInWithGoogle, supabase, supabaseConfigured, warmUpBrowser } from "../lib/supabase";
 import { syncAll, type SyncResult } from "../lib/sync";
+import { setOfflineMode } from "../lib/appMode";
 
 export default function SettingsScreen() {
   const { session, loading } = useAuth();
@@ -15,6 +16,18 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     warmUpBrowser();
+  }, []);
+
+  // Web OAuth errors (e.g. bad_oauth_state) arrive as URL params when Google
+  // redirects back — surface them in the UI instead of failing silently
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get("error_description") ?? params.get("error");
+    if (oauthError) {
+      setError(decodeURIComponent(oauthError.replace(/\+/g, " ")));
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, []);
 
   const handleSignIn = useCallback(async () => {
@@ -56,6 +69,8 @@ export default function SettingsScreen() {
     setError(null);
     const { error: signOutError } = await supabase.auth.signOut();
     if (signOutError) setError(signOutError.message);
+    // Stay in the app after signing out — local data remains
+    await setOfflineMode(true);
     setSyncResult(null);
   }, []);
 
