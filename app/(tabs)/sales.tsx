@@ -19,6 +19,7 @@ import { useSales } from "../../hooks/useSales";
 import { useUpdateDevice } from "../../hooks/useInventory";
 import { BottomSheet } from "../../components/BottomSheet";
 import { EmptyState } from "../../components/EmptyState";
+import { useIsTablet } from "../../hooks/useIsTablet";
 import { networkLockShort } from "../../lib/networkLock";
 import { formatDate, formatImei, formatPrice } from "../../lib/format";
 import type { Device, WarrantyPeriod } from "../../types";
@@ -408,6 +409,7 @@ function SaleDetailSheet({
   const updateDevice = useUpdateDevice();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const isTablet = useIsTablet();
   if (!device) return null;
 
   const sold = Number(device.sold_price ?? 0);
@@ -513,7 +515,7 @@ function SaleDetailSheet({
         overScrollMode="never"
         className="px-4 pt-3"
         contentContainerClassName="pb-10"
-        style={{ flexShrink: 1, maxHeight: Math.round(height * 0.45) }}
+        style={{ flexShrink: 1, maxHeight: Math.round(height * (isTablet ? 0.35 : 0.45)) }}
       >
         <Text className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
           Device info

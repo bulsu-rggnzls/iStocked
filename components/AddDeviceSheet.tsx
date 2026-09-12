@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheet } from "./BottomSheet";
+import { useIsTablet } from "../hooks/useIsTablet";
 import { useAddDevice } from "../hooks/useInventory";
 import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../lib/networkLock";
 import { todayIso } from "../lib/format";
@@ -54,6 +55,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei, prefi
   const addDevice = useAddDevice();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const isTablet = useIsTablet();
   const [model, setModel] = useState("");
   const [imei, setImei] = useState("");
   const [storage, setStorage] = useState<string | null>(null);
@@ -149,7 +151,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei, prefi
         overScrollMode="never"
         className="px-4 py-3"
         contentContainerClassName="pb-10 gap-4"
-        style={{ flexShrink: 1, maxHeight: Math.round(height * 0.55) }}
+        style={{ flexShrink: 1, maxHeight: Math.round(height * (isTablet ? 0.4 : 0.55)) }}
       >
         <Field label="Brand & model">
           <FormField
