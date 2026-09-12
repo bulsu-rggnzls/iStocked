@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, useWin
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomSheet } from "./BottomSheet";
 import { useRecordSale } from "../hooks/useSales";
+import { useIsTablet } from "../hooks/useIsTablet";
 import { DateField } from "./ui/DateField";
 import { formatPrice, todayIso } from "../lib/format";
 import type { Device, WarrantyPeriod } from "../types";
@@ -36,6 +37,7 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
   const recordSale = useRecordSale();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const isTablet = useIsTablet();
   const [customerName, setCustomerName] = useState("");
   const [buyerContact, setBuyerContact] = useState("");
   const [soldPrice, setSoldPrice] = useState("");
@@ -99,7 +101,7 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
         overScrollMode="never"
         className="px-4 pt-2"
         contentContainerClassName="pb-10 gap-4"
-        style={{ flexShrink: 1, maxHeight: Math.round(height * 0.55) }}
+        style={{ flexShrink: 1, maxHeight: Math.round(height * (isTablet ? 0.4 : 0.55)) }}
       >
         {/* Device summary — horizontal, left-aligned */}
         <View className="flex-row items-center justify-between rounded-2xl border border-zinc-200/80 bg-zinc-50 p-4">

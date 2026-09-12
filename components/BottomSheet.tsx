@@ -28,7 +28,7 @@ export function BottomSheet({
         {/* Sheet container: fixed cap, rounded, clips content */}
         <View
           className={`flex flex-col rounded-t-2xl bg-white overflow-hidden ${
-            isTablet ? "mx-auto max-w-lg my-auto rounded-2xl" : ""
+            isTablet ? "mx-auto max-w-xl w-full my-auto rounded-2xl" : ""
           }`}
           style={{ maxHeight: "90%" }}
         >

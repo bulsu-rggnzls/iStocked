@@ -19,6 +19,7 @@ import { useSales } from "../../hooks/useSales";
 import { useUpdateDevice } from "../../hooks/useInventory";
 import { BottomSheet } from "../../components/BottomSheet";
 import { EmptyState } from "../../components/EmptyState";
+import { useIsTablet } from "../../hooks/useIsTablet";
 import { networkLockShort } from "../../lib/networkLock";
 import { formatDate, formatImei, formatPrice } from "../../lib/format";
 import type { Device, WarrantyPeriod } from "../../types";
@@ -176,9 +177,34 @@ export default function SalesHistoryScreen() {
   // Year-scoped totals: "All" shows the selected year's numbers, not all-time
   const yearTotal = monthsThisYear.reduce((s, g) => s + g.profit, 0);
   const yearCount = monthsThisYear.reduce((s, g) => s + g.count, 0);
+  
+  // Calculate additional totals
+  const yearRevenue = useMemo(() => {
+    return (data ?? [])
+      .filter(d => {
+        const date = d.date_sold ? new Date(d.date_sold) : new Date();
+        return date.getFullYear() === selectedYear;
+      })
+      .reduce((sum, d) => sum + Number(d.sold_price ?? 0), 0);
+  }, [data, selectedYear]);
+  
+  const yearCost = useMemo(() => {
+    return (data ?? [])
+      .filter(d => {
+        const date = d.date_sold ? new Date(d.date_sold) : new Date();
+        return date.getFullYear() === selectedYear;
+      })
+      .reduce((sum, d) => sum + Number(d.buy_price) + Number(d.repair_cost ?? 0), 0);
+  }, [data, selectedYear]);
 
   const displayTotal = selectedGroup ? selectedGroup.profit : yearTotal;
   const displayCount = selectedGroup ? selectedGroup.count : yearCount;
+  const displayRevenue = selectedGroup 
+    ? selectedGroup.items.reduce((sum, d) => sum + Number(d.sold_price ?? 0), 0)
+    : yearRevenue;
+  const displayCost = selectedGroup
+    ? selectedGroup.items.reduce((sum, d) => sum + Number(d.buy_price) + Number(d.repair_cost ?? 0), 0)
+    : yearCost;
 
   if (isLoading) {
     return (
@@ -264,6 +290,25 @@ export default function SalesHistoryScreen() {
               </Text>
               <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
                 {selectedGroup ? "in this month" : "across this year"}
+              </Text>
+            </View>
+          </View>
+          <View className="mt-3 flex-row gap-4">
+            <View className="flex-1">
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+                Revenue
+              </Text>
+              <Text className="mt-1 text-lg font-bold text-emerald-700" numberOfLines={1}>
+                {formatPrice(displayRevenue)}
+              </Text>
+            </View>
+            <View className="w-px bg-zinc-200" />
+            <View className="flex-1">
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+                Cost
+              </Text>
+              <Text className="mt-1 text-lg font-bold text-red-700" numberOfLines={1}>
+                {formatPrice(displayCost)}
               </Text>
             </View>
           </View>
@@ -408,6 +453,7 @@ function SaleDetailSheet({
   const updateDevice = useUpdateDevice();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const isTablet = useIsTablet();
   if (!device) return null;
 
   const sold = Number(device.sold_price ?? 0);
@@ -513,7 +559,7 @@ function SaleDetailSheet({
         overScrollMode="never"
         className="px-4 pt-3"
         contentContainerClassName="pb-10"
-        style={{ flexShrink: 1, maxHeight: Math.round(height * 0.45) }}
+        style={{ flexShrink: 1, maxHeight: Math.round(height * (isTablet ? 0.35 : 0.45)) }}
       >
         <Text className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
           Device info
