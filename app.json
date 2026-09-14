@@ -1,12 +1,21 @@
 {
   "expo": {
     "name": "iStocked",
-    "slug": "iStocked",
+    "slug": "istocked",
     "version": "1.0.0",
     "scheme": "istocked",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f4f4f5"
+    },
+    "runtimeVersion": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
