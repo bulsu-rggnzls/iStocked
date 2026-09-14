@@ -19,24 +19,11 @@ import { useSales } from "../../hooks/useSales";
 import { useUpdateDevice } from "../../hooks/useInventory";
 import { BottomSheet } from "../../components/BottomSheet";
 import { EmptyState } from "../../components/EmptyState";
+import { WarrantyTag } from "../../components/WarrantyTag";
 import { useIsTablet } from "../../hooks/useIsTablet";
 import { networkLockShort } from "../../lib/networkLock";
 import { formatDate, formatImei, formatPrice } from "../../lib/format";
-import type { Device, WarrantyPeriod } from "../../types";
-
-function WarrantyTag({ period, dateSold }: { period: WarrantyPeriod | null; dateSold: string | null }) {
-  if (!period || period === "none" || !dateSold) return null;
-  const days = period === "7_day" ? 7 : 30;
-  const soldDate = new Date(dateSold);
-  const expiry = new Date(soldDate.getTime() + days * 24 * 60 * 60 * 1000);
-  const active = new Date() < expiry;
-
-  return (
-    <Text className={`text-[11px] font-semibold ${active ? "text-emerald-700" : "text-zinc-400"}`}>
-      {active ? `${days}d warranty` : `${days}d warranty expired`}
-    </Text>
-  );
-}
+import type { Device } from "../../types";
 
 function DetailRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (

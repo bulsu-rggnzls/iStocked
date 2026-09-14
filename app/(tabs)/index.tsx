@@ -14,22 +14,9 @@ import { useMetrics } from "../../hooks/useMetrics";
 import { useIsTablet } from "../../hooks/useIsTablet";
 import { EmptyState } from "../../components/EmptyState";
 import { AddDeviceSheet } from "../../components/AddDeviceSheet";
+import { WarrantyTag } from "../../components/WarrantyTag";
 import { formatDate, formatPrice } from "../../lib/format";
-import type { Device, WarrantyPeriod } from "../../types";
-
-function WarrantyTag({ period, dateSold }: { period: WarrantyPeriod | null; dateSold: string | null }) {
-  if (!period || period === "none" || !dateSold) return null;
-  const days = period === "7_day" ? 7 : 30;
-  const soldDate = new Date(dateSold);
-  const expiry = new Date(soldDate.getTime() + days * 24 * 60 * 60 * 1000);
-  const active = new Date() < expiry;
-
-  return (
-    <Text className={`text-[11px] font-semibold ${active ? "text-emerald-700" : "text-zinc-400"}`}>
-      {active ? `${days}d warranty` : `${days}d warranty expired`}
-    </Text>
-  );
-}
+import type { Device } from "../../types";
 
 function ReceiptRow({ device, last }: { device: Device; last: boolean }) {
   const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);

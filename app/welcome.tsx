@@ -11,16 +11,18 @@ import { setOfflineMode } from "../lib/appMode";
 export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const [signingIn, setSigningIn] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   // Web OAuth errors (e.g. expired state cookie) arrive as URL params —
-  // surface them instead of failing silently
-  useEffect(() => {
-    if (Platform.OS !== "web") return;
+  // read them once at mount instead of syncing in an effect
+  const [error, setError] = useState<string | null>(() => {
+    if (Platform.OS !== "web") return null;
     const params = new URLSearchParams(window.location.search);
     const oauthError = params.get("error_description") ?? params.get("error");
-    if (oauthError) {
-      setError(decodeURIComponent(oauthError.replace(/\+/g, " ")));
+    return oauthError ? decodeURIComponent(oauthError.replace(/\+/g, " ")) : null;
+  });
+
+  useEffect(() => {
+    // Clear the OAuth error from the URL so a refresh doesn't re-surface it
+    if (Platform.OS === "web" && window.location.search) {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);

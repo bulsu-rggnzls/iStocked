@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomSheet } from "./BottomSheet";
@@ -33,30 +33,19 @@ const WARRANTY_OPTIONS: { label: string; value: WarrantyPeriod; short: string }[
   { label: "30-day warranty", value: "30_day", short: "30-day" },
 ];
 
-export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
+// Keyed by device.id in RecordSaleSheet, so it remounts fresh for each device
+// — no effect-based reset needed.
+function RecordSaleForm({ device, onClose }: { device: Device; onClose: () => void }) {
   const recordSale = useRecordSale();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const isTablet = useIsTablet();
   const [customerName, setCustomerName] = useState("");
   const [buyerContact, setBuyerContact] = useState("");
-  const [soldPrice, setSoldPrice] = useState("");
-  const [dateSold, setDateSold] = useState("");
+  const [soldPrice, setSoldPrice] = useState(String(device.list_price));
+  const [dateSold, setDateSold] = useState(todayIso());
   const [warrantyPeriod, setWarrantyPeriod] = useState<WarrantyPeriod>("none");
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (device) {
-      setCustomerName("");
-      setBuyerContact("");
-      setSoldPrice(String(device.list_price));
-      setDateSold(todayIso());
-      setWarrantyPeriod("none");
-      setError(null);
-    }
-  }, [device]);
-
-  if (!device) return null;
 
   const price = Number(soldPrice) || 0;
   const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);
@@ -87,11 +76,7 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
   };
 
   return (
-    <BottomSheet
-      visible
-      onClose={onClose}
-      title="Record sale"
-    >
+    <>
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -243,6 +228,17 @@ export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
           )}
         </Pressable>
       </View>
+    </>
+  );
+}
+
+export function RecordSaleSheet({ device, onClose }: RecordSaleSheetProps) {
+  if (!device) return null;
+
+  return (
+    <BottomSheet visible onClose={onClose} title="Record sale">
+      {/* Keyed by id so the form remounts fresh for each device */}
+      <RecordSaleForm key={device.id} device={device} onClose={onClose} />
     </BottomSheet>
   );
 }

@@ -1,12 +1,27 @@
 {
   "expo": {
     "name": "iStocked",
-    "slug": "iStocked",
+    "slug": "istocked",
     "version": "1.0.0",
     "scheme": "istocked",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f4f4f5"
+    },
+    "runtimeVersion": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/5a9211cf-31a2-46ba-901a-eaecbdb1b07e",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -23,7 +38,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.anonymous.iStocked"
+      "package": "com.istocked.app"
     },
     "web": {
       "bundler": "metro",
@@ -53,6 +68,17 @@
       "@react-native-community/datetimepicker",
       "expo-secure-store",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "headers": {
+          "Cross-Origin-Embedder-Policy": "credentialless",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      "eas": {
+        "projectId": "5a9211cf-31a2-46ba-901a-eaecbdb1b07e"
+      }
+    }
   }
 }
