@@ -1,0 +1,19 @@
+{
+  "track": "internal",
+  "changesNotSentForReview": true,
+  "releaseStatus": "draft",
+  "metadata": {
+    "en-US": {
+      "title": "iStocked — Phone Flip Ledger",
+      "shortDescription": "Track every phone you buy, repair, and sell — offline-first.",
+      "fullDescription": "iStocked is the phone-flipper's ledger. Track every device from purchase to sale with buy price, repair cost, list price, battery health, IMEI and network lock. Record sales in seconds, capture warranty terms, and see your net profit, revenue, and cost at a glance. Your data lives on your phone and works fully offline; sign in with Google to sync your inventory across devices. Scan IMEI barcodes with the camera and filter your shelf by condition or network lock. Built for resellers who want clean numbers without the spreadsheet.",
+      "contactEmail": "support@istocked.app",
+      "contactWebsite": "https://istocked.app",
+      "privacyPolicyUrl": "https://istocked.app/privacy"
+    }
+  },
+  "android": {
+    "packageName": "com.istocked.app",
+    "category": "BUSINESS"
+  }
+}
