@@ -17,7 +17,7 @@
       "**/*"
     ],
     "updates": {
-      "url": "https://u.expo.dev/REPLACE_WITH_EAS_PROJECT_ID",
+      "url": "https://u.expo.dev/5a9211cf-31a2-46ba-901a-eaecbdb1b07e",
       "requestHeaders": {
         "expo-channel-name": "production"
       }
@@ -68,6 +68,17 @@
       "@react-native-community/datetimepicker",
       "expo-secure-store",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "headers": {
+          "Cross-Origin-Embedder-Policy": "credentialless",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      "eas": {
+        "projectId": "5a9211cf-31a2-46ba-901a-eaecbdb1b07e"
+      }
+    }
   }
 }
