@@ -23,7 +23,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.anonymous.iStocked"
+      "package": "com.istocked.app"
     },
     "web": {
       "bundler": "metro",
