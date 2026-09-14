@@ -109,10 +109,12 @@ export const supabase = createClient(
 export const oauthRedirectUri =
   Platform.OS === "web"
     ? Linking.createURL("")
-    : makeRedirectUri({
-        scheme: "istocked",
-        path: "auth/callback",
-      });
+    : Constants.appOwnership === "expo"
+      ? Linking.createURL("auth/callback")
+      : makeRedirectUri({
+          scheme: "istocked",
+          path: "auth/callback",
+        });
 
 const isNative = Platform.OS !== "web";
 
