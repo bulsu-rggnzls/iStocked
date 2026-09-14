@@ -109,12 +109,10 @@ export const supabase = createClient(
 export const oauthRedirectUri =
   Platform.OS === "web"
     ? Linking.createURL("")
-    : Constants.appOwnership === "expo"
-      ? Linking.createURL("auth/callback")
-      : makeRedirectUri({
-          scheme: "istocked",
-          path: "auth/callback",
-        });
+    : makeRedirectUri({
+        scheme: "istocked",
+        path: "auth/callback",
+      });
 
 const isNative = Platform.OS !== "web";
 
@@ -130,9 +128,14 @@ export async function signInWithGoogle(): Promise<{ ok: boolean; error?: string 
     return { ok: true };
   }
 
+  const redirectUri = makeRedirectUri({
+    scheme: "istocked",
+    path: "auth/callback",
+  });
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: oauthRedirectUri, skipBrowserRedirect: true },
+    options: { redirectTo: redirectUri, skipBrowserRedirect: true },
   });
   if (error || !data?.url) {
     return { ok: false, error: error?.message ?? "Could not start Google sign-in." };
@@ -198,13 +201,13 @@ export async function signInWithGoogle(): Promise<{ ok: boolean; error?: string 
     // Safety net: deep-link listener catches the redirect even when the
     // browser session promise never resolves (some Android OEM browsers)
     linkSub = Linking.addEventListener("url", (event) => {
-      if (event.url.includes("access_token") || event.url.startsWith(oauthRedirectUri)) {
+      if (event.url.includes("access_token") || event.url.startsWith(redirectUri)) {
         void complete(event.url);
       }
     });
 
     // Primary: browser session, resolves on redirect or dismissal
-    void WebBrowser.openAuthSessionAsync(data.url, oauthRedirectUri).then((res) => {
+    void WebBrowser.openAuthSessionAsync(data.url, redirectUri).then((res) => {
       void complete(res.type === "success" && res.url ? res.url : undefined);
     });
 
