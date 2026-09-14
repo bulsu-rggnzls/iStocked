@@ -4,7 +4,10 @@ import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
+import { makeRedirectUri } from "expo-auth-session";
 import Constants from "expo-constants";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -106,9 +109,10 @@ export const supabase = createClient(
 export const oauthRedirectUri =
   Platform.OS === "web"
     ? Linking.createURL("")
-    : Constants.appOwnership === "expo"
-      ? Linking.createURL("auth/callback")
-      : "istocked://auth/callback";
+    : makeRedirectUri({
+        scheme: "istocked",
+        path: "auth/callback",
+      });
 
 const isNative = Platform.OS !== "web";
 
