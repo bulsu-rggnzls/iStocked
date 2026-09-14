@@ -4,7 +4,10 @@ import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
+import { makeRedirectUri } from "expo-auth-session";
 import Constants from "expo-constants";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -106,15 +109,12 @@ export const supabase = createClient(
 export const oauthRedirectUri =
   Platform.OS === "web"
     ? Linking.createURL("")
-    : Constants.appOwnership === "expo"
-      ? Linking.createURL("auth/callback")
-      : "istocked://auth/callback";
-
-const isNative = Platform.OS !== "web";
+    : makeRedirectUri({
+        scheme: "istocked",
+        path: "auth/callback",
+      });
 
 export async function signInWithGoogle(): Promise<{ ok: boolean; error?: string }> {
-  // Web: let the browser navigate through Google and back — the client
-  // detects the session from the URL on arrival (detectSessionInUrl).
   if (Platform.OS === "web") {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -124,89 +124,51 @@ export async function signInWithGoogle(): Promise<{ ok: boolean; error?: string 
     return { ok: true };
   }
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: oauthRedirectUri, skipBrowserRedirect: true },
-  });
-  if (error || !data?.url) {
-    return { ok: false, error: error?.message ?? "Could not start Google sign-in." };
-  }
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: oauthRedirectUri,
+        skipBrowserRedirect: true,
+      },
+    });
 
-  return new Promise((resolve) => {
-    let settled = false;
-    let linkSub: { remove: () => void } | null = null;
+    if (error || !data?.url) {
+      return { ok: false, error: error?.message ?? "Could not start Google sign-in." };
+    }
 
-    const complete = async (url: string | undefined, timeoutError?: string) => {
-      if (settled) return;
-      settled = true;
-      linkSub?.remove();
-      if (isNative) {
-        void WebBrowser.dismissBrowser();
-        // Free the Android browser task after auth completes
-        void WebBrowser.coolDownAsync().catch(() => {});
-      }
+    // Await the browser session directly
+    const result = await WebBrowser.openAuthSessionAsync(data.url, oauthRedirectUri, {
+      showInRecents: true,
+    });
 
-      if (!url) {
-        resolve({ ok: false, error: timeoutError ?? "Sign-in cancelled." });
-        return;
-      }
-
-      // Supabase implicit flow returns tokens in the URL fragment (query as fallback)
+    if (result.type === "success" && result.url) {
+      const url = result.url;
       const payload = url.includes("#") ? url.split("#")[1] : (url.split("?")[1] ?? "");
-      const params = new Map(
-        payload
-          .split("&")
-          .filter(Boolean)
-          .map((pair) => {
-            const [k, v = ""] = pair.split("=");
-            return [k, decodeURIComponent(v)] as const;
-          }),
-      );
+      const params = new URLSearchParams(payload);
 
-      if (params.get("error")) {
-        resolve({
-          ok: false,
-          error: params.get("error_description") ?? params.get("error")!,
-        });
-        return;
-      }
+      const errorParam = params.get("error_description") || params.get("error");
+      if (errorParam) return { ok: false, error: errorParam };
 
       const accessToken = params.get("access_token");
       const refreshToken = params.get("refresh_token");
-      if (!accessToken || !refreshToken) {
-        resolve({
-          ok: false,
-          error:
-            "Sign-in did not return a session. Verify the redirect URI is added in Supabase → Authentication → URL Configuration.",
+
+      if (accessToken && refreshToken) {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
         });
-        return;
+        if (sessionError) return { ok: false, error: sessionError.message };
+        return { ok: true };
       }
+    }
 
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
-      resolve(sessionError ? { ok: false, error: sessionError.message } : { ok: true });
-    };
-
-    // Safety net: deep-link listener catches the redirect even when the
-    // browser session promise never resolves (some Android OEM browsers)
-    linkSub = Linking.addEventListener("url", (event) => {
-      if (event.url.includes("access_token") || event.url.startsWith(oauthRedirectUri)) {
-        void complete(event.url);
-      }
-    });
-
-    // Primary: browser session, resolves on redirect or dismissal
-    void WebBrowser.openAuthSessionAsync(data.url, oauthRedirectUri).then((res) => {
-      void complete(res.type === "success" && res.url ? res.url : undefined);
-    });
-
-    // Hard timeout: the button can never spin forever
-    setTimeout(() => {
-      void complete(undefined, "Sign-in timed out. Check your internet and the redirect URLs in Supabase → Authentication → URL Configuration.");
-    }, 90000);
-  });
+    return { ok: false, error: "Sign-in was cancelled or closed." };
+  } catch (err: any) {
+    return { ok: false, error: err?.message ?? "An unexpected error occurred." };
+  } finally {
+    void WebBrowser.coolDownAsync();
+  }
 }
 
 // Warm up the browser for faster OAuth (call once when Settings mounts)
