@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -51,14 +51,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei, prefilledModel, prefilledStorage, prefilledColor, prefilledSerial }: AddDeviceSheetProps) {
+// Keyed child: remounts on every open (see AddDeviceSheet), so all fields
+// initialize fresh from the prefilled props — no effect-based reset needed.
+function AddDeviceForm({
+  onClose,
+  onSaved,
+  prefilledImei,
+  prefilledModel,
+  prefilledStorage,
+  prefilledColor,
+  prefilledSerial,
+}: Omit<AddDeviceSheetProps, "visible">) {
   const addDevice = useAddDevice();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const isTablet = useIsTablet();
-  const [model, setModel] = useState("");
-  const [imei, setImei] = useState("");
-  const [storage, setStorage] = useState<string | null>(null);
+  const [model, setModel] = useState(prefilledModel?.trim() ?? "");
+  const [imei, setImei] = useState(prefilledImei?.replace(/\D/g, "") ?? "");
+  const [storage, setStorage] = useState<string | null>(prefilledStorage ?? null);
   const [condition, setCondition] = useState<string | null>(null);
   const [buyPrice, setBuyPrice] = useState("");
   const [listPrice, setListPrice] = useState("");
@@ -66,35 +76,13 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei, prefi
   const [networkLock, setNetworkLock] = useState<string>(NETWORK_LOCK_OPTIONS[0]);
   const [specsOpen, setSpecsOpen] = useState(false);
   const [batteryHealth, setBatteryHealth] = useState("");
-  const [color, setColor] = useState("");
+  const [color, setColor] = useState(prefilledColor ?? "");
   const [repairCost, setRepairCost] = useState("");
   const [imei2, setImei2] = useState("");
-  const [serialNumber, setSerialNumber] = useState("");
+  const [serialNumber, setSerialNumber] = useState(prefilledSerial?.trim() ?? "");
   const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (visible) {
-      setModel(prefilledModel?.trim() ?? "");
-      setImei(prefilledImei?.replace(/\D/g, "") ?? "");
-      setStorage(prefilledStorage ?? null);
-      setCondition(null);
-      setBuyPrice("");
-      setListPrice("");
-      setDateBought(todayIso());
-      setNetworkLock(NETWORK_LOCK_OPTIONS[0]);
-      setSpecsOpen(false);
-      setBatteryHealth("");
-      setColor(prefilledColor ?? "");
-      setRepairCost("");
-      setImei2("");
-      setSerialNumber(prefilledSerial?.trim() ?? "");
-      setAccessories([]);
-      setNotes("");
-      setError(null);
-    }
-  }, [visible, prefilledImei, prefilledModel, prefilledStorage, prefilledColor, prefilledSerial]);
 
   const handleSave = async () => {
     const digits = imei.replace(/\D/g, "");
@@ -141,7 +129,7 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei, prefi
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Add purchased phone">
+    <>
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -401,6 +389,24 @@ export function AddDeviceSheet({ visible, onClose, onSaved, prefilledImei, prefi
           </Pressable>
         </View>
       </View>
+    </>
+  );
+}
+
+export function AddDeviceSheet({ visible, ...formProps }: AddDeviceSheetProps) {
+  // Bump a key each time the sheet opens so the form remounts with fresh
+  // prefilled values instead of syncing state in an effect.
+  const [openKey, setOpenKey] = useState(0);
+  const wasVisible = useRef(false);
+
+  useEffect(() => {
+    if (visible && !wasVisible.current) setOpenKey((k) => k + 1);
+    wasVisible.current = visible;
+  }, [visible]);
+
+  return (
+    <BottomSheet visible={visible} onClose={formProps.onClose} title="Add purchased phone">
+      {visible ? <AddDeviceForm key={openKey} {...formProps} /> : null}
     </BottomSheet>
   );
 }

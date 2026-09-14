@@ -12,20 +12,19 @@ export default function SettingsScreen() {
   const [signingIn, setSigningIn] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // Web OAuth errors (e.g. bad_oauth_state) arrive as URL params when Google
+  // redirects back — read them once at mount instead of syncing in an effect
+  const [error, setError] = useState<string | null>(() => {
+    if (Platform.OS !== "web") return null;
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get("error_description") ?? params.get("error");
+    return oauthError ? decodeURIComponent(oauthError.replace(/\+/g, " ")) : null;
+  });
 
   useEffect(() => {
     warmUpBrowser();
-  }, []);
-
-  // Web OAuth errors (e.g. bad_oauth_state) arrive as URL params when Google
-  // redirects back — surface them in the UI instead of failing silently
-  useEffect(() => {
-    if (Platform.OS !== "web") return;
-    const params = new URLSearchParams(window.location.search);
-    const oauthError = params.get("error_description") ?? params.get("error");
-    if (oauthError) {
-      setError(decodeURIComponent(oauthError.replace(/\+/g, " ")));
+    // Clear the OAuth error from the URL so a refresh doesn't re-surface it
+    if (Platform.OS === "web" && window.location.search) {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);

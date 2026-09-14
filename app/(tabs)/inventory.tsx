@@ -95,18 +95,20 @@ export default function InventoryScreen() {
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [draftCondition, setDraftCondition] = useState<string>("all");
   const [draftNetworkLock, setDraftNetworkLock] = useState<string>("all");
-  const [addSheetOpen, setAddSheetOpen] = useState(false);
+  // Open the add sheet immediately if the screen was reached via a deep link
+  // carrying an IMEI — initialized at mount rather than synced in an effect
+  const [addSheetOpen, setAddSheetOpen] = useState(() => Boolean(params.addImei));
   const [saleDevice, setSaleDevice] = useState<Device | null>(null);
   const [search, setSearch] = useState(params.search ?? "");
   const [debouncedSearch, setDebouncedSearch] = useState(params.search ?? "");
   const [prefilledImei, setPrefilledImei] = useState<string | null>(params.addImei ?? null);
   const paramsHandledRef = useRef(false);
 
+  // Clear the one-time deep-link params so a refresh doesn't re-open the sheet
   useEffect(() => {
     if (paramsHandledRef.current) return;
     if (params.search || params.addImei) {
       paramsHandledRef.current = true;
-      if (params.addImei) setAddSheetOpen(true);
       router.replace("/(tabs)/inventory");
     }
   }, [params.search, params.addImei, router]);

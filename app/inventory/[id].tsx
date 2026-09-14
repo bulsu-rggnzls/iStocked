@@ -52,7 +52,7 @@ function SegmentedControl({
   value: Tab;
   onChange: (tab: Tab) => void;
 }) {
-  const tabs: Array<{ key: Tab; label: string }> = [
+  const tabs: { key: Tab; label: string }[] = [
     { key: "overview", label: "Overview" },
     { key: "edit", label: "Edit Specs" },
   ];
@@ -292,7 +292,7 @@ export default function DeviceDetailScreen() {
         <Stack.Screen options={{ headerShown: false }} />
         <View className="flex-1 bg-zinc-100 items-center justify-center px-8">
           <Text className="text-center text-base font-semibold text-zinc-950">
-            Couldn't load this device
+            Couldn&apos;t load this device
           </Text>
           <Text className="mt-2 text-center text-sm leading-5 text-red-600">
             {error instanceof Error ? error.message : "Something went wrong."}
