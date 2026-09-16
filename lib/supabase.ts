@@ -173,6 +173,6 @@ export async function signInWithGoogle(): Promise<{ ok: boolean; error?: string 
 
 // Warm up the browser for faster OAuth (call once when Settings mounts)
 export function warmUpBrowser() {
-  if (!isNative) return;
+  if (Platform.OS === "web") return;
   void WebBrowser.warmUpAsync();
 }
