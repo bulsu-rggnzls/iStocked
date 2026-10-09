@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import type { DeviceStatus } from "../../types";
+import type { DeviceStatus } from "@/types";
 
 export type BadgeTone = "brand" | "gray" | "amber" | "emerald";
 
