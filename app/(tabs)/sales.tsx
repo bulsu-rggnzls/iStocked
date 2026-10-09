@@ -15,15 +15,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { Paths, File } from "expo-file-system";
-import { useSales } from "../../hooks/useSales";
-import { useUpdateDevice } from "../../hooks/useInventory";
-import { BottomSheet } from "../../components/BottomSheet";
-import { EmptyState } from "../../components/EmptyState";
-import { WarrantyTag } from "../../components/WarrantyTag";
-import { useIsTablet } from "../../hooks/useIsTablet";
-import { networkLockShort } from "../../lib/networkLock";
-import { formatDate, formatImei, formatPrice } from "../../lib/format";
-import type { Device } from "../../types";
+import { useSales } from "@/hooks/useSales";
+import { useUpdateDevice } from "@/hooks/useInventory";
+import { BottomSheet } from "@/components/ui/BottomSheet";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { WarrantyTag } from "@/components/devices/WarrantyTag";
+import { useIsTablet } from "@/hooks/useIsTablet";
+import { networkLockShort } from "@/lib/networkLock";
+import { formatDate, formatImei, formatPrice } from "@/utils/format";
+import type { Device } from "@/types";
 
 function DetailRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
