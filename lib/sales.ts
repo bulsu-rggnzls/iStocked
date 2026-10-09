@@ -1,5 +1,5 @@
-import { ensureDb } from "./db";
-import type { Device, RecordSaleInput } from "../types";
+import { ensureDb } from "@/lib/db";
+import type { Device, RecordSaleInput } from "@/types";
 
 export async function recordSale(input: RecordSaleInput) {
   const db = await ensureDb();
