@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getSalesHistory, recordSale } from "../lib/sales";
-import { pushDevice } from "../lib/sync";
-import type { RecordSaleInput } from "../types";
+import { getSalesHistory, recordSale } from "@/lib/sales";
+import { pushDevice } from "@/lib/sync";
+import type { RecordSaleInput } from "@/types";
 
 export function useSales() {
   return useQuery({
