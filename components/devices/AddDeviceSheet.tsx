@@ -10,20 +10,20 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheet } from "./BottomSheet";
-import { useIsTablet } from "../hooks/useIsTablet";
-import { useAddDevice } from "../hooks/useInventory";
-import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../lib/networkLock";
-import { todayIso } from "../lib/format";
-import { Tag } from "./ui/Tag";
-import { FormField } from "./ui/FormField";
-import { DateField } from "./ui/DateField";
-import { genId } from "../lib/db";
+import { BottomSheet } from "@/components/ui/BottomSheet";
+import { useIsTablet } from "@/hooks/useIsTablet";
+import { useAddDevice } from "@/hooks/useInventory";
+import { NETWORK_LOCK_OPTIONS, networkLockShort } from "@/lib/networkLock";
+import { todayIso } from "@/utils/format";
+import { Tag } from "@/components/ui/Tag";
+import { FormField } from "@/components/ui/FormField";
+import { DateField } from "@/components/ui/DateField";
+import { genId } from "@/lib/db";
 import {
   ACCESSORY_OPTIONS,
   type AccessoryItem,
   type Device,
-} from "../types";
+} from "@/types";
 
 const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
