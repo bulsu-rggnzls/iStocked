@@ -15,15 +15,15 @@ import {
   useDevice,
   useDeleteDevice,
   useUpdateDevice,
-} from "../../hooks/useInventory";
-import { RecordSaleSheet } from "../../components/RecordSaleSheet";
-import { FormField } from "../../components/ui/FormField";
-import { NETWORK_LOCK_OPTIONS, networkLockShort } from "../../lib/networkLock";
-import { formatDate, formatImei, formatPrice } from "../../lib/format";
+} from "@/hooks/useInventory";
+import { RecordSaleSheet } from "@/components/sales/RecordSaleSheet";
+import { FormField } from "@/components/ui/FormField";
+import { NETWORK_LOCK_OPTIONS, networkLockShort } from "@/lib/networkLock";
+import { formatDate, formatImei, formatPrice } from "@/utils/format";
 import {
   ACCESSORY_OPTIONS,
   type AccessoryItem,
-} from "../../types";
+} from "@/types";
 
 const STORAGE_OPTIONS = ["64GB", "128GB", "256GB", "512GB", "1TB"];
 
