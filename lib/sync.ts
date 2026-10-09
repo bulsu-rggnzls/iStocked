@@ -1,7 +1,7 @@
-import { ensureDb } from "./db";
+import { ensureDb } from "@/lib/db";
 import type { SQLiteBindValue } from "expo-sqlite";
-import { supabase } from "./supabase";
-import type { Device } from "../types";
+import { supabase } from "@/lib/supabase";
+import type { Device } from "@/types";
 
 export interface SyncResult {
   pushed: number;
