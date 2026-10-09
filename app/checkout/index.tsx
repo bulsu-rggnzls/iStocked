@@ -9,14 +9,14 @@ import {
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useDevice } from "../../hooks/useInventory";
-import { useRecordSale } from "../../hooks/useSales";
-import { Button } from "../../components/ui/Button";
-import { TextField } from "../../components/ui/TextField";
-import { DateField } from "../../components/ui/DateField";
-import { AppHeader } from "../../components/ui/AppHeader";
-import { formatImei, formatPrice, todayIso } from "../../lib/format";
-import type { Device, WarrantyPeriod } from "../../types";
+import { useDevice } from "@/hooks/useInventory";
+import { useRecordSale } from "@/hooks/useSales";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
+import { DateField } from "@/components/ui/DateField";
+import { AppHeader } from "@/components/ui/AppHeader";
+import { formatImei, formatPrice, todayIso } from "@/utils/format";
+import type { Device, WarrantyPeriod } from "@/types";
 
 const WARRANTY_OPTIONS: { label: string; value: WarrantyPeriod; desc: string }[] = [
   { label: "No warranty", value: "none", desc: "Sold as-is" },
