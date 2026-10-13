@@ -27,23 +27,23 @@ export function SearchBar({
         placeholderTextColor="#a1a1aa"
         autoCapitalize="none"
         autoCorrect={false}
-        className="flex-1 px-2.5 text-base text-zinc-950"
+        className="flex-1 px-2.5 text-base text-text-on-surface"
       />
       {onFilterPress ? (
         <Pressable
           onPress={onFilterPress}
           hitSlop={8}
-          className="relative rounded-lg bg-zinc-100 p-2 active:opacity-70"
+          className="relative rounded-lg bg-surface-secondary p-2 active:opacity-70"
         >
           <Ionicons name="options-outline" size={18} color="#71717a" />
           {filterCount > 0 ? (
-            <View className="absolute -right-1 -top-1 h-4 w-4 items-center justify-center rounded-full bg-black">
+            <View className="absolute -right-1 -top-1 h-4 w-4 items-center justify-center rounded-full bg-text-muted-foreground">
               <Text className="text-[9px] font-bold text-white">{filterCount}</Text>
             </View>
           ) : null}
         </Pressable>
       ) : filterCount > 0 ? (
-        <View className="rounded-lg bg-black px-2 py-1">
+        <View className="rounded-lg bg-text-muted-foreground px-2 py-1">
           <Text className="text-[10px] font-bold text-white">{filterCount}</Text>
         </View>
       ) : null}
