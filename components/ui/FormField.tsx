@@ -19,18 +19,18 @@ export function FormField({
   return (
     <View>
       {label ? (
-        <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+        <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
           {label}
         </Text>
       ) : null}
       <View
-        className={`h-12 flex-row items-center rounded-xl border bg-white px-4 ${
-          error ? "border-red-400" : "border-zinc-200"
+        className={`h-12 flex-row items-center rounded-xl border bg-surface px-4 ${
+          error ? "border-state-error" : "border-border-subtle"
         }`}
       >
         {prefix ? (
           <Text
-            className="mr-1.5 text-sm font-semibold text-zinc-400"
+            className="mr-1.5 text-sm font-semibold text-text-muted"
             style={{ includeFontPadding: false }}
           >
             {prefix}
@@ -39,7 +39,7 @@ export function FormField({
         <TextInput
           {...inputProps}
           placeholderTextColor="#a1a1aa"
-          className="flex-1 text-sm font-medium text-zinc-950"
+          className="flex-1 text-sm font-medium text-text-on-surface"
           style={[
             {
               includeFontPadding: false,
