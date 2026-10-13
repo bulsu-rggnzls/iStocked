@@ -43,7 +43,7 @@ interface AddDeviceSheetProps {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View>
-      <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+      <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
         {label}
       </Text>
       {children}
