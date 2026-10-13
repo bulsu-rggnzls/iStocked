@@ -10,16 +10,16 @@ import { useIsFocused, useRouter } from "expo-router";
 import { CameraView, useCameraPermissions, type BarcodeScanningResult, type BarcodeType } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useDeviceByImei } from "../../hooks/useInventory";
-import { lookupDeviceByImei } from "../../lib/inventory";
-import { lookupByTac, IPHONE_MODELS, type TacResult } from "../../lib/tacLookup";
-import { lookupByPartNumber, type PartNumberResult } from "../../lib/partNumberLookup";
-import { BottomSheet } from "../../components/BottomSheet";
-import { ScanResultCard } from "../../components/ScanResultCard";
-import { AddDeviceSheet } from "../../components/AddDeviceSheet";
-import { Button } from "../../components/ui/Button";
-import { Tag } from "../../components/ui/Tag";
-import { formatImei, isValidImei } from "../../lib/format";
+import { useDeviceByImei } from "@/hooks/useInventory";
+import { lookupDeviceByImei } from "@/lib/inventory";
+import { lookupByTac, IPHONE_MODELS, type TacResult } from "@/lib/lookup/tacLookup";
+import { lookupByPartNumber, type PartNumberResult } from "@/lib/lookup/partNumberLookup";
+import { BottomSheet } from "@/components/ui/BottomSheet";
+import { ScanResultCard } from "@/components/devices/ScanResultCard";
+import { AddDeviceSheet } from "@/components/devices/AddDeviceSheet";
+import { Button } from "@/components/ui/Button";
+import { Tag } from "@/components/ui/Tag";
+import { formatImei, isValidImei } from "@/utils/format";
 
 const BARCODE_TYPES: BarcodeType[] = ["code128", "ean13", "ean8", "upc_a", "itf14", "qr"];
 

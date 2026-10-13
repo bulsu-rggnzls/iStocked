@@ -1,6 +1,6 @@
-import { ensureDb, genId } from "./db";
+import { ensureDb, genId } from "@/lib/db";
 import type { SQLiteBindValue } from "expo-sqlite";
-import type { Device, DeviceStatus, NewDeviceInput } from "../types";
+import type { Device, DeviceStatus, NewDeviceInput } from "@/types";
 
 export interface DeviceFilters {
   status?: "all" | DeviceStatus;

@@ -1,4 +1,4 @@
-import { storage } from "./storage";
+import { storage } from "@/lib/storage";
 
 const OFFLINE_MODE_KEY = "istocked.offline-mode";
 

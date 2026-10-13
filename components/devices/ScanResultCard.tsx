@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
-import type { Device } from "../types";
-import { formatImei, formatPrice } from "../lib/format";
-import { ConditionBadge, StatusBadge } from "./ui/Badge";
+import type { Device } from "@/types";
+import { formatImei, formatPrice } from "@/utils/format";
+import { ConditionBadge, StatusBadge } from "@/components/ui/Badge";
 
 interface ScanResultCardProps {
   device: Device;

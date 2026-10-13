@@ -3,10 +3,10 @@ import { Platform, Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Button } from "../components/ui/Button";
-import { signInWithGoogle, supabaseConfigured } from "../lib/supabase";
-import { syncAll } from "../lib/sync";
-import { setOfflineMode } from "../lib/appMode";
+import { Button } from "@/components/ui/Button";
+import { signInWithGoogle, supabaseConfigured } from "@/lib/supabase";
+import { syncAll } from "@/lib/sync";
+import { setOfflineMode } from "@/lib/appMode";
 
 export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();

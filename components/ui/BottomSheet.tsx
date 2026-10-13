@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useIsTablet } from "../hooks/useIsTablet";
+import { useIsTablet } from "@/hooks/useIsTablet";
 
 interface BottomSheetProps {
   visible: boolean;

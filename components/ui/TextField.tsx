@@ -20,7 +20,7 @@ export function TextField({
   return (
     <View>
       {label ? (
-        <Text className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+        <Text className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted">
           {label}
         </Text>
       ) : null}
@@ -29,8 +29,8 @@ export function TextField({
           {...inputProps}
           secureTextEntry={hidden}
           placeholderTextColor={inputProps.placeholderTextColor ?? "#a1a1aa"}
-          className={`h-12 px-4 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full ${
-            error ? "border-red-400" : ""
+          className={`h-12 px-4 rounded-xl border border-border-subtle bg-surface text-sm font-medium text-text-on-surface w-full ${
+            error ? "border-state-error" : ""
           } ${secure ? "pr-12" : ""}`}
         />
         {secure ? (

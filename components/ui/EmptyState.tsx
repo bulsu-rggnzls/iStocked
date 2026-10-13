@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Button } from "./ui/Button";
+import { Button } from "@/components/ui/Button";
 
 interface EmptyStateProps {
   icon: React.ComponentProps<typeof Ionicons>["name"];

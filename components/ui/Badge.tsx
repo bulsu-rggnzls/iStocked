@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import type { DeviceStatus } from "../../types";
+import type { DeviceStatus } from "@/types";
 
 export type BadgeTone = "brand" | "gray" | "amber" | "emerald";
 
@@ -10,17 +10,17 @@ interface BadgeProps {
 }
 
 const toneStyles: Record<BadgeTone, string> = {
-  brand: "border border-zinc-200 bg-zinc-100 text-zinc-900",
-  gray: "border border-zinc-200 bg-zinc-100 text-zinc-600",
-  amber: "border border-zinc-200 bg-zinc-100 text-zinc-700",
-  emerald: "border border-zinc-200 bg-zinc-100 text-zinc-700",
+  brand: "border border-border-subtle bg-surface-secondary text-text-muted-foreground",
+  gray: "border border-border-subtle bg-surface-secondary text-text-muted",
+  amber: "border border-border-subtle bg-surface-secondary text-text-muted-foreground",
+  emerald: "border border-border-subtle bg-surface-secondary text-text-muted-foreground",
 };
 
 const dotStyles: Record<BadgeTone, string> = {
-  brand: "bg-black",
-  gray: "bg-zinc-400",
-  amber: "bg-zinc-600",
-  emerald: "bg-zinc-600",
+  brand: "bg-brand-purple",
+  gray: "bg-text-muted",
+  amber: "bg-state-warning",
+  emerald: "bg-state-applied",
 };
 
 export function Badge({ label, tone = "gray", dot = false }: BadgeProps) {

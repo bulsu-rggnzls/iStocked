@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Platform, ScrollView, Text, View } from "react-native";
-import { AppHeader } from "../components/ui/AppHeader";
-import { Button } from "../components/ui/Button";
-import { useAuth } from "../hooks/useAuth";
-import { oauthRedirectUri, signInWithGoogle, supabase, supabaseConfigured, warmUpBrowser } from "../lib/supabase";
-import { syncAll, type SyncResult } from "../lib/sync";
-import { setOfflineMode } from "../lib/appMode";
+import { AppHeader } from "@/components/ui/AppHeader";
+import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/hooks/useAuth";
+import { oauthRedirectUri, signInWithGoogle, supabase, supabaseConfigured, warmUpBrowser } from "@/lib/supabase";
+import { syncAll, type SyncResult } from "@/lib/sync";
+import { setOfflineMode } from "@/lib/appMode";
 
 export default function SettingsScreen() {
   const { session, loading } = useAuth();

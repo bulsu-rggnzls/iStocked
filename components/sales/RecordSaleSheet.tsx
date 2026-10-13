@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BottomSheet } from "./BottomSheet";
-import { useRecordSale } from "../hooks/useSales";
-import { useIsTablet } from "../hooks/useIsTablet";
-import { DateField } from "./ui/DateField";
-import { formatPrice, todayIso } from "../lib/format";
-import type { Device, WarrantyPeriod } from "../types";
+import { BottomSheet } from "@/components/ui/BottomSheet";
+import { useRecordSale } from "@/hooks/useSales";
+import { useIsTablet } from "@/hooks/useIsTablet";
+import { DateField } from "@/components/ui/DateField";
+import { formatPrice, todayIso } from "@/utils/format";
+import type { Device, WarrantyPeriod } from "@/types";
 
 const inputClass =
   "h-12 px-4 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full";

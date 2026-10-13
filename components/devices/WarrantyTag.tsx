@@ -1,5 +1,5 @@
 import { Text } from "react-native";
-import type { WarrantyPeriod } from "../types";
+import type { WarrantyPeriod } from "@/types";
 
 export function WarrantyTag({ period, dateSold }: { period: WarrantyPeriod | null; dateSold: string | null }) {
   if (!period || period === "none" || !dateSold) return null;

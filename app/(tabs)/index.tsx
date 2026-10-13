@@ -10,13 +10,13 @@ import {
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMetrics } from "../../hooks/useMetrics";
-import { useIsTablet } from "../../hooks/useIsTablet";
-import { EmptyState } from "../../components/EmptyState";
-import { AddDeviceSheet } from "../../components/AddDeviceSheet";
-import { WarrantyTag } from "../../components/WarrantyTag";
-import { formatDate, formatPrice } from "../../lib/format";
-import type { Device } from "../../types";
+import { useMetrics } from "@/hooks/useMetrics";
+import { useIsTablet } from "@/hooks/useIsTablet";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { AddDeviceSheet } from "@/components/devices/AddDeviceSheet";
+import { WarrantyTag } from "@/components/devices/WarrantyTag";
+import { formatDate, formatPrice } from "@/utils/format";
+import type { Device } from "@/types";
 
 function ReceiptRow({ device, last }: { device: Device; last: boolean }) {
   const totalCost = Number(device.buy_price) + Number(device.repair_cost ?? 0);

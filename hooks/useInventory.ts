@@ -7,9 +7,9 @@ import {
   lookupDeviceByImei,
   updateDevice,
   type DeviceFilters,
-} from "../lib/inventory";
-import { pushDevice, deleteRemoteDevice } from "../lib/sync";
-import type { Device, NewDeviceInput } from "../types";
+} from "@/lib/inventory";
+import { pushDevice, deleteRemoteDevice } from "@/lib/sync";
+import type { Device, NewDeviceInput } from "@/types";
 
 export function useDevices(filters: DeviceFilters = {}) {
   return useQuery({

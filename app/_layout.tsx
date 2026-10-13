@@ -1,4 +1,4 @@
-import "../global.css";
+import "@/global.css";
 
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -13,8 +13,8 @@ import {
   Poppins_700Bold,
   useFonts,
 } from "@expo-google-fonts/poppins";
-import { useAuth } from "../hooks/useAuth";
-import { getOfflineMode } from "../lib/appMode";
+import { useAuth } from "@/hooks/useAuth";
+import { getOfflineMode } from "@/lib/appMode";
 
 // Completes the OAuth return when the browser redirects back into the app
 WebBrowser.maybeCompleteAuthSession();

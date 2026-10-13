@@ -1,5 +1,5 @@
-import { ensureDb } from "./db";
-import type { Device } from "../types";
+import { ensureDb } from "@/lib/db";
+import type { Device } from "@/types";
 
 export interface Metrics {
   totalNetProfit: number;

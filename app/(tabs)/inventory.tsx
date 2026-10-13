@@ -10,15 +10,15 @@ import {
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useDevices } from "../../hooks/useInventory";
-import { SearchBar } from "../../components/ui/SearchBar";
-import { BottomSheet } from "../../components/BottomSheet";
-import { AddDeviceSheet } from "../../components/AddDeviceSheet";
-import { RecordSaleSheet } from "../../components/RecordSaleSheet";
-import { EmptyState } from "../../components/EmptyState";
-import { NETWORK_LOCK_OPTIONS } from "../../lib/networkLock";
-import { formatPrice } from "../../lib/format";
-import type { Device } from "../../types";
+import { useDevices } from "@/hooks/useInventory";
+import { SearchBar } from "@/components/ui/SearchBar";
+import { BottomSheet } from "@/components/ui/BottomSheet";
+import { AddDeviceSheet } from "@/components/devices/AddDeviceSheet";
+import { RecordSaleSheet } from "@/components/sales/RecordSaleSheet";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { NETWORK_LOCK_OPTIONS } from "@/lib/networkLock";
+import { formatPrice } from "@/utils/format";
+import type { Device } from "@/types";
 
 const CONDITION_OPTIONS = [
   { label: "All conditions", value: "all" },

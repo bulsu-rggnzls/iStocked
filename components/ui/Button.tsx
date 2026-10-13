@@ -14,17 +14,17 @@ interface ButtonProps {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-zinc-900 active:bg-black",
-  secondary: "border border-zinc-200 bg-white active:bg-zinc-100",
-  danger: "bg-red-600 active:bg-red-700",
-  ghost: "bg-transparent active:opacity-70",
+  primary: "bg-brand-primary active:bg-brand-purple",
+  secondary: "border border-border-subtle bg-surface active:bg-surface-secondary",
+  danger: "bg-state-error active:bg-red-700",
+  ghost: "bg-transparent active:opacity-80",
 };
 
 const textStyles: Record<ButtonVariant, string> = {
-  primary: "text-white",
-  secondary: "text-zinc-950",
-  danger: "text-white",
-  ghost: "text-zinc-900",
+  primary: "text-brand-primary-foreground",
+  secondary: "text-text-on-surface",
+  danger: "text-state-error-foreground",
+  ghost: "text-text-muted-foreground",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
