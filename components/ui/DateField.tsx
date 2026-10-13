@@ -46,16 +46,16 @@ export function DateField({ label, value, onChange }: DateFieldProps) {
   return (
     <View>
       {label ? (
-        <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+        <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
           {label}
         </Text>
       ) : null}
       <Pressable
         onPress={toggle}
-        className="h-12 flex-row items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 active:opacity-80"
+        className="h-12 flex-row items-center justify-between rounded-xl border border-border-subtle bg-surface px-4 active:opacity-80"
       >
         <Text
-          className={`flex-1 text-sm font-medium ${value ? "text-zinc-950" : "text-zinc-400"}`}
+          className={`flex-1 text-sm font-medium ${value ? "text-text-on-surface" : "text-text-muted"}`}
           numberOfLines={1}
           style={{ includeFontPadding: false }}
         >
@@ -76,10 +76,10 @@ export function DateField({ label, value, onChange }: DateFieldProps) {
       ) : null}
 
       {open && Platform.OS === "ios" ? (
-        <View className="mt-2 rounded-2xl border border-zinc-200 bg-white">
+        <View className="mt-2 rounded-2xl border border-border-subtle bg-surface">
           <View className="flex-row items-center justify-between px-3 pb-1 pt-2">
             <Pressable onPress={() => setOpen(false)} hitSlop={8}>
-              <Text className="text-sm font-semibold text-zinc-900">Done</Text>
+              <Text className="text-sm font-semibold text-text-on-surface">Done</Text>
             </Pressable>
           </View>
           <DateTimePicker
