@@ -28,9 +28,9 @@ import type { Device } from "@/types";
 function DetailRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <View className="flex-row items-center justify-between gap-3 py-2">
-      <Text className="shrink text-sm text-zinc-500" numberOfLines={1}>{label}</Text>
+      <Text className="shrink text-sm text-text-muted" numberOfLines={1}>{label}</Text>
       <Text
-        className={`text-sm text-zinc-950 ${strong ? "font-bold" : "font-medium"}`}
+        className={`text-sm text-text-on-surface ${strong ? "font-bold" : "font-medium"}`}
         numberOfLines={1}
       >
         {value}
@@ -49,25 +49,27 @@ function LedgerRow({ device, onPress, last }: { device: Device; onPress: () => v
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-row items-center gap-3 py-2.5 active:opacity-70 ${last ? "" : "border-b border-dashed border-zinc-200"}`}
+      accessibilityRole="button"
+      accessibilityLabel={`View sale details for ${device.model}`}
+      className={`flex-row items-center gap-3 py-2.5 active:opacity-70 ${last ? "" : "border-b border-dashed border-border-subtle"}`}
     >
-      <View className="w-9 h-9 shrink-0 items-center justify-center rounded-full bg-zinc-100">
+      <View className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-surface-secondary">
         <Ionicons name="checkmark" size={15} color="#3f3f46" />
       </View>
 
       <View className="flex-1">
         <View className="flex-row items-center gap-1.5">
-          <Text numberOfLines={1} className="shrink text-sm font-semibold text-zinc-950">
+          <Text numberOfLines={1} className="shrink text-sm font-semibold text-text-on-surface">
             {device.model}
           </Text>
           {lock ? (
-            <View className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-px">
-              <Text className="text-[9px] font-semibold text-zinc-600">{lock}</Text>
+            <View className="rounded border border-border-subtle bg-bg-surface-secondary px-1.5 py-px">
+              <Text className="text-[9px] font-semibold text-text-muted-foreground">{lock}</Text>
             </View>
           ) : null}
         </View>
         <View className="mt-0.5 flex-row items-center gap-1.5">
-          <Text numberOfLines={1} className="shrink text-[11px] text-zinc-500">
+          <Text numberOfLines={1} className="shrink text-[11px] text-text-muted">
             {device.date_sold ? formatDate(device.date_sold) : "\u2014"} · {device.customer_name ?? "Walk-in"}
           </Text>
           <WarrantyTag period={device.warranty_period} dateSold={device.date_sold} />
@@ -75,7 +77,7 @@ function LedgerRow({ device, onPress, last }: { device: Device; onPress: () => v
       </View>
 
       <View className="items-end">
-        <Text numberOfLines={1} className="text-sm font-bold text-zinc-950">
+        <Text numberOfLines={1} className="text-sm font-bold text-text-on-surface">
           {formatPrice(sold)}
         </Text>
         <Text
@@ -453,35 +455,78 @@ function SaleDetailSheet({
   const handlePrintReceipt = async () => {
     const warrantyLabel = warrantyDays > 0 ? `${warrantyDays}-Day Warranty` : "No Warranty";
     const profitColor = profit >= 0 ? "#059669" : "#dc2626";
+    const buyerName = device.customer_name || "Walk-in Customer";
+    const saleDate = device.date_sold ? formatDate(device.date_sold) : "";
+    const imeiFormatted = formatImei(device.imei);
+
     const html = [
       "<!DOCTYPE html><html><head><style>",
-      "body{font-family:-apple-system,sans-serif;padding:32px;color:#18181b}",
-      "h1{font-size:20px;margin:0 0 4px}",
-      ".sub{font-size:12px;color:#71717a;margin-bottom:24px}",
-      "table{width:100%;border-collapse:collapse}",
-      "td{padding:8px 0;font-size:13px;border-bottom:1px solid #e4e4e7}",
-      "td:last-child{text-align:right;font-weight:600}",
-      ".total td{border-bottom:none;font-size:15px;font-weight:700;padding-top:12px}",
-      `.profit{color:${profitColor}}`,
+      "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:40px 32px;color:#18181b;background:#fff}",
+      "@media print { body { padding: 0; } }",
+      ".receipt{max-width:420px;margin:0 auto;background:#fff}",
+      ".header{text-align:center;border-bottom:2px solid #18181b;padding-bottom:24px;margin-bottom:24px}",
+      ".shop-name{font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#71717a;margin-bottom:8px}",
+      ".receipt-title{font-size:28px;font-weight:800;color:#18181b;margin:0 0 4px;letter-spacing:-0.02em}",
+      ".buyer-name{font-size:22px;font-weight:700;color:#18181b;margin:0 0 8px;letter-spacing:-0.01em}",
+      ".sale-date{font-size:13px;color:#71717a;margin:0}",
+      ".section{margin-bottom:20px}",
+      ".section-title{font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#71717a;margin-bottom:12px;display:flex;align-items:center;gap:8px}",
+      ".section-title::before{content:'';width:24px;height:1px;background:#e4e4e7}",
+      ".unit-card{background:#fafafa;border:1px solid #e4e4e7;border-radius:12px;padding:16px}",
+      ".unit-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e4e4e7;font-size:13px}",
+      ".unit-row:last-child{border-bottom:none;padding-bottom:0}",
+      ".unit-label{color:#71717a;font-weight:500}",
+      ".unit-value{color:#18181b;font-weight:600;text-align:right;max-width:65%;word-break:break-word}",
+      ".unit-row.highlight .unit-value{font-size:15px;font-weight:700;color:#18181b}",
+      ".financial-table{width:100%;border-collapse:collapse}",
+      ".financial-table td{padding:10px 0;font-size:13px;border-bottom:1px solid #e4e4e7}",
+      ".financial-table td:first-child{color:#71717a;font-weight:500}",
+      ".financial-table td:last-child{text-align:right;font-weight:600;color:#18181b}",
+      ".financial-table tr.total td{border-bottom:none;font-size:15px;font-weight:700;padding-top:16px}",
+      `.financial-table .profit{color:${profitColor}}`,
+      ".warranty-badge{display:inline-block;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#f0fdf4;color:#059669}",
+      ".warranty-badge.none{background:#fef2f2;color:#dc2626}",
+      ".footer{margin-top:32px;padding-top:20px;border-top:1px solid #e4e4e7;text-align:center;font-size:11px;color:#a1a1aa}",
       "</style></head><body>",
-      "<h1>iStocked Receipt</h1>",
-      `<p class="sub">${device.date_sold ? formatDate(device.date_sold) : ""}</p>`,
-      "<table>",
-      `<tr><td>Device</td><td>${device.model}</td></tr>`,
-      `<tr><td>Storage / Condition</td><td>${device.storage} &middot; ${device.condition}</td></tr>`,
-      device.color ? `<tr><td>Color</td><td>${device.color}</td></tr>` : "",
-      `<tr><td>IMEI</td><td>${formatImei(device.imei)}</td></tr>`,
-      lock ? `<tr><td>Network</td><td>${lock}</td></tr>` : "",
-      `<tr><td>Buyer</td><td>${device.customer_name || "Walk-in"}</td></tr>`,
-      device.buyer_contact ? `<tr><td>Contact</td><td>${device.buyer_contact}</td></tr>` : "",
-      `<tr><td>Warranty</td><td>${warrantyLabel}</td></tr>`,
+      "<div class='receipt'>",
+      "<div class='header'>",
+      "<div class='shop-name'>iStocked</div>",
+      "<h1 class='receipt-title'>Sales Receipt</h1>",
+      `<p class='buyer-name'>${buyerName}</p>`,
+      `<p class='sale-date'>${saleDate}</p>`,
+      "</div>",
+
+      "<div class='section'>",
+      "<div class='section-title'>Unit Details</div>",
+      "<div class='unit-card'>",
+      `<div class='unit-row highlight'><span class='unit-label'>Model</span><span class='unit-value'>${device.model}</span></div>`,
+      `<div class='unit-row'><span class='unit-label'>Storage / Condition</span><span class='unit-value'>${device.storage} · ${device.condition}</span></div>`,
+      device.color ? `<div class='unit-row'><span class='unit-label'>Color</span><span class='unit-value'>${device.color}</span></div>` : "",
+      `<div class='unit-row'><span class='unit-label'>IMEI</span><span class='unit-value'>${imeiFormatted}</span></div>`,
+      lock ? `<div class='unit-row'><span class='unit-label'>Network</span><span class='unit-value'>${lock}</span></div>` : "",
+      `<div class='unit-row'><span class='unit-label'>Warranty</span><span class='unit-value'>${warrantyLabel}</span></div>`,
+      "</div>",
+      "</div>",
+
+      "<div class='section'>",
+      "<div class='section-title'>Financial Summary</div>",
+      "<table class='financial-table'>",
       `<tr><td>Purchase Price</td><td>${formatPrice(device.buy_price)}</td></tr>`,
       Number(device.repair_cost ?? 0) > 0
         ? `<tr><td>Repair Cost</td><td>${formatPrice(device.repair_cost)}</td></tr>`
         : "",
       `<tr><td>Selling Price</td><td>${formatPrice(sold)}</td></tr>`,
-      `<tr class="total"><td>Net Profit</td><td class="profit">${profit >= 0 ? "+" : ""}${formatPrice(profit)}</td></tr>`,
-      "</table></body></html>",
+      `<tr class='total'><td>Net Profit</td><td class='profit'>${profit >= 0 ? "+" : "−"}${formatPrice(Math.abs(profit))}</td></tr>`,
+      "</table>",
+      "</div>",
+
+      device.buyer_contact
+        ? `<div class='section'><div class='section-title'>Buyer Contact</div><div class='unit-card' style='padding:12px 16px;'><div style='font-size:13px;font-weight:600;color:#18181b'>${device.buyer_contact}</div></div></div>`
+        : "",
+
+      "<div class='footer'>Thank you for your business · Generated by iStocked</div>",
+      "</div>",
+      "</body></html>",
     ].join("\n");
 
     try {
