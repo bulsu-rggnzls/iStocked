@@ -237,9 +237,11 @@ function AddDeviceForm({
 
         <Pressable
           onPress={() => setSpecsOpen((o) => !o)}
-          className="mb-3 flex flex-row items-center justify-between rounded-xl border border-zinc-200/80 bg-zinc-50 px-4 py-3 active:bg-zinc-100"
+          accessibilityRole="button"
+          accessibilityLabel={specsOpen ? "Collapse optional specs" : "Expand optional specs"}
+          className="mb-3 flex flex-row items-center justify-between rounded-xl border border-border-subtle/80 bg-bg-surface-secondary px-4 py-3 active:bg-bg-surface-secondary"
         >
-          <Text className="text-sm font-semibold text-zinc-950">
+          <Text className="text-sm font-semibold text-text-on-surface">
             Optional Specs (Battery, Color, Repair)
           </Text>
           <Ionicons
@@ -320,6 +322,10 @@ function AddDeviceForm({
                             : [...prev, opt.key],
                         )
                       }
+                      accessibilityRole="checkbox"
+                      accessibilityLabel={opt.label}
+                      accessibilityState={{ checked: isSelected }}
+                      hitSlop={8}
                       className="flex-row items-center gap-1.5 rounded-lg border px-2.5 py-1.5 active:opacity-80"
                       style={{
                         backgroundColor: isSelected ? "#ecfdf5" : "#ffffff",
@@ -356,7 +362,7 @@ function AddDeviceForm({
                 numberOfLines={3}
                 textAlignVertical="top"
                 scrollEnabled
-                className="h-24 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-950"
+                className="h-24 w-full rounded-xl border border-border-subtle bg-bg-surface px-4 py-3 text-sm font-medium text-text-on-surface"
               />
             </Field>
           </View>
@@ -366,25 +372,29 @@ function AddDeviceForm({
       </ScrollView>
 
       <View
-        className="shrink-0 flex-row items-center gap-2 border-t border-zinc-100 bg-white px-4 pt-3"
+        className="shrink-0 flex-row items-center gap-2 border-t border-border-subtle bg-bg-surface px-4 pt-3"
         style={{ paddingBottom: Math.max(insets.bottom, 32) }}
       >
         <View className="flex-row gap-2 w-full">
           <Pressable
             onPress={onClose}
-            className="flex-1 h-10 text-xs font-semibold rounded-xl w-full border border-zinc-200 bg-white items-center justify-center active:bg-zinc-100"
+            accessibilityRole="button"
+            accessibilityLabel="Cancel"
+            className="flex-1 h-10 text-xs font-semibold rounded-xl w-full border border-border-subtle bg-bg-surface items-center justify-center active:bg-bg-surface-secondary"
           >
-            <Text className="text-xs font-semibold text-zinc-950">Cancel</Text>
+            <Text className="text-xs font-semibold text-text-on-surface">Cancel</Text>
           </Pressable>
           <Pressable
             onPress={handleSave}
             disabled={addDevice.isPending}
-            className="flex-1 h-10 text-xs font-semibold rounded-xl w-full bg-zinc-900 items-center justify-center active:bg-black disabled:opacity-60"
+            accessibilityRole="button"
+            accessibilityLabel="Add to stock"
+            className="flex-1 h-10 text-xs font-semibold rounded-xl w-full bg-text-on-surface items-center justify-center active:bg-black disabled:opacity-60"
           >
             {addDevice.isPending ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
-              <Text className="text-xs font-semibold text-white">Add to stock</Text>
+              <Text className="text-xs font-semibold text-brand-primary-foreground">Add to stock</Text>
             )}
           </Pressable>
         </View>

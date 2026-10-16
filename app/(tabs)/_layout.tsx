@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { View, useWindowDimensions, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 const TABLET_BREAKPOINT = 768;
 
@@ -14,14 +15,14 @@ const TAB_CONFIG: { name: string; icon: IoniconsName; label: string }[] = [
   { name: "scan", icon: "scan-outline", label: "Scan" },
 ];
 
-function CustomTabBar({ state, navigation }: any) {
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const { width } = useWindowDimensions();
   const isTablet = width >= TABLET_BREAKPOINT;
   const insets = useSafeAreaInsets();
 
   return (
     <View
-      className="inset-x-0 bottom-0 z-50 border-t border-zinc-200"
+      className="inset-x-0 bottom-0 z-50 border-t border-border-subtle"
       style={{
         position: "absolute",
         left: isTablet ? "10%" : 0,
@@ -42,8 +43,8 @@ function CustomTabBar({ state, navigation }: any) {
       }}
     >
       <View className="flex-1 flex-row items-center justify-around">
-        {state.routes.map((route: any) => {
-          const isFocused = state.index === state.routes.indexOf(route);
+        {state.routes.map((route, index) => {
+          const isFocused = state.index === index;
           const color = isFocused ? "#09090b" : "#71717a";
           const tabConfig = TAB_CONFIG.find((t) => t.name === route.name);
 
@@ -57,6 +58,9 @@ function CustomTabBar({ state, navigation }: any) {
             <Pressable
               key={route.key}
               onPress={onPress}
+              accessibilityRole="tab"
+              accessibilityLabel={tabConfig?.label ?? route.name}
+              accessibilityState={{ selected: isFocused }}
               className="flex-1 flex-col items-center justify-center py-2 gap-1"
             >
               <Ionicons
