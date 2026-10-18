@@ -14,10 +14,10 @@ export function ScanResultCard({ device }: ScanResultCardProps) {
     <View>
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1">
-          <Text className="text-xl font-bold text-zinc-950">
+          <Text className="text-xl font-bold text-text-on-surface">
             {device.model}
           </Text>
-          <Text className="mt-1 font-mono text-sm tracking-wide text-zinc-500">
+          <Text className="mt-1 font-mono text-sm tracking-wide text-text-muted">
             {formatImei(device.imei)}
           </Text>
         </View>
@@ -25,22 +25,22 @@ export function ScanResultCard({ device }: ScanResultCardProps) {
       </View>
 
       <View className="mt-3 flex-row flex-wrap items-center gap-x-2 gap-y-1.5">
-        <Text className="text-sm text-zinc-500">{device.storage}</Text>
-        <View className="h-1 w-1 rounded-full bg-zinc-300" />
+        <Text className="text-sm text-text-muted">{device.storage}</Text>
+        <View className="h-1 w-1 rounded-full bg-border-subtle" />
         <ConditionBadge condition={device.condition} />
       </View>
 
-      <View className="mt-4 rounded-xl bg-zinc-100 px-4 py-3">
+      <View className="mt-4 rounded-xl bg-bg-surface-secondary px-4 py-3">
         <View className="flex-row items-center justify-between">
-          <Text className="text-sm text-zinc-500">List price</Text>
-          <Text className="text-xl font-bold text-zinc-950">
+          <Text className="text-sm text-text-muted">List price</Text>
+          <Text className="text-xl font-bold text-text-on-surface">
             {formatPrice(device.list_price)}
           </Text>
         </View>
         {Number(device.repair_cost ?? 0) > 0 ? (
-          <View className="mt-2 flex-row items-center justify-between border-t border-zinc-200 pt-2">
-            <Text className="text-sm text-zinc-500">Total cost (buy + repair)</Text>
-            <Text className="text-sm font-semibold text-zinc-700">
+          <View className="mt-2 flex-row items-center justify-between border-t border-border-subtle pt-2">
+            <Text className="text-sm text-text-muted">Total cost (buy + repair)</Text>
+            <Text className="text-sm font-semibold text-text-muted-foreground">
               {formatPrice(totalCost)}
             </Text>
           </View>

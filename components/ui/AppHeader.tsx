@@ -32,18 +32,20 @@ export function AppHeader({ title, onBack, right }: AppHeaderProps) {
 
   return (
     <View
-      className="flex-row items-center gap-3 bg-zinc-100 px-4 pb-3"
+      className="flex-row items-center gap-3 bg-bg-surface-secondary px-4 pb-3"
       style={{ paddingTop: insets.top + 8 }}
     >
       <Pressable
         onPress={handleBack}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
         hitSlop={8}
-        className="flex-row items-center gap-0.5 rounded-full border border-zinc-200 bg-white py-2 pl-2 pr-3.5 active:opacity-80"
+        className="flex-row items-center gap-0.5 rounded-full border border-border-subtle bg-bg-surface py-2 pl-2 pr-3.5 active:opacity-80"
       >
         <Ionicons name="chevron-back" size={18} color="#09090b" />
-        <Text className="text-sm font-semibold text-zinc-950">Back</Text>
+        <Text className="text-sm font-semibold text-text-on-surface">Back</Text>
       </Pressable>
-      <Text className="flex-1 text-lg font-bold text-zinc-950" numberOfLines={1}>{title}</Text>
+      <Text className="flex-1 text-lg font-bold text-text-on-surface" numberOfLines={1}>{title}</Text>
       {right}
     </View>
   );

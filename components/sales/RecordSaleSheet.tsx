@@ -9,7 +9,7 @@ import { formatPrice, todayIso } from "@/utils/format";
 import type { Device, WarrantyPeriod } from "@/types";
 
 const inputClass =
-  "h-12 px-4 rounded-xl border border-zinc-200 bg-white text-sm font-medium text-zinc-950 w-full";
+  "h-12 px-4 rounded-xl border border-border-subtle bg-bg-surface text-sm font-medium text-text-on-surface w-full";
 
 interface RecordSaleSheetProps {
   device: Device | null;
@@ -19,7 +19,7 @@ interface RecordSaleSheetProps {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View>
-      <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+      <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
         {label}
       </Text>
       {children}
@@ -89,21 +89,21 @@ function RecordSaleForm({ device, onClose }: { device: Device; onClose: () => vo
         style={{ flexShrink: 1, maxHeight: Math.round(height * (isTablet ? 0.4 : 0.55)) }}
       >
         {/* Device summary — horizontal, left-aligned */}
-        <View className="flex-row items-center justify-between rounded-2xl border border-zinc-200/80 bg-zinc-50 p-4">
+        <View className="flex-row items-center justify-between rounded-2xl border border-border-subtle bg-bg-surface-secondary p-4">
           <View className="flex-1 pr-3">
-            <Text numberOfLines={1} className="text-sm font-bold text-zinc-950">
+            <Text numberOfLines={1} className="text-sm font-bold text-text-on-surface">
               {device.model}
             </Text>
-            <Text numberOfLines={1} className="mt-0.5 text-[11px] text-zinc-500">
+            <Text numberOfLines={1} className="mt-0.5 text-[11px] text-text-muted">
               {device.storage} · {device.condition}
             </Text>
           </View>
           <View className="items-end">
-            <Text className="text-xs font-medium text-zinc-600">
+            <Text className="text-xs font-medium text-text-muted-foreground">
               Cost {formatPrice(totalCost)}
             </Text>
             {Number(device.repair_cost ?? 0) > 0 ? (
-              <Text className="mt-0.5 text-[11px] text-zinc-400">
+              <Text className="mt-0.5 text-[11px] text-text-secondary">
                 incl. repair {formatPrice(device.repair_cost)}
               </Text>
             ) : null}
@@ -151,7 +151,7 @@ function RecordSaleForm({ device, onClose }: { device: Device; onClose: () => vo
 
         {/* Warranty chips */}
         <View>
-          <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+          <Text className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
             Warranty
           </Text>
           <View className="flex-row gap-2">
@@ -161,6 +161,10 @@ function RecordSaleForm({ device, onClose }: { device: Device; onClose: () => vo
                 <Pressable
                   key={option.value}
                   onPress={() => setWarrantyPeriod(option.value)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${option.label}`}
+                  accessibilityState={{ selected }}
+                  hitSlop={8}
                   className="h-10 flex-1 items-center justify-center rounded-xl border active:opacity-80"
                   style={{
                     backgroundColor: selected ? "#000000" : "#ffffff",
@@ -203,28 +207,32 @@ function RecordSaleForm({ device, onClose }: { device: Device; onClose: () => vo
           </Text>
         </View>
 
-        {error ? <Text className="text-sm text-red-600">{error}</Text> : null}
+        {error ? <Text className="text-sm text-state-error">{error}</Text> : null}
       </ScrollView>
 
       <View
-        className="shrink-0 flex-row gap-3 border-t border-zinc-100 bg-white px-4 pt-3"
+        className="shrink-0 flex-row gap-3 border-t border-border-subtle bg-bg-surface px-4 pt-3"
         style={{ paddingBottom: Math.max(insets.bottom, 32) }}
       >
         <Pressable
           onPress={onClose}
-          className="h-11 flex-1 items-center justify-center rounded-2xl border border-zinc-200 bg-white active:bg-zinc-100"
+          accessibilityRole="button"
+          accessibilityLabel="Cancel"
+          className="h-11 flex-1 items-center justify-center rounded-2xl border border-border-subtle bg-bg-surface active:bg-bg-surface-secondary"
         >
-          <Text className="text-xs font-semibold text-zinc-950">Cancel</Text>
+          <Text className="text-xs font-semibold text-text-on-surface">Cancel</Text>
         </Pressable>
         <Pressable
           onPress={handleConfirm}
           disabled={recordSale.isPending}
-          className="h-11 flex-1 items-center justify-center rounded-2xl bg-black active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel="Confirm sale"
+          className="h-11 flex-1 items-center justify-center rounded-2xl bg-text-on-surface active:opacity-80"
         >
           {recordSale.isPending ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
-            <Text className="text-xs font-semibold text-white">Confirm sale</Text>
+            <Text className="text-xs font-semibold text-brand-primary-foreground">Confirm sale</Text>
           )}
         </Pressable>
       </View>
