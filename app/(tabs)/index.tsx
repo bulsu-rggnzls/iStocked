@@ -25,18 +25,18 @@ function ReceiptRow({ device, last }: { device: Device; last: boolean }) {
 
   return (
     <View
-      className={`flex-row items-center gap-3 py-2.5 ${last ? "" : "border-b border-dashed border-zinc-200"}`}
+      className={`flex-row items-center gap-3 py-2.5 ${last ? "" : "border-b border-dashed border-border-subtle"}`}
     >
-      <View className="w-9 h-9 shrink-0 items-center justify-center rounded-full bg-zinc-100">
+      <View className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-surface-secondary">
         <Ionicons name="checkmark" size={15} color="#3f3f46" />
       </View>
 
       <View className="flex-1">
-        <Text numberOfLines={1} className="text-sm font-semibold text-zinc-950">
+        <Text numberOfLines={1} className="text-sm font-semibold text-text-on-surface">
           {device.model}
         </Text>
         <View className="mt-0.5 flex-row items-center gap-1.5">
-          <Text numberOfLines={1} className="text-[11px] text-zinc-500">
+          <Text numberOfLines={1} className="text-[11px] text-text-muted">
             {device.date_sold ? formatDate(device.date_sold) : "\u2014"} · {device.customer_name ?? "Walk-in"}
           </Text>
           <WarrantyTag period={device.warranty_period} dateSold={device.date_sold} />
@@ -44,8 +44,8 @@ function ReceiptRow({ device, last }: { device: Device; last: boolean }) {
       </View>
 
       <View className="items-end">
-        <Text className="text-sm font-bold text-zinc-950">{formatPrice(device.sold_price ?? 0)}</Text>
-        <Text className={`text-[11px] font-semibold ${positive ? "text-emerald-700" : "text-red-700"}`}>
+        <Text className="text-sm font-bold text-text-on-surface">{formatPrice(device.sold_price ?? 0)}</Text>
+        <Text className={`text-[11px] font-semibold ${positive ? "text-emerald-700" : "text-state-error"}`}>
           {positive ? "+" : "\u2212"}
           {formatPrice(Math.abs(profit))} net
         </Text>
@@ -57,13 +57,13 @@ function ReceiptRow({ device, last }: { device: Device; last: boolean }) {
 function HeroStat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <View className="flex-1">
-      <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+      <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted" numberOfLines={1}>
         {label}
       </Text>
-      <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
+      <Text className="mt-1 text-lg font-bold text-text-on-surface" numberOfLines={1}>
         {value}
       </Text>
-      {sub ? <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>{sub}</Text> : null}
+      {sub ? <Text className="mt-0.5 text-[11px] text-text-muted" numberOfLines={1}>{sub}</Text> : null}
     </View>
   );
 }
@@ -85,7 +85,7 @@ export default function DashboardScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-zinc-100">
+      <View className="flex-1 items-center justify-center bg-bg-surface-secondary">
         <ActivityIndicator size="large" color="#09090b" />
       </View>
     );
@@ -93,18 +93,20 @@ export default function DashboardScreen() {
 
   if (isError) {
     return (
-      <View className="flex-1 items-center justify-center bg-zinc-100 px-8">
-        <Text className="text-center text-base font-semibold text-zinc-950">
+      <View className="flex-1 items-center justify-center bg-bg-surface-secondary px-8">
+        <Text className="text-center text-base font-semibold text-text-on-surface">
           Couldn&apos;t load your dashboard
         </Text>
-        <Text className="mt-2 text-center text-sm leading-5 text-red-600">
+        <Text className="mt-2 text-center text-sm leading-5 text-state-error">
           {error instanceof Error ? error.message : "Something went wrong."}
         </Text>
         <Pressable
           onPress={() => refetch()}
-          className="mt-5 rounded-xl bg-black px-6 py-3 active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel="Retry loading dashboard"
+          className="mt-5 rounded-xl bg-text-on-surface px-6 py-3 active:opacity-80"
         >
-          <Text className="font-semibold text-white">Retry</Text>
+          <Text className="font-semibold text-brand-primary-foreground">Retry</Text>
         </Pressable>
       </View>
     );
@@ -112,7 +114,7 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-zinc-100"
+      className="flex-1 bg-bg-surface-secondary"
       contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
       bounces={false}
       alwaysBounceVertical={false}
@@ -126,19 +128,20 @@ export default function DashboardScreen() {
       <View className="px-4" style={{ paddingTop: insets.top + 16 }}>
         <View className="flex-row items-start justify-between">
           <View className="flex-1 pr-4">
-            <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-text-muted">
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 month: "long",
                 day: "numeric",
               })}
             </Text>
-            <Text className="mt-1 text-3xl font-bold text-zinc-950">Dashboard</Text>
+            <Text className="mt-1 text-3xl font-bold text-text-on-surface">Dashboard</Text>
           </View>
           <Pressable
             onPress={() => router.push("/settings")}
-            className="h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white active:bg-zinc-100"
+            accessibilityRole="button"
             accessibilityLabel="Settings"
+            className="h-10 w-10 items-center justify-center rounded-full border border-border-subtle bg-bg-surface active:bg-bg-surface-secondary"
           >
             <Ionicons name="settings-outline" size={20} color="#09090b" />
           </Pressable>
@@ -147,26 +150,26 @@ export default function DashboardScreen() {
 
       {/* Hero: the ledger */}
       <View className="px-4 pt-4">
-        <View className="rounded-2xl bg-white p-4 shadow-sm border border-zinc-200/70">
-          <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <View className="rounded-2xl bg-bg-surface p-4 shadow-sm border border-border-subtle">
+          <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
             Net profit
           </Text>
           <View className="mt-1 flex-row items-baseline gap-2">
-            <Text className="text-[36px] leading-[41px] font-bold tracking-tight text-zinc-950">
+            <Text className="text-[36px] leading-[41px] font-bold tracking-tight text-text-on-surface">
               {formatPrice(data?.totalNetProfit ?? 0)}
             </Text>
           </View>
-          <Text className="mt-1 text-xs text-zinc-500">
+          <Text className="mt-1 text-xs text-text-muted">
             from {data?.unitsSold ?? 0} {data?.unitsSold === 1 ? "phone" : "phones"} sold to date
           </Text>
 
-          <View className="mt-3.5 border-t border-dashed border-zinc-200 pt-3 flex-row gap-4">
+          <View className="mt-3.5 border-t border-dashed border-border-subtle pt-3 flex-row gap-4">
             <HeroStat
               label="In stock"
               value={formatPrice(data?.totalInvestment ?? 0)}
               sub={`${data?.unitsAvailable ?? 0} ${data?.unitsAvailable === 1 ? "unit" : "units"} on shelf`}
             />
-            <View className="w-px bg-zinc-200" />
+            <View className="w-px bg-border-subtle" />
             <HeroStat
               label="If all sells"
               value={formatPrice(data?.potentialProfit ?? 0)}
@@ -174,7 +177,7 @@ export default function DashboardScreen() {
             />
             {isTablet ? (
               <>
-                <View className="w-px bg-zinc-200" />
+                <View className="w-px bg-border-subtle" />
                 <HeroStat
                   label="Repairs"
                   value={formatPrice(data?.totalRepairCost ?? 0)}
@@ -185,7 +188,7 @@ export default function DashboardScreen() {
           </View>
 
           {!isTablet && (data?.totalRepairCost ?? 0) > 0 ? (
-            <Text className="mt-3 text-[11px] text-zinc-500">
+            <Text className="mt-3 text-[11px] text-text-muted">
               Repair spend to date · {formatPrice(data?.totalRepairCost ?? 0)}
             </Text>
           ) : null}
@@ -196,34 +199,43 @@ export default function DashboardScreen() {
       <View className="px-4 pt-4 flex-row gap-3">
         <Pressable
           onPress={() => setAddSheetOpen(true)}
-          className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-black active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel="Add purchased phone"
+          className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-text-on-surface active:opacity-80"
         >
           <Ionicons name="add" size={17} color="#ffffff" />
-          <Text className="text-xs font-semibold text-white">Add purchased phone</Text>
+          <Text className="text-xs font-semibold text-brand-primary-foreground">Add purchased phone</Text>
         </Pressable>
         <Pressable
           onPress={() => router.push("/sales")}
-          className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white active:bg-zinc-100"
+          accessibilityRole="button"
+          accessibilityLabel="View sales history"
+          className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-border-subtle bg-bg-surface active:bg-bg-surface-secondary"
         >
           <Ionicons name="receipt-outline" size={16} color="#09090b" />
-          <Text className="text-xs font-semibold text-zinc-950">Sales history</Text>
+          <Text className="text-xs font-semibold text-text-on-surface">Sales history</Text>
         </Pressable>
       </View>
 
       {/* Recent sales */}
       <View className="px-4 pt-5">
         <View className="flex-row items-center justify-between pb-2">
-          <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+          <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-text-muted">
             Recent sales
           </Text>
           {sales.length > 0 ? (
-            <Pressable onPress={() => router.push("/sales")} hitSlop={8}>
-              <Text className="text-xs font-semibold text-zinc-900">View all</Text>
+            <Pressable
+              onPress={() => router.push("/sales")}
+              accessibilityRole="button"
+              accessibilityLabel="View all recent sales"
+              hitSlop={8}
+            >
+              <Text className="text-xs font-semibold text-text-on-surface">View all</Text>
             </Pressable>
           ) : null}
         </View>
 
-        <View className="rounded-2xl border border-zinc-200 bg-white px-4">
+        <View className="rounded-2xl border border-border-subtle bg-bg-surface px-4">
           {sales.length === 0 ? (
             <View className="py-2">
               <EmptyState
