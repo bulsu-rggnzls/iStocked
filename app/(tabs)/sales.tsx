@@ -197,7 +197,7 @@ export default function SalesHistoryScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-zinc-100">
+      <View className="flex-1 items-center justify-center bg-bg-surface-secondary">
         <ActivityIndicator size="large" color="#09090b" />
       </View>
     );
@@ -205,18 +205,20 @@ export default function SalesHistoryScreen() {
 
   if (isError) {
     return (
-      <View className="flex-1 items-center justify-center bg-zinc-100 px-8">
-        <Text className="text-center text-base font-semibold text-zinc-950">
+      <View className="flex-1 items-center justify-center bg-bg-surface-secondary px-8">
+        <Text className="text-center text-base font-semibold text-text-on-surface">
           Couldn&apos;t load sales history
         </Text>
-        <Text className="mt-2 text-center text-sm leading-5 text-red-600">
+        <Text className="mt-2 text-center text-sm leading-5 text-state-error">
           {error instanceof Error ? error.message : "Something went wrong."}
         </Text>
         <Pressable
           onPress={() => refetch()}
-          className="mt-5 rounded-xl bg-black px-6 py-3 active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel="Retry loading sales history"
+          className="mt-5 rounded-xl bg-text-on-surface px-6 py-3 active:opacity-80"
         >
-          <Text className="font-semibold text-white">Retry</Text>
+          <Text className="font-semibold text-brand-primary-foreground">Retry</Text>
         </Pressable>
       </View>
     );
@@ -224,7 +226,7 @@ export default function SalesHistoryScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-zinc-100"
+      className="flex-1 bg-bg-surface-secondary"
       contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
       bounces={false}
       alwaysBounceVertical={false}
@@ -242,61 +244,61 @@ export default function SalesHistoryScreen() {
       <View className="px-4" style={{ paddingTop: insets.top + 16 }}>
         <View className="flex-row items-start justify-between">
           <View className="flex-1 pr-4">
-            <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <Text className="text-[11px] font-bold uppercase tracking-[0.18em] text-text-muted">
               Flip ledger
             </Text>
-            <Text className="mt-1 text-3xl font-bold text-zinc-950">Sales history</Text>
+            <Text className="mt-1 text-3xl font-bold text-text-on-surface">Sales history</Text>
           </View>
         </View>
       </View>
 
       {/* Totals strip */}
       <View className="px-4 pt-4">
-        <View className="rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm">
+        <View className="rounded-2xl border border-border-subtle bg-bg-surface p-4 shadow-sm">
           <View className="flex-row gap-4">
             <View className="flex-1">
-              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted" numberOfLines={1}>
                 {selectedGroup
                   ? selectedGroup.label
                   : selectedYear === new Date().getFullYear()
                     ? "This year"
                     : String(selectedYear)}
               </Text>
-              <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
+              <Text className="mt-1 text-lg font-bold text-text-on-surface" numberOfLines={1}>
                 {formatPrice(displayTotal)}
               </Text>
-              <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
+              <Text className="mt-0.5 text-[11px] text-text-muted" numberOfLines={1}>
                 {displayCount} {displayCount === 1 ? "sale" : "sales"}
               </Text>
             </View>
-            <View className="w-px bg-zinc-200" />
+            <View className="w-px bg-border-subtle" />
             <View className="flex-1">
-              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted" numberOfLines={1}>
                 {selectedGroup ? "Per sale" : "Avg. per sale"}
               </Text>
-              <Text className="mt-1 text-lg font-bold text-zinc-950" numberOfLines={1}>
+              <Text className="mt-1 text-lg font-bold text-text-on-surface" numberOfLines={1}>
                 {formatPrice(displayCount ? displayTotal / displayCount : 0)}
               </Text>
-              <Text className="mt-0.5 text-[11px] text-zinc-500" numberOfLines={1}>
+              <Text className="mt-0.5 text-[11px] text-text-muted" numberOfLines={1}>
                 {selectedGroup ? "in this month" : "across this year"}
               </Text>
             </View>
           </View>
           <View className="mt-3 flex-row gap-4">
             <View className="flex-1">
-              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted" numberOfLines={1}>
                 Revenue
               </Text>
               <Text className="mt-1 text-lg font-bold text-emerald-700" numberOfLines={1}>
                 {formatPrice(displayRevenue)}
               </Text>
             </View>
-            <View className="w-px bg-zinc-200" />
+            <View className="w-px bg-border-subtle" />
             <View className="flex-1">
-              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500" numberOfLines={1}>
+              <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted" numberOfLines={1}>
                 Cost
               </Text>
-              <Text className="mt-1 text-lg font-bold text-red-700" numberOfLines={1}>
+              <Text className="mt-1 text-lg font-bold text-state-error" numberOfLines={1}>
                 {formatPrice(displayCost)}
               </Text>
             </View>
@@ -309,22 +311,26 @@ export default function SalesHistoryScreen() {
         <View className="px-4 pt-4">
           {/* Year toggle */}
           <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+            <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
               Period
             </Text>
             <View className="flex-row items-center gap-3">
               <Pressable
                 onPress={() => changeYear(Math.max(Math.min(...availableYears), selectedYear - 1))}
+                accessibilityRole="button"
+                accessibilityLabel="Previous year"
                 hitSlop={8}
                 className="active:opacity-60"
               >
                 <Ionicons name="chevron-back" size={18} color="#71717a" />
               </Pressable>
-              <Text className="text-sm font-bold text-zinc-950 min-w-[3ch] text-center">
+              <Text className="text-sm font-bold text-text-on-surface min-w-[3ch] text-center">
                 {selectedYear}
               </Text>
               <Pressable
                 onPress={() => changeYear(Math.min(Math.max(...availableYears), selectedYear + 1))}
+                accessibilityRole="button"
+                accessibilityLabel="Next year"
                 hitSlop={8}
                 className="active:opacity-60"
               >
@@ -340,6 +346,9 @@ export default function SalesHistoryScreen() {
           >
             <Pressable
               onPress={() => setSelectedMonth(null)}
+              accessibilityRole="button"
+              accessibilityLabel="Show all months"
+              accessibilityState={{ selected: selectedMonth === null }}
               className="h-9 shrink-0 items-center justify-center rounded-full border px-4 active:opacity-80"
               style={{
                 backgroundColor: selectedMonth === null ? "#09090b" : "#ffffff",
@@ -354,6 +363,9 @@ export default function SalesHistoryScreen() {
               <Pressable
                 key={g.key}
                 onPress={() => setSelectedMonth(selectedMonth === g.key ? null : g.key)}
+                accessibilityRole="button"
+                accessibilityLabel={`Filter by ${shortMonth(g.key)}`}
+                accessibilityState={{ selected: selectedMonth === g.key }}
                 className="h-9 shrink-0 items-center justify-center rounded-full border px-4 active:opacity-80"
                 style={{
                   backgroundColor: selectedMonth === g.key ? "#09090b" : "#ffffff",
@@ -371,12 +383,12 @@ export default function SalesHistoryScreen() {
 
       {/* Monthly compiled */}
       <View className="px-4 pt-5">
-        <Text className="pb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <Text className="pb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-text-muted">
           Transactions
         </Text>
 
         {filteredGroups.length === 0 ? (
-          <View className="rounded-2xl border border-zinc-200 bg-white px-4">
+          <View className="rounded-2xl border border-border-subtle bg-bg-surface px-4">
             <View className="py-2">
               <EmptyState
                 icon="checkmark-circle-outline"
@@ -390,22 +402,22 @@ export default function SalesHistoryScreen() {
         ) : (
           <View className="gap-5">
             {filteredGroups.map((group) => (
-              <View key={group.key}>
+               <View key={group.key}>
                 <View className="flex-row items-center justify-between pb-2">
-                  <Text className="text-sm font-bold text-zinc-950">{group.label}</Text>
+                  <Text className="text-sm font-bold text-text-on-surface">{group.label}</Text>
                   <View className="flex-row items-center gap-2">
-                    <Text className="text-[11px] font-medium text-zinc-500">
+                    <Text className="text-[11px] font-medium text-text-muted">
                       {group.count} {group.count === 1 ? "sale" : "sales"}
                     </Text>
                     <Text
-                      className={`text-sm font-bold ${group.profit >= 0 ? "text-emerald-700" : "text-red-700"}`}
+                      className={`text-sm font-bold ${group.profit >= 0 ? "text-emerald-700" : "text-state-error"}`}
                     >
                       {group.profit >= 0 ? "+" : "\u2212"}
                       {formatPrice(Math.abs(group.profit))} net
                     </Text>
                   </View>
                 </View>
-                <View className="rounded-2xl border border-zinc-200 bg-white px-4">
+                <View className="rounded-2xl border border-border-subtle bg-bg-surface px-4">
                   {group.items.map((item, i) => (
                     <LedgerRow
                       device={item}
@@ -593,10 +605,10 @@ function SaleDetailSheet({
         contentContainerClassName="pb-10"
         style={{ flexShrink: 1, maxHeight: Math.round(height * (isTablet ? 0.35 : 0.45)) }}
       >
-        <Text className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <Text className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
           Device info
         </Text>
-        <View className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-3.5">
+        <View className="rounded-2xl border border-border-subtle bg-bg-surface-secondary p-3.5">
           <DetailRow label="Model" value={device.model} />
           <DetailRow label="Storage" value={device.storage} />
           <DetailRow label="Condition" value={device.condition} />
@@ -605,16 +617,16 @@ function SaleDetailSheet({
           {lock ? <DetailRow label="Network" value={lock} /> : null}
         </View>
 
-        <Text className="mb-1.5 mt-4 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <Text className="mb-1.5 mt-4 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
           Financial breakdown
         </Text>
-        <View className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-3.5">
+        <View className="rounded-2xl border border-border-subtle bg-bg-surface-secondary p-3.5">
           <DetailRow label="Purchase price" value={formatPrice(device.buy_price)} />
           {Number(device.repair_cost ?? 0) > 0 ? (
             <DetailRow label="Repair / extra" value={formatPrice(device.repair_cost)} />
           ) : null}
           <DetailRow label="Selling price" value={formatPrice(sold)} />
-          <View className="border-t border-dashed border-zinc-200">
+          <View className="border-t border-dashed border-border-subtle">
             <DetailRow
               label="Net profit"
               value={`${profit >= 0 ? "+" : "\u2212"}${formatPrice(Math.abs(profit))}`}
@@ -623,38 +635,42 @@ function SaleDetailSheet({
           </View>
         </View>
 
-        <Text className="mb-1.5 mt-4 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <Text className="mb-1.5 mt-4 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
           Buyer &amp; date
         </Text>
-        <View className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-3.5">
+        <View className="rounded-2xl border border-border-subtle bg-bg-surface-secondary p-3.5">
           <DetailRow label="Buyer name" value={device.customer_name || "Walk-in"} />
           {device.buyer_contact ? (
             <DetailRow label="Contact" value={device.buyer_contact} />
           ) : null}
           <DetailRow label="Sale date" value={device.date_sold ? formatDate(device.date_sold) : "\u2014"} />
           <View className="flex-row items-center justify-between py-2">
-            <Text className="text-sm text-zinc-500">Warranty</Text>
+            <Text className="text-sm text-text-muted">Warranty</Text>
             <WarrantyTag period={device.warranty_period} dateSold={device.date_sold} />
           </View>
         </View>
       </ScrollView>
       <View
-        className="shrink-0 flex-col gap-2 border-t border-zinc-100 bg-white px-4 pt-3"
+        className="shrink-0 flex-col gap-2 border-t border-border-subtle bg-bg-surface px-4 pt-3"
         style={{ paddingBottom: Math.max(insets.bottom, 32) }}
       >
         <Pressable
           onPress={handlePrintReceipt}
-          className="h-11 flex-row items-center justify-center gap-2 rounded-2xl bg-black active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel="Save or share PDF receipt"
+          className="h-11 flex-row items-center justify-center gap-2 rounded-2xl bg-text-on-surface active:opacity-80"
         >
           <Ionicons name="document-text-outline" size={16} color="#ffffff" />
-          <Text className="text-xs font-semibold text-white">Save / share PDF receipt</Text>
+          <Text className="text-xs font-semibold text-brand-primary-foreground">Save / share PDF receipt</Text>
         </Pressable>
         <Pressable
           onPress={handleRefund}
-          className="h-11 flex-row items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white active:bg-red-50"
+          accessibilityRole="button"
+          accessibilityLabel="Refund transaction"
+          className="h-11 flex-row items-center justify-center gap-2 rounded-2xl border border-state-error/30 bg-bg-surface active:bg-red-50"
         >
           <Ionicons name="arrow-undo-outline" size={16} color="#dc2626" />
-          <Text className="text-xs font-semibold text-red-600">Refund transaction</Text>
+          <Text className="text-xs font-semibold text-state-error">Refund transaction</Text>
         </Pressable>
       </View>
     </BottomSheet>
