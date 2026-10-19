@@ -74,7 +74,7 @@ export default function SettingsScreen() {
   }, []);
 
   return (
-    <View className="flex-1 bg-zinc-100">
+    <View className="flex-1 bg-bg-surface-secondary">
       <AppHeader title="Settings" />
       <ScrollView
         className="flex-1"
@@ -85,8 +85,8 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Account */}
-        <View className="rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm">
-          <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <View className="rounded-2xl border border-border-subtle bg-bg-surface p-4 shadow-sm">
+          <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
             Account
           </Text>
           {!supabaseConfigured ? (
@@ -110,10 +110,10 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-bold text-zinc-950" numberOfLines={1}>
+                  <Text className="text-sm font-bold text-text-on-surface" numberOfLines={1}>
                     {session.user.email ?? "Signed in"}
                   </Text>
-                  <Text className="text-[11px] text-zinc-500">
+                  <Text className="text-[11px] text-text-muted">
                     Your inventory syncs to this account
                   </Text>
                 </View>
@@ -130,7 +130,7 @@ export default function SettingsScreen() {
             </>
           ) : (
             <>
-              <Text className="mt-1.5 text-sm leading-5 text-zinc-500">
+              <Text className="mt-1.5 text-sm leading-5 text-text-muted">
                 Sign in with Google to keep your inventory safe and carry it to any
                 phone. Everything still works offline without an account.
               </Text>
@@ -141,11 +141,11 @@ export default function SettingsScreen() {
                   loading={signingIn}
                 />
               </View>
-              <Text className="mt-2 text-[11px] leading-4 text-zinc-400">
+              <Text className="mt-2 text-[11px] leading-4 text-text-secondary">
                 If sign-in fails, add this redirect URL in Supabase → Authentication
                 → URL Configuration → Redirect URLs:
               </Text>
-              <Text className="mt-1 font-mono text-[10px] text-zinc-500" selectable>
+              <Text className="mt-1 font-mono text-[10px] text-text-muted" selectable>
                 {oauthRedirectUri}
               </Text>
             </>
@@ -154,16 +154,16 @@ export default function SettingsScreen() {
 
         {/* Sync status */}
         {session ? (
-          <View className="rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm">
-            <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+          <View className="rounded-2xl border border-border-subtle bg-bg-surface p-4 shadow-sm">
+            <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
               Last sync
             </Text>
             {syncResult && !syncResult.skipped ? (
-              <Text className="mt-1 text-sm font-medium text-zinc-950">
+              <Text className="mt-1 text-sm font-medium text-text-on-surface">
                 Pushed {syncResult.pushed} · Pulled {syncResult.pulled}
               </Text>
             ) : (
-              <Text className="mt-1 text-sm text-zinc-500">
+              <Text className="mt-1 text-sm text-text-muted">
                 {syncResult?.skipped
                   ? "Skipped — you were offline or signed out"
                   : "Tap Sync now to back up your inventory"}
@@ -173,29 +173,29 @@ export default function SettingsScreen() {
         ) : null}
 
         {/* How sync works */}
-        <View className="rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm">
-          <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+        <View className="rounded-2xl border border-border-subtle bg-bg-surface p-4 shadow-sm">
+          <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
             How syncing works
           </Text>
           <View className="mt-2 gap-2">
-            <Text className="text-xs leading-5 text-zinc-500">
+            <Text className="text-xs leading-5 text-text-muted">
               · Everything is saved on this phone first — the app works fully offline.
             </Text>
-            <Text className="text-xs leading-5 text-zinc-500">
+            <Text className="text-xs leading-5 text-text-muted">
               · Signed in? Every add, edit, sale, refund and delete is also copied to
               your account.
             </Text>
-            <Text className="text-xs leading-5 text-zinc-500">
+            <Text className="text-xs leading-5 text-text-muted">
               · New phone: install, sign in, done — your whole ledger comes back.
             </Text>
-            <Text className="text-xs leading-5 text-zinc-500">
+            <Text className="text-xs leading-5 text-text-muted">
               · Each account only sees its own data. Nobody else can.
             </Text>
           </View>
         </View>
 
         {error ? (
-          <Text className="px-1 text-sm leading-5 text-red-600">{error}</Text>
+          <Text className="px-1 text-sm leading-5 text-state-error">{error}</Text>
         ) : null}
       </ScrollView>
     </View>
