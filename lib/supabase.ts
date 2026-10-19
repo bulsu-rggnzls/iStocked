@@ -9,8 +9,14 @@ import Constants from "expo-constants";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const DEFAULT_SUPABASE_URL = "https://bmipeaajwqstgszfuvga.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY =
+  "sb_publishable_Bz1Y45XJFi3uoasMmUMLfw_0VSiHmOS";
+
+const supabaseUrl =
+  process.env.EXPO_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+const supabaseAnonKey =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
 
 export const supabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
