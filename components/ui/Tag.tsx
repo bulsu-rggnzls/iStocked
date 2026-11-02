@@ -10,16 +10,15 @@ export function Tag({ label, selected = false, onPress }: TagProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="h-9 shrink-0 items-center justify-center rounded-lg px-3.5 active:opacity-80"
-      style={{
-        backgroundColor: selected ? "#18181b" : "#f4f4f5",
-      }}
+      className={`h-9 shrink-0 items-center justify-center rounded-lg px-3.5 active:opacity-80 ${
+        selected ? "bg-text-main" : "bg-bg-surface-secondary"
+      }`}
     >
       <Text
-        className="text-xs"
+        className={`text-xs ${
+          selected ? "font-semibold text-text-inverted" : "font-medium text-text-muted-foreground"
+        }`}
         style={{
-          color: selected ? "#ffffff" : "#3f3f46",
-          fontWeight: selected ? "600" : "500",
           includeFontPadding: false,
           textAlignVertical: "center",
         }}

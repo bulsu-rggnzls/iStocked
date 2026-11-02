@@ -308,24 +308,20 @@ export default function ScanScreen() {
           <View className="mt-2 flex-row gap-2">
             <Pressable
               onPress={() => { setMode("box"); resetCurrentMode(); }}
-              className="rounded-full px-4 py-2"
-              style={{ backgroundColor: mode === "box" ? "#ffffff" : "rgba(255,255,255,0.15)" }}
+              className={`rounded-full px-4 py-2 ${mode === "box" ? "bg-bg-surface" : "bg-white/15"}`}
             >
               <Text
-                className="text-xs font-semibold"
-                style={{ color: mode === "box" ? "#09090b" : "#ffffff" }}
+                className={`text-xs font-semibold ${mode === "box" ? "text-text-on-surface" : "text-brand-primary-foreground"}`}
               >
                 Scan Box
               </Text>
             </Pressable>
             <Pressable
               onPress={() => { setMode("device"); resetCurrentMode(); }}
-              className="rounded-full px-4 py-2"
-              style={{ backgroundColor: mode === "device" ? "#ffffff" : "rgba(255,255,255,0.15)" }}
+              className={`rounded-full px-4 py-2 ${mode === "device" ? "bg-bg-surface" : "bg-white/15"}`}
             >
               <Text
-                className="text-xs font-semibold"
-                style={{ color: mode === "device" ? "#09090b" : "#ffffff" }}
+                className={`text-xs font-semibold ${mode === "device" ? "text-text-on-surface" : "text-brand-primary-foreground"}`}
               >
                 Scan Device (*#06#)
               </Text>
@@ -334,8 +330,7 @@ export default function ScanScreen() {
         </View>
         <Pressable
           onPress={() => setTorch((t) => !t)}
-          className="ml-3 h-11 w-11 items-center justify-center rounded-full active:opacity-80"
-          style={{ backgroundColor: torch ? "#ffffff" : "rgba(255,255,255,0.15)" }}
+          className={`ml-3 h-11 w-11 items-center justify-center rounded-full active:opacity-80 ${torch ? "bg-bg-surface" : "bg-white/15"}`}
         >
           <Ionicons
             name={torch ? "flashlight" : "flashlight-outline"}

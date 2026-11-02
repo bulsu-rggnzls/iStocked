@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
+  content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}", "./src/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   darkMode: "class",
   theme: {
@@ -39,8 +39,23 @@ module.exports = {
         "status-offer-foreground": "#ffffff",
         "state-error": "#ef4444",
         "state-error-foreground": "#ffffff",
+        "state-error-bg": "#fef2f2",
+        "state-error-border": "#fecaca",
+        "state-error-text": "#b91c1c",
+        "state-success": "#10b981",
+        "state-success-bg": "#ecfdf5",
+        "state-success-border": "#a7f3d0",
+        "state-success-text": "#047857",
         "state-warning": "#fbbf24",
         "state-warning-foreground": "#000000",
+      },
+      borderRadius: {
+        xs: "0.25rem",
+        sm: "0.375rem",
+        md: "0.75rem",
+        lg: "1rem",
+        xl: "1.25rem",
+        "2xl": "1.5rem",
       },
     },
   },

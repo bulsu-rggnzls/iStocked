@@ -165,16 +165,11 @@ function RecordSaleForm({ device, onClose }: { device: Device; onClose: () => vo
                   accessibilityLabel={`Select ${option.label}`}
                   accessibilityState={{ selected }}
                   hitSlop={8}
-                  className="h-10 flex-1 items-center justify-center rounded-xl border active:opacity-80"
-                  style={{
-                    backgroundColor: selected ? "#000000" : "#ffffff",
-                    borderColor: selected ? "#000000" : "#e4e4e7",
-                  }}
+                  className={`h-10 flex-1 items-center justify-center rounded-xl border active:opacity-80 ${selected ? "bg-text-on-surface border-text-on-surface" : "bg-bg-surface border-border-subtle"}`}
                 >
                   <Text
                     numberOfLines={1}
-                    className="text-xs font-semibold"
-                    style={{ color: selected ? "#ffffff" : "#3f3f46" }}
+                    className={`text-xs font-semibold ${selected ? "text-brand-primary-foreground" : "text-text-muted"}`}
                   >
                     {option.short}
                   </Text>
@@ -186,21 +181,15 @@ function RecordSaleForm({ device, onClose }: { device: Device; onClose: () => vo
 
         {/* Profit banner — horizontal split */}
         <View
-          className="flex-row items-center justify-between rounded-2xl border px-5 py-3.5"
-          style={{
-            backgroundColor: positive ? "#ecfdf5" : "#fef2f2",
-            borderColor: positive ? "#a7f3d0" : "#fecaca",
-          }}
+          className={`flex-row items-center justify-between rounded-2xl border px-5 py-3.5 ${positive ? "bg-state-success-bg border-state-success-border" : "bg-state-error-bg border-state-error-border"}`}
         >
           <Text
-            className="text-xs font-bold uppercase tracking-[0.16em]"
-            style={{ color: positive ? "#065f46" : "#991b1b" }}
+            className={`text-xs font-bold uppercase tracking-[0.16em] ${positive ? "text-state-success-text" : "text-state-error-text"}`}
           >
             Profit
           </Text>
           <Text
-            className="text-base font-extrabold"
-            style={{ color: positive ? "#047857" : "#b91c1c" }}
+            className={`text-base font-extrabold ${positive ? "text-state-success-text" : "text-state-error-text"}`}
           >
             {positive ? "+" : "\u2212"}
             {formatPrice(Math.abs(profit))}

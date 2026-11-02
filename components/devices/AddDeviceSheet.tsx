@@ -326,11 +326,11 @@ function AddDeviceForm({
                       accessibilityLabel={opt.label}
                       accessibilityState={{ checked: isSelected }}
                       hitSlop={8}
-                      className="flex-row items-center gap-1.5 rounded-lg border px-2.5 py-1.5 active:opacity-80"
-                      style={{
-                        backgroundColor: isSelected ? "#ecfdf5" : "#ffffff",
-                        borderColor: isSelected ? "#6ee7b7" : "#e4e4e7",
-                      }}
+                      className={`flex-row items-center gap-1.5 rounded-lg border px-2.5 py-1.5 active:opacity-80 ${
+                        isSelected
+                          ? "border-state-success-border bg-state-success-bg"
+                          : "border-border-subtle bg-bg-surface"
+                      }`}
                     >
                       <Ionicons
                         name={isSelected ? "checkmark-circle" : "ellipse-outline"}
@@ -338,11 +338,11 @@ function AddDeviceForm({
                         color={isSelected ? "#059669" : "#a1a1aa"}
                       />
                       <Text
-                        className="text-xs"
-                        style={{
-                          color: isSelected ? "#047857" : "#52525b",
-                          fontWeight: isSelected ? "600" : "500",
-                        }}
+                        className={`text-xs ${
+                          isSelected
+                            ? "font-semibold text-state-success-text"
+                            : "font-medium text-text-muted-foreground"
+                        }`}
                       >
                         {opt.label}
                       </Text>

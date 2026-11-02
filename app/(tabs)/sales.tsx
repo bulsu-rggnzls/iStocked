@@ -349,13 +349,9 @@ export default function SalesHistoryScreen() {
               accessibilityRole="button"
               accessibilityLabel="Show all months"
               accessibilityState={{ selected: selectedMonth === null }}
-              className="h-9 shrink-0 items-center justify-center rounded-full border px-4 active:opacity-80"
-              style={{
-                backgroundColor: selectedMonth === null ? "#09090b" : "#ffffff",
-                borderColor: selectedMonth === null ? "#09090b" : "#e4e4e7",
-              }}
-            >
-              <Text className="text-xs font-semibold" style={{ color: selectedMonth === null ? "#ffffff" : "#3f3f46" }}>
+              className={`h-9 shrink-0 items-center justify-center rounded-full border px-4 active:opacity-80 ${selectedMonth === null ? "bg-text-on-surface border-text-on-surface" : "bg-bg-surface border-border-subtle"}`}>
+              <Text className={`text-xs font-semibold ${selectedMonth === null ? "text-brand-primary-foreground" : "text-text-muted"}`}>
+
                 All
               </Text>
             </Pressable>
@@ -366,13 +362,9 @@ export default function SalesHistoryScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={`Filter by ${shortMonth(g.key)}`}
                 accessibilityState={{ selected: selectedMonth === g.key }}
-                className="h-9 shrink-0 items-center justify-center rounded-full border px-4 active:opacity-80"
-                style={{
-                  backgroundColor: selectedMonth === g.key ? "#09090b" : "#ffffff",
-                  borderColor: selectedMonth === g.key ? "#09090b" : "#e4e4e7",
-                }}
-              >
-                <Text className="text-xs font-semibold" style={{ color: selectedMonth === g.key ? "#ffffff" : "#3f3f46" }}>
+                className={`h-9 shrink-0 items-center justify-center rounded-full border px-4 active:opacity-80 ${selectedMonth === g.key ? "bg-text-on-surface border-text-on-surface" : "bg-bg-surface border-border-subtle"}`}>
+                <Text className={`text-xs font-semibold ${selectedMonth === g.key ? "text-brand-primary-foreground" : "text-text-muted"}`}>
+
                   {shortMonth(g.key)}
                 </Text>
               </Pressable>

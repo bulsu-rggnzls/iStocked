@@ -161,11 +161,11 @@ function AccessoryChips({
             <Pressable
               key={opt.key}
               onPress={() => onToggle(opt.key)}
-              className="h-9 shrink-0 flex-row items-center justify-center gap-1.5 rounded-lg border px-3.5 active:opacity-80"
-              style={{
-                backgroundColor: isSelected ? "#ecfdf5" : "#ffffff",
-                borderColor: isSelected ? "#6ee7b7" : "#e4e4e7",
-              }}
+              className={`h-9 shrink-0 flex-row items-center justify-center gap-1.5 rounded-lg border px-3.5 active:opacity-80 ${
+                isSelected
+                  ? "border-state-success-border bg-state-success-bg"
+                  : "border-border-subtle bg-bg-surface"
+              }`}
             >
               <Ionicons
                 name={isSelected ? "checkmark-circle" : "ellipse-outline"}
@@ -173,10 +173,12 @@ function AccessoryChips({
                 color={isSelected ? "#059669" : "#a1a1aa"}
               />
               <Text
-                className="text-xs"
+                className={`text-xs ${
+                  isSelected
+                    ? "font-semibold text-state-success-text"
+                    : "font-medium text-text-muted-foreground"
+                }`}
                 style={{
-                  color: isSelected ? "#047857" : "#52525b",
-                  fontWeight: isSelected ? "600" : "500",
                   includeFontPadding: false,
                 }}
               >
@@ -457,20 +459,17 @@ export default function DeviceDetailScreen() {
                   </Text>
                   <View className="mt-1 flex-row items-center gap-2">
                     <Text
-                      className="text-[32px] font-bold leading-9 tracking-tight"
-                      style={{ color: profit >= 0 ? "#09090b" : "#b91c1c" }}
+                      className={`text-[32px] font-bold leading-9 tracking-tight ${profit >= 0 ? "text-text-on-surface" : "text-state-error-text"}`}
                       numberOfLines={1}
                     >
                       {profit >= 0 ? "" : "\u2212"}
                       {formatPrice(Math.abs(profit))}
                     </Text>
                     <View
-                      className="rounded-full px-2 py-0.5"
-                      style={{ backgroundColor: profit >= 0 ? "#ecfdf5" : "#fef2f2" }}
+                      className={`rounded-full px-2 py-0.5 ${profit >= 0 ? "bg-state-success-bg" : "bg-state-error-bg"}`}
                     >
                       <Text
-                        className="text-xs font-bold"
-                        style={{ color: profit >= 0 ? "#059669" : "#dc2626" }}
+                        className={`text-xs font-bold ${profit >= 0 ? "text-state-success-text" : "text-state-error"}`}
                       >
                         {margin}%
                       </Text>
@@ -484,20 +483,17 @@ export default function DeviceDetailScreen() {
                   </Text>
                   <View className="mt-1 flex-row items-center gap-2">
                     <Text
-                      className="text-[32px] font-bold leading-9 tracking-tight"
-                      style={{ color: profit >= 0 ? "#09090b" : "#b91c1c" }}
+                      className={`text-[32px] font-bold leading-9 tracking-tight ${profit >= 0 ? "text-text-on-surface" : "text-state-error-text"}`}
                       numberOfLines={1}
                     >
                       {profit >= 0 ? "+" : "\u2212"}
                       {formatPrice(Math.abs(profit))}
                     </Text>
                     <View
-                      className="rounded-full px-2 py-0.5"
-                      style={{ backgroundColor: profit >= 0 ? "#ecfdf5" : "#fef2f2" }}
+                      className={`rounded-full px-2 py-0.5 ${profit >= 0 ? "bg-state-success-bg" : "bg-state-error-bg"}`}
                     >
                       <Text
-                        className="text-xs font-bold"
-                        style={{ color: profit >= 0 ? "#059669" : "#dc2626" }}
+                        className={`text-xs font-bold ${profit >= 0 ? "text-state-success-text" : "text-state-error"}`}
                       >
                         {margin}%
                       </Text>
@@ -664,14 +660,13 @@ export default function DeviceDetailScreen() {
               </View>
 
               {/* Live Profit & ROI */}
-              <View className="mt-3 flex-row items-center gap-3 rounded-xl border px-4 py-3" style={{ backgroundColor: "#fafafa", borderColor: "#e4e4e7" }}>
+              <View className="mt-3 flex-row items-center gap-3 rounded-xl border border-border-subtle bg-bg-surface-secondary px-4 py-3">
                 <View className="flex-1">
-                  <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                  <Text className="text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted">
                     Expected profit
                   </Text>
                   <Text
-                    className="text-base font-bold mt-0.5"
-                    style={{ color: profit >= 0 ? "#059669" : "#dc2626" }}
+                    className={`text-base font-bold mt-0.5 ${profit >= 0 ? "text-state-success-text" : "text-state-error"}`}
                     numberOfLines={1}
                   >
                     {profit >= 0 ? "+" : "\u2212"}
@@ -684,8 +679,7 @@ export default function DeviceDetailScreen() {
                     ROI
                   </Text>
                   <View
-                    className="flex-row items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full"
-                    style={{ backgroundColor: profit >= 0 ? "#ecfdf5" : "#fef2f2" }}
+                    className={`flex-row items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full ${profit >= 0 ? "bg-state-success-bg" : "bg-state-error-bg"}`}
                   >
                     <Ionicons
                       name={profit >= 0 ? "trending-up" : "trending-down"}
@@ -693,8 +687,7 @@ export default function DeviceDetailScreen() {
                       color={profit >= 0 ? "#059669" : "#dc2626"}
                     />
                     <Text
-                      className="text-sm font-bold"
-                      style={{ color: profit >= 0 ? "#059669" : "#dc2626" }}
+                      className={`text-sm font-bold ${profit >= 0 ? "text-state-success-text" : "text-state-error"}`}
                     >
                       {margin}%
                     </Text>
