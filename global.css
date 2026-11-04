@@ -1,6 +1,6 @@
 /* ==========================================================================
    iStocked Global Stylesheet (Expo Root Entry Point)
-   Imports unified tokenized system from styles/index.css
+   Imports unified tokenized system from src/index.css
    ========================================================================== */
 
-@import "./styles/index.css";
+@import "./src/index.css";
